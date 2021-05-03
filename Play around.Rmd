@@ -1,0 +1,54 @@
+---
+title: "Bioinfo Projekt"
+author: "Ilya"
+date: "5/1/2021"
+output: html_document
+---
+
+```{r}
+load("C:/Users/schni/OneDrive/Documents/Germany/4. Semester/Projekt Bioinfo/prism_datasets.rda")
+load("C:/Users/schni/OneDrive/Documents/Germany/4. Semester/Projekt Bioinfo/cellline_datasets.rda")
+```
+
+#Guidelines
+
+prism: effect of the treatment (columns) on cell growth of cell lines (rows).For example, BRD-A00077618-236-07-6::0.0024414::HTS002 indicates treatment with the drug BRD-A00077618-236-07-6, with a dose of 2.4 nM, in assay HTS002. Values represent log fold changes with respect to a control DMSO experiment.
+
+prism.treat:information about the treatment (row) and the drug used
+
+prism.cl: cell lines' info
+
+prism.exp: gene TPM (transcripts per million) values. Indicate over/underexpression. Rows = cell lines, columns = genes
+
+prism.cnv: gene copy number (CN) values. In absolute terms, CN = 2, since there are two alleles per genes. In cancer, genes might be amplified CN > 2 or deleted CN < 2
+
+prism.snv: observed mutations in a sample. The isDeleterious flag specifies if mutation has a functional effect or not.
+
+prism.achilles: gene KO scores, a measure of how essential/important is a particular gene for the cell survival
+
+IDEA: use same indications as in PRISM paper to start filtering for relevant genes, cell lines? 
+
+#Cleaning
+
+##Selecting brain cancer specific cell lines in all data sets
+```{r}
+brain_cancer_cl=subset.data.frame(prism.cl, disease == 	"Brain Cancer") #identify the brain cancer cell lines' names
+
+names=brain_cancer_cl[,1] #saving the names as names
+
+#select wanted cell lines from all datasets
+brain_cancer=prism[names,]
+brain_cancer_achilles=prism.achilles[names,]
+brain_cancer_cnv=prism.cnv[names,]
+brain_cancer_exp=prism.exp[names,]
+brain_cancer_snv=prism.snv[names,] #didnt work
+brain_cancer_treat=prism.treat[names,] #didnt work
+```
+
+##NA removal
+```{r}
+brain_cancer_achilles=na.o mit(brain_cancer_achilles) #remove the entire cell lines from everywhere without KO scores?
+
+```
+
+
