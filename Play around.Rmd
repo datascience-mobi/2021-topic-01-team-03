@@ -47,8 +47,22 @@ brain_cancer_treat=prism.treat[names,] #didnt work
 
 ##NA removal
 ```{r}
-brain_cancer_achilles=na.o mit(brain_cancer_achilles) #remove the entire cell lines from everywhere without KO scores?
+brain_cancer_achilles=na.omit(brain_cancer_achilles) #remove the entire cell lines from everywhere without KO scores?
 
+```
+
+##NA removal
+```{r}
+#brain_cancer_achilles=na.omit(brain_cancer_achilles) #remove the entire cell lines from everywhere without KO scores?
+
+bc2=brain_cancer[ , colSums(is.na(brain_cancer)) == 0]
+
+
+```
+
+##Selecting relevant drugs
+```{r}
+apply(bc2,2,max)
 ```
 
 
