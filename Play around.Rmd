@@ -47,12 +47,6 @@ brain_cancer_treat=prism.treat[names,] #didnt work
 
 ##NA removal
 ```{r}
-brain_cancer_achilles=na.omit(brain_cancer_achilles) #remove the entire cell lines from everywhere without KO scores?
-
-```
-
-##NA removal
-```{r}
 #brain_cancer_achilles=na.omit(brain_cancer_achilles) #remove the entire cell lines from everywhere without KO scores?
 
 bc2=brain_cancer[ , colSums(is.na(brain_cancer)) == 0]
@@ -62,7 +56,15 @@ bc2=brain_cancer[ , colSums(is.na(brain_cancer)) == 0]
 
 ##Selecting relevant drugs
 ```{r}
-apply(bc2,2,max)
+max=apply(bc2,2,max)
+min=apply(bc2,2,min)
+mean=apply(bc2,2,mean)
+median=apply(bc2,2,median)
+#add quantiles to the dataframe?
+
+drug_summery=data.frame(max, min, mean, median)
+#do the drugs with negative coefficients have negative effect on cell cultures? if so should we select the drugs with really negative mean and minimum? Or may be that have all 4 variables in dataframe negative? How big/strict should be the selection?
+
 ```
 
 
