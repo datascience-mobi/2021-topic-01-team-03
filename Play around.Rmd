@@ -77,6 +77,10 @@ sum(is.na(drug_summary$mean))
 
 hist(drug_summary$mean, breaks = 100,)
 abline(v = quantile(drug_summary$mean, c(0.25,0.5,0.75)), col = "blue", lwd = 2)
+#what would be the type of this distribution? Poisson? Negative binominal?
+
+median(drug_summary$mean) # 0.3 criteria from PRISM paper makes sense since it covers more than a half of the drugs
+mean(drug_summary$mean) 
 
 ```
 
