@@ -49,7 +49,7 @@ brain_cancer_exp=prism.exp[names,]
 ```{r}
 #brain_cancer_achilles=na.omit(brain_cancer_achilles) #remove the entire cell lines from everywhere without KO scores?
 
-#bc2=brain_cancer[ , colSums(is.na(brain_cancer)) == 0]
+
 
 
 ```
@@ -59,6 +59,8 @@ brain_cancer_exp=prism.exp[names,]
 for(i in 1:ncol(brain_cancer)){
   brain_cancer[is.na(brain_cancer[,i]), i] <- mean(brain_cancer[,i], na.rm = TRUE)
 }
+
+brain_cancer=brain_cancer[ , colSums(is.na(brain_cancer)) == 0]
 ```
 
 ##Selecting relevant drugs
@@ -70,7 +72,11 @@ median=apply(brain_cancer,2,median)
 #add quantiles to the dataframe?
 
 drug_summary=data.frame(max, min, mean, median)
+sum(is.na(drug_summary$mean))
 
+
+hist(drug_summary$mean, breaks = 100,)
+abline(v = quantile(drug_summary$mean, c(0.25,0.5,0.75)), col = "blue", lwd = 2)
 
 ```
 
