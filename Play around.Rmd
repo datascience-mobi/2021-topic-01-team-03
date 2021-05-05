@@ -6,8 +6,8 @@ output: html_document
 ---
 
 ```{r}
-load("C:/Users/schni/OneDrive/Documents/Germany/4. Semester/Projekt Bioinfo/prism_datasets.rda")
-load("C:/Users/schni/OneDrive/Documents/Germany/4. Semester/Projekt Bioinfo/cellline_datasets.rda")
+load("../2021-topic-01-team-03/dataset/prism_datasets.rda")
+load("../2021-topic-01-team-03/dataset/cellline_datasets.rda")
 ```
 
 #Guidelines
