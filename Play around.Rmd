@@ -135,10 +135,9 @@ mean(apply(deviation[,-keep],2,mean))#curioisty
 
 ##Selecting relevant drugs
 ```{r}
-no_keep_drugs=colnames(deviation[,-keep])
-
-brain_cancer[,no_keep_drugs]
-#brain_cancer=brain_cancer[,-no_keep_drugs] #WHY?! dataframe with drugs that we dont wanna keep. find a way to remove them from dataframe brain_cancer
+no_keep_drugs=colnames(deviation[,-keep])#vector with NAMES of drugs we dont want
+no_keep_drugs=unique (grep(paste(no_keep_drugs,collapse="|"), colnames(brain_cancer)))#vector of POSITIONS of drugs we dont want in dataframe brain_cancer
+brain_cancer=brain_cancer[,-no_keep_drugs]#removing the drugs we dont want
 
 max=apply(brain_cancer,2,max)
 min=apply(brain_cancer,2,min)
