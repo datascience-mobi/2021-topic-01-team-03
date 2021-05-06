@@ -48,10 +48,6 @@ brain_cancer_exp=prism.exp[names,]
 ##NA removal
 ```{r}
 #brain_cancer_achilles=na.omit(brain_cancer_achilles) #remove the entire cell lines from everywhere without KO scores?
-
-
-
-
 ```
 
 ##NA for mean substituition
@@ -65,16 +61,26 @@ brain_cancer=brain_cancer[ , colSums(is.na(brain_cancer)) == 0]
 
 ##Deviding drugs in doses groups
 ```{r}
-d1=brain_cancer[,grep("0.00061034", colnames(brain_cancer))]
-d2=brain_cancer[,grep("0.0024414", colnames(brain_cancer))]
-d3=brain_cancer[,grep("0.00976562", colnames(brain_cancer))]
-d4=brain_cancer[,grep("0.0390625", colnames(brain_cancer))]
-d5=brain_cancer[,grep("0.15625", colnames(brain_cancer))]
-d6=brain_cancer[,grep("0.625", colnames(brain_cancer))]
-d7=brain_cancer[,grep("10:", colnames(brain_cancer))]
-d8=brain_cancer[,grep("2.5:", colnames(brain_cancer))]
-#these are the standard doses summed up into seperate dataframes
+dd1=grep("0.00061034", colnames(brain_cancer))
+dd2=grep("0.0024414", colnames(brain_cancer))
+dd3=grep("0.00976562", colnames(brain_cancer))
+dd4=grep("0.0390625", colnames(brain_cancer))
+dd5=grep("0.15625", colnames(brain_cancer))
+dd6=grep("0.625", colnames(brain_cancer))
+dd7=grep("10:", colnames(brain_cancer))
+dd8=grep("2.5:", colnames(brain_cancer))
+#positions of the respective doses in the dataframe 
+doses=c(dd1,dd2,dd3,dd4,dd5,dd6,dd7,dd8)
 
+d1=brain_cancer[,dd1]
+d2=brain_cancer[,dd2]
+d3=brain_cancer[,dd3]
+d4=brain_cancer[,dd4]
+d5=brain_cancer[,dd5]
+d6=brain_cancer[,dd6]
+d7=brain_cancer[,dd7]
+d8=brain_cancer[,dd8]
+#these are the standard doses summed up into seperate dataframes
 sum(length(d1), length(d2), length(d3), length(d4),length(d5), length(d6),length(d7),length(d8)) #ups something missing
 
 deviation=brain_cancer[,-doses] #lets see what we missed-> these are the doses that are not exact and have some kind of a deviation
@@ -88,35 +94,35 @@ questionable_drugs=prism.treat[colnames(deviation),]#we dont know if we can use 
 
 keep_d1=which (0.00061034-0.1*0.00061034 < questionable_drugs[,2] & 0.00061034+0.1*0.00061034 >questionable_drugs[,2]) #apply the 10% gap and find which genes are that qualify for it
 d1_extra=brain_cancer[,rownames(questionable_drugs[keep_d1,])] #create a dataframe with these genes 
-d1=merge(d1,d1_extra) #merge the obtained dataframe with the standard dose one
+d1=cbind(d1,d1_extra) #merge the obtained dataframe with the standard dose one
 
 keep_d2=which (0.0024414-0.1*0.0024414 < questionable_drugs[,2] & 0.0024414+0.1*0.0024414 >questionable_drugs[,2])
 d2_extra=brain_cancer[,rownames(questionable_drugs[keep_d2,])]
-d2=merge(d2,d2_extra)
+d2=cbind(d2,d2_extra)
 
 keep_d3=which (0.00976562-0.1*0.00976562 < questionable_drugs[,2] & 0.00976562+0.1*0.00976562 >questionable_drugs[,2])
 d3_extra=brain_cancer[,rownames(questionable_drugs[keep_d3,])]
-d3=merge(d3,d3_extra)
+d3=cbind(d3,d3_extra)
 
 keep_d4=which (0.0390625-0.1*0.0390625 < questionable_drugs[,2] & 0.0390625+0.1*0.0390625 >questionable_drugs[,2])
 d4_extra=brain_cancer[,rownames(questionable_drugs[keep_d4,])]
-d4=merge(d4,d4_extra)
+d4=cbind(d4,d4_extra)
 
 keep_d5=which (0.15625-0.1*0.15625 < questionable_drugs[,2] & 0.15625+0.1*0.15625 >questionable_drugs[,2])
 d5_extra=brain_cancer[,rownames(questionable_drugs[keep_d5,])]
-d5=merge(d5,d5_extra)
+d5=cbind(d5,d5_extra)
 
 keep_d6=which (0.625-0.1*0.625 < questionable_drugs[,2] & 0.625+0.1*0.625 >questionable_drugs[,2])
 d6_extra=brain_cancer[,rownames(questionable_drugs[keep_d6,])]
-d6=merge(d6,d6_extra)
+d6=cbind(d6,d6_extra)
 
 keep_d7=which (10-0.1*10 < questionable_drugs[,2] & 10+0.1*10 >questionable_drugs[,2])
 d7_extra=brain_cancer[,rownames(questionable_drugs[keep_d7,])]
-d7=merge(d7,d7_extra)
+d7=cbind(d7,d7_extra)
 
 keep_d8=which (2.5-0.1*2.5 < questionable_drugs[,2] & 2.5+0.1*2.5 >questionable_drugs[,2])
 d8_extra=brain_cancer[,rownames(questionable_drugs[keep_d8,])]
-d8=merge(d8,d8_extra)
+d8=cbind(d8,d8_extra)
 
 
 #look at the genes we did not keep
@@ -125,12 +131,14 @@ View(deviation[,-keep])
 
 mean(apply(deviation[,-keep],2,mean))#curioisty
 
-
 ```
 
 ##Selecting relevant drugs
 ```{r}
-brain_cancer[,drugs_not_keep] #dataframe with drugs that we dont wanna keep. find a way to remove them from dataframe brain_cancer
+no_keep_drugs=colnames(deviation[,-keep])
+
+brain_cancer[,no_keep_drugs]
+#brain_cancer=brain_cancer[,-no_keep_drugs] #WHY?! dataframe with drugs that we dont wanna keep. find a way to remove them from dataframe brain_cancer
 
 max=apply(brain_cancer,2,max)
 min=apply(brain_cancer,2,min)
@@ -140,7 +148,6 @@ median=apply(brain_cancer,2,median)
 
 drug_summary=data.frame(max, min, mean, median)
 sum(is.na(drug_summary$mean))
-
 
 hist(drug_summary$mean, breaks = 100,)
 abline(v = quantile(drug_summary$mean, c(0.25,0.5,0.75)), col = "blue", lwd = 2)
