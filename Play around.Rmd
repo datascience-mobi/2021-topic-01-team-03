@@ -63,8 +63,75 @@ for(i in 1:ncol(brain_cancer)){
 brain_cancer=brain_cancer[ , colSums(is.na(brain_cancer)) == 0]
 ```
 
+##Deviding drugs in doses groups
+```{r}
+d1=brain_cancer[,grep("0.00061034", colnames(brain_cancer))]
+d2=brain_cancer[,grep("0.0024414", colnames(brain_cancer))]
+d3=brain_cancer[,grep("0.00976562", colnames(brain_cancer))]
+d4=brain_cancer[,grep("0.0390625", colnames(brain_cancer))]
+d5=brain_cancer[,grep("0.15625", colnames(brain_cancer))]
+d6=brain_cancer[,grep("0.625", colnames(brain_cancer))]
+d7=brain_cancer[,grep("10:", colnames(brain_cancer))]
+d8=brain_cancer[,grep("2.5:", colnames(brain_cancer))]
+#these are the standard doses summed up into seperate dataframes
+
+sum(length(d1), length(d2), length(d3), length(d4),length(d5), length(d6),length(d7),length(d8)) #ups something missing
+
+deviation=brain_cancer[,-doses] #lets see what we missed-> these are the doses that are not exact and have some kind of a deviation
+
+#rest of the doeses are all different. What do we do with them?
+
+#lets keep from "deviation" only the ones that have a deviation less than 10% from original
+questionable_drugs=prism.treat[colnames(deviation),]#we dont know if we can use these drugs, may be their doses deviate too far from the standard
+
+#filtering the doses that deviate less than 10%
+
+keep_d1=which (0.00061034-0.1*0.00061034 < questionable_drugs[,2] & 0.00061034+0.1*0.00061034 >questionable_drugs[,2]) #apply the 10% gap and find which genes are that qualify for it
+d1_extra=brain_cancer[,rownames(questionable_drugs[keep_d1,])] #create a dataframe with these genes 
+d1=merge(d1,d1_extra) #merge the obtained dataframe with the standard dose one
+
+keep_d2=which (0.0024414-0.1*0.0024414 < questionable_drugs[,2] & 0.0024414+0.1*0.0024414 >questionable_drugs[,2])
+d2_extra=brain_cancer[,rownames(questionable_drugs[keep_d2,])]
+d2=merge(d2,d2_extra)
+
+keep_d3=which (0.00976562-0.1*0.00976562 < questionable_drugs[,2] & 0.00976562+0.1*0.00976562 >questionable_drugs[,2])
+d3_extra=brain_cancer[,rownames(questionable_drugs[keep_d3,])]
+d3=merge(d3,d3_extra)
+
+keep_d4=which (0.0390625-0.1*0.0390625 < questionable_drugs[,2] & 0.0390625+0.1*0.0390625 >questionable_drugs[,2])
+d4_extra=brain_cancer[,rownames(questionable_drugs[keep_d4,])]
+d4=merge(d4,d4_extra)
+
+keep_d5=which (0.15625-0.1*0.15625 < questionable_drugs[,2] & 0.15625+0.1*0.15625 >questionable_drugs[,2])
+d5_extra=brain_cancer[,rownames(questionable_drugs[keep_d5,])]
+d5=merge(d5,d5_extra)
+
+keep_d6=which (0.625-0.1*0.625 < questionable_drugs[,2] & 0.625+0.1*0.625 >questionable_drugs[,2])
+d6_extra=brain_cancer[,rownames(questionable_drugs[keep_d6,])]
+d6=merge(d6,d6_extra)
+
+keep_d7=which (10-0.1*10 < questionable_drugs[,2] & 10+0.1*10 >questionable_drugs[,2])
+d7_extra=brain_cancer[,rownames(questionable_drugs[keep_d7,])]
+d7=merge(d7,d7_extra)
+
+keep_d8=which (2.5-0.1*2.5 < questionable_drugs[,2] & 2.5+0.1*2.5 >questionable_drugs[,2])
+d8_extra=brain_cancer[,rownames(questionable_drugs[keep_d8,])]
+d8=merge(d8,d8_extra)
+
+
+#look at the genes we did not keep
+keep=c(keep_d1, keep_d2, keep_d3, keep_d4,keep_d5,keep_d6,keep_d7,keep_d8)
+View(deviation[,-keep])
+
+mean(apply(deviation[,-keep],2,mean))#curioisty
+
+
+```
+
 ##Selecting relevant drugs
 ```{r}
+brain_cancer[,drugs_not_keep] #dataframe with drugs that we dont wanna keep. find a way to remove them from dataframe brain_cancer
+
 max=apply(brain_cancer,2,max)
 min=apply(brain_cancer,2,min)
 mean=apply(brain_cancer,2,mean)
@@ -83,5 +150,4 @@ median(drug_summary$mean) # 0.3 criteria from PRISM paper makes sense since it c
 mean(drug_summary$mean) 
 
 ```
-
 
