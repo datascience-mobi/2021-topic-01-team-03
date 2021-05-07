@@ -87,7 +87,10 @@ deviation=brain_cancer[,-doses] #lets see what we missed-> these are the doses t
 
 #rest of the doeses are all different. What do we do with them?
 
-#lets keep from "deviation" only the ones that have a deviation less than 10% from original
+#lets keep from "deviation" only the ones that have a deviation less than "10%" from original
+
+#to do: make a distribution test for a non normal distribution to justify the 10%
+
 questionable_drugs=prism.treat[colnames(deviation),]#we dont know if we can use these drugs, may be their doses deviate too far from the standard
 
 #filtering the doses that deviate less than 10%
@@ -154,6 +157,28 @@ abline(v = quantile(drug_summary$mean, c(0.25,0.5,0.75)), col = "blue", lwd = 2)
 
 median(drug_summary$mean) # 0.3 criteria from PRISM paper makes sense since it covers more than a half of the drugs
 mean(drug_summary$mean) 
+
+```
+
+##Apllying the dosis separation of dataset brain_cancer on prism.treat
+```{r}
+brain_canancer_treat=prism.treat[colnames(brain_cancer),] #selecting only the drugs ve previously filtered out from brain_cancer
+
+dt1=brain_canancer_treat[colnames(d1),]
+dt2=brain_canancer_treat[colnames(d2),]
+dt3=brain_canancer_treat[colnames(d3),]
+dt4=brain_canancer_treat[colnames(d4),]
+dt5=brain_canancer_treat[colnames(d5),]
+dt6=brain_canancer_treat[colnames(d6),]
+dt7=brain_canancer_treat[colnames(d7),]
+dt8=brain_canancer_treat[colnames(d8),]
+
+#not sure this sorting makes sense now for the brain_cancer_treat, but now we have it in case we need it in the future
+
+summary(brain_canancer_treat)#can be useful to identify trends or come up with some new ideas for filtering, interesting columns can be looked at separetely, for example:
+summary(brain_canancer_treat$disease.area)
+
+
 
 ```
 
