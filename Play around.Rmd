@@ -128,7 +128,7 @@ d8_extra=brain_cancer[,rownames(questionable_drugs[keep_d8,])]
 d8=cbind(d8,d8_extra)
 
 
-#look at the genes we did not keep
+#look at the drugs we did not keep
 keep=c(keep_d1, keep_d2, keep_d3, keep_d4,keep_d5,keep_d6,keep_d7,keep_d8)
 View(deviation[,-keep])
 
@@ -178,7 +178,19 @@ dt8=brain_canancer_treat[colnames(d8),]
 summary(brain_canancer_treat)#can be useful to identify trends or come up with some new ideas for filtering, interesting columns can be looked at separetely, for example:
 summary(brain_canancer_treat$disease.area)
 
+```
 
+##Dividing cell lines into subgroups
+```{r}
+medulloblastoma=brain_cancer_cl$DepMap_ID[grep("Medulloblastoma", brain_cancer_cl$disease_subtype)]#we obtain the names of the cell lines that are classified as medulloblastoma
 
+glioblastoma=brain_cancer_cl$DepMap_ID[grep("Glioblastoma", brain_cancer_cl$disease_subtype)]
+
+glioma=brain_cancer_cl$DepMap_ID[grep("Glioma", brain_cancer_cl$disease_subtype)]
+
+astrocytoma=brain_cancer_cl$DepMap_ID[grep("Astrocytoma", brain_cancer_cl$disease_subtype)]
+
+disease_subtypes=c(medulloblastoma,glioblastoma,glioma,astrocytoma)
+length(disease_subtypes)#making sure we didnt forget anything
 ```
 
