@@ -81,7 +81,7 @@ d6=brain_cancer[,dd6]
 d7=brain_cancer[,dd7]
 d8=brain_cancer[,dd8]
 #these are the standard doses summed up into seperate dataframes
-sum(length(d1), length(d2), length(d3), length(d4),length(d5), length(d6),length(d7),length(d8)) #ups something missing
+sum(length(dd1), length(dd2), length(dd3), length(dd4),length(dd5), length(dd6),length(dd7),length(dd8)) #ups something missing
 
 deviation=brain_cancer[,-doses] #lets see what we missed-> these are the doses that are not exact and have some kind of a deviation
 
@@ -130,7 +130,7 @@ d8=cbind(d8,d8_extra)
 
 #look at the drugs we did not keep
 keep=c(keep_d1, keep_d2, keep_d3, keep_d4,keep_d5,keep_d6,keep_d7,keep_d8)
-View(deviation[,-keep])
+doses_outliers=deviation[,-keep]
 
 mean(apply(deviation[,-keep],2,mean))#curioisty
 
@@ -162,21 +162,21 @@ mean(drug_summary$mean)
 
 ##Apllying the dosis separation of dataset brain_cancer on prism.treat
 ```{r}
-brain_canancer_treat=prism.treat[colnames(brain_cancer),] #selecting only the drugs ve previously filtered out from brain_cancer
+brain_cancer_treat=prism.treat[colnames(brain_cancer),] #selecting only the drugs we previously filtered out from brain_cancer
 
-dt1=brain_canancer_treat[colnames(d1),]
-dt2=brain_canancer_treat[colnames(d2),]
-dt3=brain_canancer_treat[colnames(d3),]
-dt4=brain_canancer_treat[colnames(d4),]
-dt5=brain_canancer_treat[colnames(d5),]
-dt6=brain_canancer_treat[colnames(d6),]
-dt7=brain_canancer_treat[colnames(d7),]
-dt8=brain_canancer_treat[colnames(d8),]
+dt1=brain_cancer_treat[colnames(d1),]
+dt2=brain_cancer_treat[colnames(d2),]
+dt3=brain_cancer_treat[colnames(d3),]
+dt4=brain_cancer_treat[colnames(d4),]
+dt5=brain_cancer_treat[colnames(d5),]
+dt6=brain_cancer_treat[colnames(d6),]
+dt7=brain_cancer_treat[colnames(d7),]
+dt8=brain_cancer_treat[colnames(d8),]
 
 #not sure this sorting makes sense now for the brain_cancer_treat, but now we have it in case we need it in the future
 
-summary(brain_canancer_treat)#can be useful to identify trends or come up with some new ideas for filtering, interesting columns can be looked at separetely, for example:
-summary(brain_canancer_treat$disease.area)
+summary(brain_cancer_treat)#can be useful to identify trends or come up with some new ideas for filtering, interesting columns can be looked at separetely, for example:
+summary(brain_cancer_treat$disease.area)
 
 ```
 
@@ -193,9 +193,6 @@ astrocytoma=brain_cancer_cl$DepMap_ID[grep("Astrocytoma", brain_cancer_cl$diseas
 disease_subtypes=c(medulloblastoma,glioblastoma,glioma,astrocytoma)
 length(disease_subtypes)#making sure we didnt forget anything
 ```
->>>>>>> b52712a29a6bfdaca9a50177d68eef04d4c7ab3e
-
-
 ##Clustering
 
 ```{r}
@@ -210,6 +207,7 @@ brain.km$cluster
 ##PCA for brain_cancer dataset
 
 ```{r}
+library("factoextra")
 dim(brain_cancer)
 pca = prcomp(brain_cancer, center = TRUE, scale. = TRUE)
 
@@ -233,6 +231,7 @@ head(eigenvalue)
 
 
 ```{r}
+library(ggpubr)
 ggscatter(
   coordinates, x = "Dim.1", y = "Dim.2",
   color = "cluster", palette = "npg", ellipse = TRUE, ellipse.type = "convex",
@@ -244,13 +243,6 @@ ggscatter(
 ) +
   stat_mean(aes(color = cluster), size = 3)
 
-```
-
-## Silhouette plot to check the number of clusters
-```{r}
-sil_plot = silhouette(coordinates)
-
-## das habe ich nicht hingekriegt mit dem Silhouette plot
 ```
 ```{r}
 
