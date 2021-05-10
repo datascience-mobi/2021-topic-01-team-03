@@ -67,4 +67,7 @@ drug_summery=data.frame(max, min, mean, median)
 
 ```
 
+```{r}
 
+View(drug_summery)
+```
