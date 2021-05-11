@@ -45,9 +45,9 @@ brain_cancer_exp=prism.exp[names,]
 #brain_cancer_treat=prism.treat[names,] #does not make sense no cell line info, other type of filtering required
 ```
 
-##NA removal
+##NA removal from brain_cancer_achilles
 ```{r}
-#brain_cancer_achilles=na.omit(brain_cancer_achilles) #remove the entire cell lines from everywhere without KO scores?
+brain_cancer_achilles=na.omit(brain_cancer_achilles) #remove the entire cell lines from everywhere without KO scores?
 ```
 
 ##NA for mean substituition
@@ -57,6 +57,29 @@ for(i in 1:ncol(brain_cancer)){
 }
 
 brain_cancer=brain_cancer[ , colSums(is.na(brain_cancer)) == 0]
+```
+
+##Brain_cancer distribution visualising
+```{r}
+max=apply(brain_cancer,2,max)
+min=apply(brain_cancer,2,min)
+mean=apply(brain_cancer,2,mean)
+median=apply(brain_cancer,2,median)
+#add quantiles to the dataframe?
+
+drug_summary=data.frame(max, min, mean, median)
+sum(is.na(drug_summary$mean))
+
+hist(drug_summary$mean,main= "Distribution of means of each drug",xlab= "means of drugs", freq= F, breaks = 100)
+abline(v = quantile(drug_summary$mean, c(0.25,0.5,0.75)), col = "blue", lwd = 2)
+#what would be the type of this distribution? Poisson? Negative binominal?
+
+median(drug_summary$mean) # 0.3 criteria from PRISM paper makes sense since it covers more than a half of the drugs
+mean(drug_summary$mean) 
+
+qqnorm(drug_summary$mean) #data not normally distributed
+abline(a = 0, b = 0.33) #however one part of it seems to match the normal distribution, starting from -1 sample quantile
+
 ```
 
 ##Deviding drugs in doses groups
@@ -80,19 +103,26 @@ d5=brain_cancer[,dd5]
 d6=brain_cancer[,dd6]
 d7=brain_cancer[,dd7]
 d8=brain_cancer[,dd8]
+
+hist(apply(d1,2,mean), freq= F, breaks = 100)
+
 #these are the standard doses summed up into seperate dataframes
 sum(length(dd1), length(dd2), length(dd3), length(dd4),length(dd5), length(dd6),length(dd7),length(dd8)) #ups something missing
 
 deviation=brain_cancer[,-doses] #lets see what we missed-> these are the doses that are not exact and have some kind of a deviation
 
+questionable_drugs=prism.treat[colnames(deviation),]#we dont know if we can use these drugs, may be their doses deviate too far from the standard
+
+shapiro.test() 
+```
+
+#Working on drugs that do not fit the standart doses
+```{r}
 #rest of the doeses are all different. What do we do with them?
 
 #lets keep from "deviation" only the ones that have a deviation less than "10%" from original
 
 #to do: make a distribution test for a non normal distribution to justify the 10%
-
-questionable_drugs=prism.treat[colnames(deviation),]#we dont know if we can use these drugs, may be their doses deviate too far from the standard
-
 #filtering the doses that deviate less than 10%
 
 keep_d1=which (0.00061034-0.1*0.00061034 < questionable_drugs[,2] & 0.00061034+0.1*0.00061034 >questionable_drugs[,2]) #apply the 10% gap and find which genes are that qualify for it
@@ -141,23 +171,6 @@ mean(apply(deviation[,-keep],2,mean))#curioisty
 no_keep_drugs=colnames(deviation[,-keep])#vector with NAMES of drugs we dont want
 no_keep_drugs=unique (grep(paste(no_keep_drugs,collapse="|"), colnames(brain_cancer)))#vector of POSITIONS of drugs we dont want in dataframe brain_cancer
 brain_cancer=brain_cancer[,-no_keep_drugs]#removing the drugs we dont want
-
-max=apply(brain_cancer,2,max)
-min=apply(brain_cancer,2,min)
-mean=apply(brain_cancer,2,mean)
-median=apply(brain_cancer,2,median)
-#add quantiles to the dataframe?
-
-drug_summary=data.frame(max, min, mean, median)
-sum(is.na(drug_summary$mean))
-
-hist(drug_summary$mean, breaks = 100,)
-abline(v = quantile(drug_summary$mean, c(0.25,0.5,0.75)), col = "blue", lwd = 2)
-#what would be the type of this distribution? Poisson? Negative binominal?
-
-median(drug_summary$mean) # 0.3 criteria from PRISM paper makes sense since it covers more than a half of the drugs
-mean(drug_summary$mean) 
-
 ```
 
 ##Apllying the dosis separation of dataset brain_cancer on prism.treat
