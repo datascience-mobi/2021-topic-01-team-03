@@ -1,0 +1,168 @@
+---
+title: "Data exploration"
+author: "Lennard"
+date: "11/5/2021"
+output: html_document
+---
+``` {r}
+load("../2021-topic-01-team-03/dataset/prism_datasets.rda")
+load("../2021-topic-01-team-03/dataset/cellline_datasets.rda")
+```
+
+```{r}
+View(prism)
+View(prism.cl)
+View(prism.achilles)
+View(prism.cnv)
+View(prism.exp)
+View(prism.snv)
+View(prism.treat)
+```
+
+
+##Selecting brain cancer specific cell lines in all data sets
+```{r}
+brain_cancer_cl=subset.data.frame(prism.cl, disease == 	"Brain Cancer") #identify the brain cancer cell lines' names
+
+names=brain_cancer_cl[,1] #saving the names as names
+
+#select wanted cell lines from all datasets
+brain_cancer=prism[names,]
+brain_cancer_achilles=prism.achilles[names,]
+brain_cancer_cnv=prism.cnv[names,]
+brain_cancer_exp=prism.exp[names,]
+#brain_cancer_snv=prism.snv[names,] #does not make sense no cell line info, other type of filtering required
+#brain_cancer_treat=prism.treat[names,] #does not make sense no cell line info, other type of filtering required
+```
+
+prism exploration
+
+```{r}
+# prism data frame as vector
+mat.prism <- as.matrix(prism)
+vec.prism <- as.vector(mat.prism)
+```
+
+
+```{r}
+# summary of prism 
+sum.prism <- summary(vec.prism)
+sum.prism
+dim.prism <- dim(prism)
+dim.prism
+datp.prism <- dim.prism[1] * dim.prism[2]
+datp.prism
+
+# prism histogram
+hist(mat.prism, breaks = 200, xlim = range(-9,2.5), xlab = "prism")
+abline(v = c(sum.prism[2:5]), col = "red", lwd = 1, lty = 1)
+
+## heatmap prism cancer celllines
+#NA substitution
+for(i in 1:ncol(brain_cancer)){
+  brain_cancer[is.na(brain_cancer[,i]), i] <- mean(brain_cancer[,i], na.rm = TRUE)
+}
+brain_cancer=brain_cancer[ , colSums(is.na(brain_cancer)) == 0]
+#heatmaping
+heatmap(as.matrix(brain_cancer))
+```
+
+
+prism.achilles exploration
+
+```{r}
+# prism.achilles data frame as vector
+mat.prism.achilles <- as.matrix(prism.achilles)
+vec.prism.achilles <- as.vector(mat.prism.achilles)
+```
+
+```{r}
+# summary of prism.achilles 
+sum.prism.achilles <- summary(vec.prism.achilles)
+sum.prism.achilles
+dim.prism.achilles <- dim(prism.achilles)
+dim.prism.achilles
+datp.prism.achilles <- dim.prism.achilles[1] * dim.prism.achilles[2]
+datp.prism.achilles
+
+# prism histogram
+hist(mat.prism.achilles, breaks = 200, xlim = range(-2.5,1), xlab = "prism.achilles")
+abline(v = c(sum.prism.achilles[2:5]), col = "red", lwd = 1, lty = 1)
+
+## heatmap prism cancer celllines
+#NA substitution
+for(i in 1:ncol(brain_cancer_achilles)){
+  brain_cancer_achilles[is.na(brain_cancer_achilles[,i]), i] <- mean(brain_cancer_achilles[,i], na.rm = TRUE)
+}
+brain_cancer_achilles=brain_cancer_achilles[ , colSums(is.na(brain_cancer_achilles)) == 0]
+brain_cancer_achilles <- brain_cancer_achilles[-c(4,7,13,22,24,28,29,33,34),] # remove missing rows
+#heatmaping
+heatmap(as.matrix(brain_cancer_achilles))
+```
+
+prism.cnv exploration
+
+```{r}
+# prism.cnv data frame as vector
+mat.prism.cnv <- as.matrix(prism.cnv)
+vec.prism.cnv <- as.vector(mat.prism.cnv)
+```
+
+```{r}
+# summary of prism.cnv
+sum.prism.cnv <- summary(vec.prism.cnv)
+sum.prism.cnv
+dim.prism.cnv <- dim(prism.cnv)
+dim.prism.cnv
+datp.prism.cnv <- dim.prism.cnv[1] * dim.prism.cnv[2]
+datp.prism.cnv
+
+# prism histogram
+hist(mat.prism.cnv, breaks = 200, xlim = range(0,3), xlab = "prism.cnv")
+abline(v = c(sum.prism.cnv[2:5]), col = "red", lwd = 1, lty = 1)
+
+## heatmap prism.cnv cancer celllines
+#NA substitution
+for(i in 1:ncol(brain_cancer_cnv)){
+  brain_cancer_cnv[is.na(brain_cancer_cnv[,i]), i] <- mean(brain_cancer_cnv[,i], na.rm = TRUE)
+}
+brain_cancer_cnv=brain_cancer_cnv[ , colSums(is.na(brain_cancer_cnv)) == 0]
+#further cleanup
+#brain
+#heatmaping
+#heatmap(as.matrix(brain_cancer_cnv)) probably to big
+```
+
+
+prism.exp exploration
+
+```{r}
+# prism.exp data frame as vector
+mat.prism.exp <- as.matrix(prism.exp)
+vec.prism.exp <- as.vector(mat.prism.exp)
+```
+
+```{r}
+# summary of prism.exp
+sum.prism.exp <- summary(vec.prism.exp)
+sum.prism.exp
+dim.prism.exp <- dim(prism.exp)
+dim.prism.exp
+datp.prism.exp <- dim.prism.exp[1] * dim.prism.exp[2]
+datp.prism.exp
+
+# prism histogram
+hist(mat.prism.exp, breaks = 200, xlim = range(0,15), ylim = range(0,500000), xlab = "prism.exp")
+abline(v = c(sum.prism.exp[2:5]), col = "red", lwd = 1, lty = 1)
+
+## heatmap prism.exp cancer celllines
+#NA substitution
+for(i in 1:ncol(brain_cancer_exp)){
+  brain_cancer_exp[is.na(brain_cancer_exp[,i]), i] <- mean(brain_cancer_exp[,i], na.rm = TRUE)
+}
+brain_cancer_exp=brain_cancer_exp[ , colSums(is.na(brain_cancer_exp)) == 0]
+#heatmaping
+heatmap(as.matrix(brain_cancer_exp))
+```
+
+
