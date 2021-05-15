@@ -171,9 +171,36 @@ mean(apply(deviation[,-keep],2,mean))#curioisty
 
 ##Selecting relevant drugs
 ```{r}
-no_keep_drugs=colnames(deviation[,-keep])#vector with NAMES of drugs we dont want
+no_keep_drugs=colnames(doses_outliers)#vector with NAMES of drugs we dont want
 no_keep_drugs=unique (grep(paste(no_keep_drugs,collapse="|"), colnames(brain_cancer)))#vector of POSITIONS of drugs we dont want in dataframe brain_cancer
 brain_cancer=brain_cancer[,-no_keep_drugs]#removing the drugs we dont want
+```
+
+##Filter effective drugs in each dose group
+
+```{r}
+#Lets say for now that our threshold is 0,3 so we can see how many drugs meet this criteria in each dose group
+effective_drugs<-function(x){
+  effective_x<-x[,which(apply(x,2,mean)<0.3)]
+  return(effective_x)
+}
+
+effective_d1=effective_drugs(d1)
+effective_d2=effective_drugs(d2)
+effective_d3=effective_drugs(d3)
+effective_d4=effective_drugs(d4)
+effective_d5=effective_drugs(d5)
+effective_d6=effective_drugs(d6)
+effective_d7=effective_drugs(d7)
+effective_d8=effective_drugs(d8)
+
+
+all_effective_drugs=c(colnames(effective_d1),colnames(effective_d2),colnames(effective_d3),colnames(effective_d4),colnames(effective_d5),colnames(effective_d6),colnames(effective_d7),colnames(effective_d8))
+
+length(all_effective_drugs)
+length(which(apply(brain_cancer,2,mean)<0.3)) #this is the amount of drugs that we keep in total
+
+#look into this, some kind of a problem
 ```
 
 #Question 2: What are the targets of the effective drugs?
