@@ -82,6 +82,8 @@ abline(a = 0, b = 0.33) #however one part of it seems to match the normal distri
 
 ```
 
+#Question 1: How can we distinguish the most effective drugs?
+
 ##Deviding drugs in doses groups
 ```{r}
 dd1=grep("0.00061034", colnames(brain_cancer))
@@ -174,6 +176,8 @@ no_keep_drugs=unique (grep(paste(no_keep_drugs,collapse="|"), colnames(brain_can
 brain_cancer=brain_cancer[,-no_keep_drugs]#removing the drugs we dont want
 ```
 
+#Question 2: What are the targets of the effective drugs?
+
 ##Apllying the dosis separation of dataset brain_cancer on prism.treat
 ```{r}
 brain_cancer_treat=prism.treat[colnames(brain_cancer),] #selecting only the drugs we previously filtered out from brain_cancer
@@ -194,6 +198,8 @@ summary(brain_cancer_treat$disease.area)
 
 ```
 
+#Question 3: Are there any genetic markers that are specific for brain cancer subtypes?
+
 ##Dividing cell lines into subgroups
 ```{r}
 medulloblastoma=brain_cancer_cl$DepMap_ID[grep("Medulloblastoma", brain_cancer_cl$disease_subtype)]#we obtain the names of the cell lines that are classified as medulloblastoma
@@ -207,6 +213,11 @@ astrocytoma=brain_cancer_cl$DepMap_ID[grep("Astrocytoma", brain_cancer_cl$diseas
 disease_subtypes=c(medulloblastoma,glioblastoma,glioma,astrocytoma)
 length(disease_subtypes)#making sure we didnt forget anything
 ```
+
+#Question 4: What other factors contribute to drug effectiveness prediction?
+
+#Random: place to try out things
+
 ##Clustering
 
 ```{r}
@@ -256,6 +267,7 @@ ggscatter(
   stat_mean(aes(color = cluster), size = 3)
 
 ```
+
 ```{r}
 
 # Compute and plot wss for k = 2 to k = 12
