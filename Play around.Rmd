@@ -41,8 +41,7 @@ brain_cancer=prism[names,]
 brain_cancer_achilles=prism.achilles[names,]
 brain_cancer_cnv=prism.cnv[names,]
 brain_cancer_exp=prism.exp[names,]
-#brain_cancer_snv=prism.snv[names,] #does not make sense no cell line info, other type of filtering required
-#brain_cancer_treat=prism.treat[names,] #does not make sense no cell line info, other type of filtering required
+
 ```
 
 ##NA removal from brain_cancer_achilles
@@ -60,6 +59,7 @@ brain_cancer=brain_cancer[ , colSums(is.na(brain_cancer)) == 0]
 ```
 
 ##Brain_cancer distribution visualising
+
 ```{r}
 max=apply(brain_cancer,2,max)
 min=apply(brain_cancer,2,min)
@@ -165,6 +165,7 @@ mean(apply(deviation[,-keep],2,mean))#curioisty
 ```
 
 ##Selecting relevant drugs
+
 ```{r}
 no_keep_drugs=colnames(doses_outliers)#vector with NAMES of drugs we dont want
 no_keep_drugs=unique (grep(paste(no_keep_drugs,collapse="|"), colnames(brain_cancer)))#vector of POSITIONS of drugs we dont want in dataframe brain_cancer
