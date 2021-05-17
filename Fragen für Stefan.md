@@ -1,5 +1,6 @@
 # 2021-topic-01-team-03
 
 - Strukturieren: ob es sinnvoll ist verschiedene Markdowns erstellen
-- Was ist prism.cnv? Was sind die columns und rows?
+- Was ist prism.snv? Was sind die columns und rows?
 - Emails von Stephan
+- Wie sieht das Enddokument aus?
