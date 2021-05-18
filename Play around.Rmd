@@ -10,7 +10,7 @@ load("../2021-topic-01-team-03/dataset/prism_datasets.rda")
 load("../2021-topic-01-team-03/dataset/cellline_datasets.rda")
 ```
 
-#Guidelines
+# Guidelines
 
 prism: effect of the treatment (columns) on cell growth of cell lines (rows).For example, BRD-A00077618-236-07-6::0.0024414::HTS002 indicates treatment with the drug BRD-A00077618-236-07-6, with a dose of 2.4 nM, in assay HTS002. Values represent log fold changes with respect to a control DMSO experiment.
 
@@ -28,9 +28,10 @@ prism.achilles: gene KO scores, a measure of how essential/important is a partic
 
 IDEA: use same indications as in PRISM paper to start filtering for relevant genes, cell lines? 
 
-#Cleaning
+# Cleaning
 
-##Selecting brain cancer specific cell lines in all data sets
+## Selecting brain cancer specific cell lines in all data sets
+
 ```{r}
 brain_cancer_cl=subset.data.frame(prism.cl, disease == 	"Brain Cancer") #identify the brain cancer cell lines' names
 
@@ -44,12 +45,14 @@ brain_cancer_exp=prism.exp[names,]
 
 ```
 
-##NA removal from brain_cancer_achilles
+## NA removal from brain_cancer_achilles
+
 ```{r}
 brain_cancer_achilles=na.omit(brain_cancer_achilles) #remove the entire cell lines from everywhere without KO scores
 ```
 
-##NA for mean substituition
+## NA for mean substituition in brain_cancer
+
 ```{r}
 for(i in 1:ncol(brain_cancer)){
   brain_cancer[is.na(brain_cancer[,i]), i] <- mean(brain_cancer[,i], na.rm = TRUE)
@@ -58,7 +61,7 @@ for(i in 1:ncol(brain_cancer)){
 brain_cancer=brain_cancer[ , colSums(is.na(brain_cancer)) == 0]
 ```
 
-##Brain_cancer distribution visualising
+## Brain_cancer distribution visualising
 
 ```{r}
 max=apply(brain_cancer,2,max)
@@ -82,9 +85,10 @@ abline(a = 0, b = 0.33) #however one part of it seems to match the normal distri
 
 ```
 
-#Question 1: How can we distinguish the most effective drugs?
+# Question 1: How can we distinguish the most effective drugs?
 
-##Deviding drugs in doses groups
+## Deviding drugs in doses groups
+
 ```{r}
 dd1=grep("::0.00061034::", colnames(brain_cancer))
 dd2=grep("::0.0024414::", colnames(brain_cancer))
@@ -114,7 +118,8 @@ deviation=brain_cancer[,-doses] #lets see what we missed-> these are the doses t
 questionable_drugs=prism.treat[colnames(deviation),]#we dont know if we can use these drugs, may be their doses deviate too far from the standard
 ```
 
-#Working on drugs that do not fit the standart doses
+## Working on drugs that do not fit the standart doses
+
 ```{r}
 #rest of the doeses are all different. What do we do with them?
 
@@ -164,7 +169,7 @@ mean(apply(deviation[,-keep],2,mean))#curioisty
 
 ```
 
-##Selecting relevant drugs
+## Selecting relevant drugs
 
 ```{r}
 no_keep_drugs=colnames(doses_outliers)#vector with NAMES of drugs we dont want
@@ -172,7 +177,7 @@ no_keep_drugs=unique (grep(paste(no_keep_drugs,collapse="|"), colnames(brain_can
 brain_cancer=brain_cancer[,-no_keep_drugs]#removing the drugs we dont want
 ```
 
-##Filter effective drugs in each dose group
+## Filter effective drugs in each dose group
 
 ```{r}
 #Lets say for now that our threshold is 0,3 so we can see how many drugs meet this criteria in each dose group
@@ -196,10 +201,37 @@ all_effective_drugs=c(colnames(effective_d1),colnames(effective_d2),colnames(eff
 length(all_effective_drugs)
 length(which(apply(brain_cancer,2,mean)<=0.3)) #this is the amount of drugs that we keep in total. We compare these 2 length to make sure that that we do not select the same drug twice. If it was the case the first length would be bigger than the second one
 ```
+##Select the drugs that are effective in multiple doses
 
-#Question 2: What are the targets of the effective drugs?
+```{r}
+colnames(effective_d1)=gsub(pattern = "::.*", replacement = "", colnames(effective_d1))
+## remove everything but the drug information from colnames and make them new colnames of the dataframes
+colnames(effective_d2)=gsub(pattern = "::.*", replacement = "", colnames(effective_d2))
 
-##Apllying the dosis separation of dataset brain_cancer on prism.treat
+#try to make it work as a function
+
+d1_and_d2=setdiff(colnames(effective_d1), colnames(effective_d2))
+#identify which are the drug names that are different in these 2 dataframes
+d1_and_d2=unique(grep(paste(d1_and_d2,collapse="|"), colnames(effective_d1)))
+View(effective_d1[,-d1_and_d2])
+
+d2_and_d1=setdiff(colnames(effective_d2), colnames(effective_d1))
+d2_and_d1=unique(grep(paste(d2_and_d1,collapse="|"), colnames(effective_d2)))
+View(effective_d2[,-d2_and_d1])
+#gives us identical dataframes, so all correct. 321 drugs from d1 are present in d2
+
+d1_and_d8=setdiff(colnames(effective_d1), colnames(effective_d8)) #all of the drugs in effective_d1 are present in effective_d8
+d1_and_d8=unique(grep(paste(d1_and_d8,collapse="|"), colnames(effective_d1)))
+View(effective_d1[,-d1_and_d8])#this is an empty dataframe
+
+#try to make it work as a function
+
+```
+
+# Question 2: What are the targets of the effective drugs?
+
+## Apllying the dosis separation of dataset brain_cancer on prism.treat
+
 ```{r}
 brain_cancer_treat=prism.treat[colnames(brain_cancer),] #selecting only the drugs we previously filtered out from brain_cancer
 
@@ -219,9 +251,10 @@ summary(brain_cancer_treat$disease.area)
 
 ```
 
-#Question 3: Are there any genetic markers that are specific for brain cancer subtypes?
+# Question 3: Are there any genetic markers that are specific for brain cancer subtypes?
 
-##Dividing cell lines into subgroups
+## Dividing cell lines into subgroups
+
 ```{r}
 medulloblastoma=brain_cancer_cl$DepMap_ID[grep("Medulloblastoma", brain_cancer_cl$disease_subtype)]#we obtain the names of the cell lines that are classified as medulloblastoma
 
@@ -235,11 +268,11 @@ disease_subtypes=c(medulloblastoma,glioblastoma,glioma,astrocytoma)
 length(disease_subtypes)#making sure we didnt forget anything
 ```
 
-#Question 4: What other factors contribute to drug effectiveness prediction?
+# Question 4: What other factors contribute to drug effectiveness prediction?
 
-#Random: place to try out things
+# Random: place to try out things
 
-##Clustering
+## Clustering
 
 ```{r}
 
@@ -249,7 +282,7 @@ brain.km$cluster
 
 ```
 
-##PCA for brain_cancer dataset
+## PCA for brain_cancer dataset
 ```{r}
 library("factoextra")
 dim(brain_cancer)
