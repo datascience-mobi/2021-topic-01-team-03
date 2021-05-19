@@ -22,7 +22,8 @@ prism.exp: gene TPM (transcripts per million) values. Indicate over/underexpress
 
 prism.cnv: gene copy number (CN) values. In absolute terms, CN = 2, since there are two alleles per genes. In cancer, genes might be amplified CN > 2 or deleted CN < 2
 
-prism.snv: observed mutations in a sample. The isDeleterious flag specifies if mutation has a functional effect or not.
+prism.snv: observed mutations in a sample. The isDeleterious flag specifies if mutation has a functional effect or not. First column is genes. There is a column
+(DepMap_ID) with corresponding cell lines
 
 prism.achilles: gene KO scores, a measure of how essential/important is a particular gene for the cell survival
 
@@ -42,6 +43,17 @@ brain_cancer=prism[names,]
 brain_cancer_achilles=prism.achilles[names,]
 brain_cancer_cnv=prism.cnv[names,]
 brain_cancer_exp=prism.exp[names,]
+
+```
+
+##Selecting relevant info from prism.snv
+
+```{r}
+for (x in names){
+ print(which(prism.snv$DepMap_ID == 	
+x))
+}
+
 
 ```
 
@@ -204,11 +216,18 @@ length(which(apply(brain_cancer,2,mean)<=0.3)) #this is the amount of drugs that
 ##Select the drugs that are effective in multiple doses
 
 ```{r}
-colnames(effective_d1)=gsub(pattern = "::.*", replacement = "", colnames(effective_d1))
+new_colnames<-function(x){
+  a<-gsub(pattern = "::.*", replacement = "", colnames(x))
+  return(a)
+}
+colnames(effective_d3)<-new_colnames(effective_d3)
 ## remove everything but the drug information from colnames and make them new colnames of the dataframes
-colnames(effective_d2)=gsub(pattern = "::.*", replacement = "", colnames(effective_d2))
 
-#try to make it work as a function
+save_new_colnames=function(y){
+  colnames(y)<-new_colnames(y)
+}
+save_new_colnames(effective_d4)
+#does not work
 
 d1_and_d2=setdiff(colnames(effective_d1), colnames(effective_d2))
 #identify which are the drug names that are different in these 2 dataframes
