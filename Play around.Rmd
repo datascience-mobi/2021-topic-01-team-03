@@ -49,10 +49,22 @@ brain_cancer_exp=prism.exp[names,]
 ##Selecting relevant info from prism.snv
 
 ```{r}
-for (x in names){
- print(which(prism.snv$DepMap_ID == 	
-x))
+for (i in names){
+ resut<-which(prism.snv$DepMap_ID == 	
+i)
 }
+result #only delivers results for one of 34 cell lines. without saving it as result it works on all cell lines
+
+sapply(names, function(i){
+  snv<-which(prism.snv$DepMap_ID == 	
+i)
+  View(prism.snv[snv,])
+}) #works but kinda weird
+
+
+
+
+
 
 
 ```
@@ -213,6 +225,7 @@ all_effective_drugs=c(colnames(effective_d1),colnames(effective_d2),colnames(eff
 length(all_effective_drugs)
 length(which(apply(brain_cancer,2,mean)<=0.3)) #this is the amount of drugs that we keep in total. We compare these 2 length to make sure that that we do not select the same drug twice. If it was the case the first length would be bigger than the second one
 ```
+
 ##Select the drugs that are effective in multiple doses
 
 ```{r}
@@ -220,7 +233,14 @@ new_colnames<-function(x){
   a<-gsub(pattern = "::.*", replacement = "", colnames(x))
   return(a)
 }
+colnames(effective_d1)<-new_colnames(effective_d1)
+colnames(effective_d2)<-new_colnames(effective_d2)
 colnames(effective_d3)<-new_colnames(effective_d3)
+colnames(effective_d4)<-new_colnames(effective_d4)
+colnames(effective_d5)<-new_colnames(effective_d5)
+colnames(effective_d6)<-new_colnames(effective_d6)
+colnames(effective_d7)<-new_colnames(effective_d7)
+colnames(effective_d8)<-new_colnames(effective_d8)
 ## remove everything but the drug information from colnames and make them new colnames of the dataframes
 
 save_new_colnames=function(y){
@@ -229,22 +249,54 @@ save_new_colnames=function(y){
 save_new_colnames(effective_d4)
 #does not work
 
-d1_and_d2=setdiff(colnames(effective_d1), colnames(effective_d2))
-#identify which are the drug names that are different in these 2 dataframes
-d1_and_d2=unique(grep(paste(d1_and_d2,collapse="|"), colnames(effective_d1)))
-View(effective_d1[,-d1_and_d2])
+  
+common_drugs<-function(x,y){
+  different<-setdiff(colnames(x), colnames(y))
+  
+  different<-unique(grep(paste(different,collapse="|"), colnames(x)))
+  
+  colnames(x[,-different])
+}
+#function returns the names of the common drugs between 2 dataframes
 
-d2_and_d1=setdiff(colnames(effective_d2), colnames(effective_d1))
-d2_and_d1=unique(grep(paste(d2_and_d1,collapse="|"), colnames(effective_d2)))
-View(effective_d2[,-d2_and_d1])
-#gives us identical dataframes, so all correct. 321 drugs from d1 are present in d2
+d1_d2=common_drugs(effective_d1,effective_d2)
+d2_d1=common_drugs(effective_d2,effective_d1)
+#both are equal, so the function works correctly
 
-d1_and_d8=setdiff(colnames(effective_d1), colnames(effective_d8)) #all of the drugs in effective_d1 are present in effective_d8
-d1_and_d8=unique(grep(paste(d1_and_d8,collapse="|"), colnames(effective_d1)))
-View(effective_d1[,-d1_and_d8])#this is an empty dataframe
 
-#try to make it work as a function
+d1_d3=common_drugs(effective_d1,effective_d3)
+d1_d4=common_drugs(effective_d1,effective_d4)
+d1_d5=common_drugs(effective_d1,effective_d5)
+d1_d6=common_drugs(effective_d1,effective_d6)
+d1_d7=common_drugs(effective_d1,effective_d7)
+d1_d8=common_drugs(effective_d1,effective_d8)
 
+#which drugs are present in all 4 8 doses?
+
+present_in_all_doses<-function(a,b,c,d,e,f,g){
+ bb<-setdiff(a, b)
+ a<-a [! a %in% bb]
+ 
+ cc<-setdiff(a, c)
+ a<-a [! a %in% cc]
+ 
+ dd<-setdiff(a, d)
+ a<-a [! a %in% dd]
+ 
+ ee<-setdiff(a, e)
+ a<-a [! a %in% ee]
+ 
+ ff<-setdiff(a, f)
+ a<-a [! a %in% ff]
+ 
+ gg<-setdiff(a, g)
+ a<-a [! a %in% gg]
+ 
+ return(a)
+}
+
+effective_in_all_doses=present_in_all_doses(d1_d2,d1_d3,d1_d4,d1_d5,d1_d6,d1_d7,d1_d8)
+#158 drugs are effective in all doses
 ```
 
 # Question 2: What are the targets of the effective drugs?
