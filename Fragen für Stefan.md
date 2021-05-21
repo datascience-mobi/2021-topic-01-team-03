@@ -1,5 +1,10 @@
 # 2021-topic-01-team-03
 
+**26.03.21**
+- Wie erstellt man einen Vektor mit Einträgen aus einem for loop?
+- Wie speichert man eine neue Variable von einem loop oder apply?
+
+**19.03.21**
 - Cedrik pull and push
 + späteres Meeting zusammen
 
