@@ -12,4 +12,5 @@ Till 31.05
 - [x] Solve the "Filter effective drugs" problem. **Ilya**
 - [ ] Select the drugs that are effective in multiple doses. **Ilya**
 - [ ] Select drug targets. Who?
+- [ ] Research which doses are aplicable on humans. Who?
 
