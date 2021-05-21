@@ -227,10 +227,14 @@ for (i in std_doses) {
 
 ```{r}
 std_doses <- c(0.00061034,0.0024414,0.00976562,0.0390625,0.15625,0.625,10,2.5)
+doses_to_assign=as.numeric(questionable_drugs$dose)
 
 extra_drugs <-data.frame(matrix(nrow = 8,ncol = 1144),row.names = std_doses)
 colnames(extra_drugs)=rownames(questionable_drugs)
 
+for (i in 1:length(doses_to_assign)){
+    extra_drugs[,i]=abs(doses_to_assign[i]-std_doses)
+}
 
 ```
 
