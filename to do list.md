@@ -9,8 +9,8 @@ Till 24.05
 Till 31.05
 - [ ] Do we want to select just effective drugs in all 34 cell lines or we want to select effective drugs specifically for each of 4 subtypes? Somebody needs to look into it and see if it is worth it or not. **Xenia**
 - [x] Solve the "Filter effective drugs" problem. **Ilya**
-- [ ] Select the drugs that are effective in multiple doses. **Ilya**
-- [ ] Select drug targets. Who?
+- [x] Select the drugs that are effective in multiple doses. **Ilya**
+- [ ] Select drug targets. **Ilya**
 - [ ] Research which doses are aplicable on humans. Who?
 
 For future:
