@@ -161,7 +161,10 @@ d7=add_extra_doses(d7_extra,d7)
 d8=add_extra_doses(d8_extra,d8)
 
 
-#Resumé: new data sets for each dosage with assigned outliers to closest standard deviation
+#Resumé: new data sets for each dosage with assigned outliers to closest deviation
+
+ncol(d2)+ncol(d1)+ncol(d3)+ncol(d4)+ncol(d5)+ncol(d6)+ncol(d7)+ncol(d8)
+ncol(brain_cancer)
 ```
 
 
