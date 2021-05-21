@@ -15,7 +15,6 @@
 - We cannot remove the entire columns because we would lose a lot of information, so we substitute all the NAs for the mean of the column
 - However, there are a few columns left that only have NAs. So the substitution for mean did not work there, since there are not any values in the column to calculate the mean
 - We remove these columns because they do not have any valuable infromation for us
-- **before: 11043 columns; after: 11043? Where is the mistake?! I cannot see any column with just NAs either in the normal prism dataset**
 
 ## Brain_cancer distribution visualising
 - Just some basic visualisation of *brain_cancer* dataset. Just out of curiosity
