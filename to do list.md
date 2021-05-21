@@ -13,3 +13,5 @@ Till 31.05
 - [ ] Select drug targets. Who?
 - [ ] Research which doses are aplicable on humans. Who?
 
+For future:
+- trying to find a way to store long codes in loops just to make it more professional (when enough time for it)
