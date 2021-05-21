@@ -48,7 +48,7 @@ brain_cancer_exp=prism.exp[names,]
 
 ##Selecting relevant info from prism.snv
 
-```{r}
+```{r
 for (i in names){
  result<-which(prism.snv$DepMap_ID == 	
 i)
@@ -60,12 +60,6 @@ sapply(names, function(i){
 i)
   View(prism.snv[snv,])
 }) #works but kinda weird
-
-
-
-
-
-
 
 ```
 
@@ -82,30 +76,6 @@ for(i in 1:ncol(brain_cancer)){
   brain_cancer[is.na(brain_cancer[,i]), i] <- mean(brain_cancer[,i], na.rm = TRUE)
 }
 brain_cancer=brain_cancer[ , colSums(is.na(brain_cancer)) == 0]
-```
-
-## Brain_cancer distribution visualising
-
-```{r}
-max=apply(brain_cancer,2,max)
-min=apply(brain_cancer,2,min)
-mean=apply(brain_cancer,2,mean)
-median=apply(brain_cancer,2,median)
-#add quantiles to the dataframe?
-
-drug_summary=data.frame(max, min, mean, median)
-sum(is.na(drug_summary$mean))
-
-hist(drug_summary$mean,main= "Distribution of means of each drug",xlab= "means of drugs", freq= F, breaks = 100)
-abline(v = quantile(drug_summary$mean, c(0.25,0.5,0.75)), col = "blue", lwd = 2)
-#what would be the type of this distribution? Poisson? Negative binominal?
-
-median(drug_summary$mean) # 0.3 criteria from PRISM paper makes sense since it covers more than a half of the drugs
-mean(drug_summary$mean) 
-
-qqnorm(drug_summary$mean) #data not normally distributed
-abline(a = 0, b = 0.33) #however one part of it seems to match the normal distribution, starting from -1 sample quantile
-
 ```
 
 # Question 1: How can we distinguish the most effective drugs?
@@ -145,57 +115,7 @@ View(questionable_drugs)
 
 ## Working on drugs that do not fit the standard doses
 
-```{r alternative 1}
-#rest of the doeses are all different. What do we do with them?
-
-#lets keep from "deviation" only the ones that have a deviation less than "10%" from original
-
-#to do: make a distribution test for a non normal distribution to justify the 10%
-#filtering the doses that deviate less than 10%
-
-keep_d1=which (0.00061034-0.1*0.00061034 <=questionable_drugs[,2] & 0.00061034+0.1*0.00061034 >=questionable_drugs[,2]) #apply the 10% gap and find which genes are that qualify for it
-d1_extra=brain_cancer[,rownames(questionable_drugs[keep_d1,])] #create a dataframe with these genes 
-d1=cbind(d1,d1_extra) #merge the obtained dataframe with the standard dose one
-
-keep_d2=which (0.0024414-0.1*0.0024414 <= questionable_drugs[,2] & 0.0024414+0.1*0.0024414 >=questionable_drugs[,2])
-d2_extra=brain_cancer[,rownames(questionable_drugs[keep_d2,])]
-d2=cbind(d2,d2_extra)
-
-keep_d3=which (0.00976562-0.1*0.00976562 <= questionable_drugs[,2] & 0.00976562+0.1*0.00976562 >=questionable_drugs[,2])
-d3_extra=brain_cancer[,rownames(questionable_drugs[keep_d3,])]
-d3=cbind(d3,d3_extra)
-
-keep_d4=which (0.0390625-0.1*0.0390625 < questionable_drugs[,2] & 0.0390625+0.1*0.0390625 >questionable_drugs[,2])
-d4_extra=brain_cancer[,rownames(questionable_drugs[keep_d4,])]
-d4=cbind(d4,d4_extra)
-
-keep_d5=which (0.15625-0.1*0.15625 <= questionable_drugs[,2] & 0.15625+0.1*0.15625 >=questionable_drugs[,2])
-d5_extra=brain_cancer[,rownames(questionable_drugs[keep_d5,])]
-d5=cbind(d5,d5_extra)
-
-keep_d6=which (0.625-0.1*0.625 <= questionable_drugs[,2] & 0.625+0.1*0.625 >=questionable_drugs[,2])
-d6_extra=brain_cancer[,rownames(questionable_drugs[keep_d6,])]
-d6=cbind(d6,d6_extra)
-
-keep_d7=which (10-0.1*10 <= questionable_drugs[,2] & 10+0.1*10 >=questionable_drugs[,2])
-d7_extra=brain_cancer[,rownames(questionable_drugs[keep_d7,])]
-d7=cbind(d7,d7_extra)
-
-keep_d8=which (2.5-0.1*2.5 <= questionable_drugs[,2] & 2.5+0.1*2.5 >=questionable_drugs[,2])
-d8_extra=brain_cancer[,rownames(questionable_drugs[keep_d8,])]
-d8=cbind(d8,d8_extra)
-
-
-#look at the drugs we did not keep
-keep=c(keep_d1, keep_d2, keep_d3, keep_d4,keep_d5,keep_d6,keep_d7,keep_d8)
-doses_outliers=deviation[,-keep]
-
-mean(apply(deviation[,-keep],2,mean))#curioisty
-
-```
-## Another way to work on drugs that do not fit the standard doses
-
-```{r alternative 2}
+```{r}
 #Stefan's suggestion: assigning the outliers to closest standard doses
 
 #Calculation of all differences between questionable drugs and standard doses
@@ -236,16 +156,18 @@ for (i in 1:length(doses_to_assign)){
     extra_drugs[,i]=abs(doses_to_assign[i]-std_doses)
 }
 
+
+y=apply(extra_drugs, 2, which.min)
+z=as.numeric(y)
+a=c(1,2,3,4,5,6,7,8)
+
+which(z==3)
+
+#brain_cancer and bind it in this case to d1
+View(cbind(brain_cancer[,which(colnames(extra_drugs)[x]==colnames(brain_cancer))],d1))
+
+
 ```
-
-## Selecting relevant drugs
-
-```{r}
-no_keep_drugs=colnames(doses_outliers)#vector with NAMES of drugs we dont want
-no_keep_drugs=unique (grep(paste(no_keep_drugs,collapse="|"), colnames(brain_cancer)))#vector of POSITIONS of drugs we dont want in dataframe brain_cancer
-brain_cancer=brain_cancer[,-no_keep_drugs]#removing the drugs we dont want
-```
-
 ## Filter effective drugs in each dose group
 
 ```{r}
