@@ -7,6 +7,7 @@
 ## NA removal from brain_cancer_achilles
 - Achilles dataset contains information about gene KO. However some of the brain cancer cell lines do not have information about KO at all. In other words in *brain_cancer_achilles* some cell lines have entire row of NAs
 - We remove such cell lines 
+- before: 34 cell lines; after removal: 25 cell lines
 
 ## NA for mean substituition in brain_cancer
 - In this dataset columns represent drugs in different assays and concentrations, basically column = experiment on every cell line
@@ -14,23 +15,26 @@
 - We cannot remove the entire columns because we would lose a lot of information, so we substitute all the NAs for the mean of the column
 - However, there are a few columns left that only have NAs. So the substitution for mean did not work there, since there are not any values in the column to calculate the mean
 - We remove these columns because they do not have any valuable infromation for us
+- **before: 11043 columns; after: 11043? Where is the mistake?! I cannot see any column with just NAs either in the normal prism dataset**
 
 ## Brain_cancer distribution visualising
 - Just some basic visualisation of *brain_cancer* dataset. Just out of curiosity
 - It is not that crucial and we can actually consider removing it
+- it is visualized that the efficiency values are not normally distributed
+- The mean of the distribution of means is -0.27
 
 # Question 1: How can we distinguish the most effective drugs?
 
 ## Deviding drugs in doses groups
 - We identify 8 standard doses, that consatantly repeat in *brain_cancer*
-- As *ddx* (x for 1,2,3,4,5,6,7,8) we save the names of the drugs that correspond to each dose
+- As *ddx* (x for 1,2,3,4,5,6,7,8) we save the columnnames of the drugs that correspond to each dose
 - After that we creat *dx* (x for 1,2,3,4,5,6,7,8) dataframe for each dose
 - We identify the doses that do not exactly match the standard doses and save them in *deviation* dataframe. This dataframe originates from *brain_cancer*. Here the names of unmatched drugs are the colnames. We will need it to select the doses of these drugs
-- We use *deviation* dataframe to create a second dataframe with non-standart drugs and call it *questionable drugs*. This dataframe originates from *prism.treat* and has drug names as rownames. We do this in order to see which are the doses of these drugs easier (second column of the dataframe *questionable_drugs*). 
+- We use *deviation* dataframe to create a second dataframe with non-standart drugs and call it *questionable drugs*. This dataframe originates from *prism.treat* and has drug names as rownames. We do this in order to see which are the doses of these drugs easier (second column of the dataframe *questionable_drugs*). These are 1144 from 11168 so around 10%.
 - Now we know exactly the names of non-standard drugs and in which dose they were applied. We will work in detail on these drugs in the next chunk
 
-## Working on drugs that do not fit the standart doses
-- For now we decide that we only wanna some keep the drugs that deviate from the satndart doses. The chosen max deviation is 10%
+## Working on drugs that do not fit the standard doses
+- For now we decide that we only wanna keep the drugs that deviate from the standard doses. The chosen max deviation is 10%
 - As *keep_dx* (x for 1,2,3,4,5,6,7,8) we assign drugs that have the deviation less or equal to 10%. We use the infromation from the second column of *questionable_drugs* dataframe to compare the doses to the 10% deviation (with *which* function). *keep_dx* is a vector which represents the rownumbers of drugs that satisfy the 10% max deviation
 - We create *dx_extra* dataframe. Here from *brain_cancer* dataset we select only the columns that have the same name as rownames of  *keep_dx* in *questionable_drugs*
 - With *cbind* function we fuse 2 dataframes: *dx* + *dx_extra*
