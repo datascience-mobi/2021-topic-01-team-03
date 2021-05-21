@@ -110,7 +110,6 @@ sum(length(dd1), length(dd2), length(dd3), length(dd4),length(dd5), length(dd6),
 deviation=brain_cancer[,-doses] #lets see what we missed-> these are the doses that are not exact and have some kind of a deviation
 
 questionable_drugs=prism.treat[colnames(deviation),]#we dont know if we can use these drugs, may be their doses deviate too far from the standard
-View(questionable_drugs)
 ```
 
 ## Working on drugs that do not fit the standard doses
@@ -157,15 +156,33 @@ for (i in 1:length(doses_to_assign)){
 }
 
 
-y=apply(extra_drugs, 2, which.min)
-z=as.numeric(y)
-a=c(1,2,3,4,5,6,7,8)
+to_which_dose=apply(extra_drugs, 2, which.min)
 
-which(z==3)
+d1_extra=which(to_which_dose==1)
+d2_extra=which(to_which_dose==2)
+d3_extra=which(to_which_dose==3)
+d4_extra=which(to_which_dose==4)
+d5_extra=which(to_which_dose==5)
+d6_extra=which(to_which_dose==6)
+d7_extra=which(to_which_dose==7)
+d8_extra=which(to_which_dose==8)
 
-#brain_cancer and bind it in this case to d1
-View(cbind(brain_cancer[,which(colnames(extra_drugs)[x]==colnames(brain_cancer))],d1))
+not_standard_doses=c(d1_extra,d2_extra,d3_extra,d4_extra,d5_extra,d6_extra,d7_extra,d8_extra)
+length(not_standard_doses)
 
+
+add_extra_doses=function(x,y){cbind(brain_cancer[,unique(grep(paste(colnames(extra_drugs[,x]),collapse="|"), colnames(brain_cancer)))], y)}
+
+d1=add_extra_doses(d1_extra,d1)
+d2=add_extra_doses(d2_extra,d2)
+d3=add_extra_doses(d3_extra,d3)
+d4=add_extra_doses(d4_extra,d4)
+d5=add_extra_doses(d5_extra,d5)
+d6=add_extra_doses(d6_extra,d6)
+d7=add_extra_doses(d7_extra,d7)
+d8=add_extra_doses(d8_extra,d8)
+
+#Check the numbers tomorrow
 
 ```
 ## Filter effective drugs in each dose group
