@@ -48,12 +48,18 @@ brain_cancer_exp=prism.exp[names,]
 
 ##Selecting relevant info from prism.snv
 
-```{r}
-for (x in names){
- print(which(prism.snv$DepMap_ID == 	
-x))
+```{r
+for (i in names){
+ result<-which(prism.snv$DepMap_ID == 	
+i)
 }
+result #only delivers results for one of 34 cell lines. without saving it as result it works on all cell lines
 
+sapply(names, function(i){
+  snv<-which(prism.snv$DepMap_ID == 	
+i)
+  View(prism.snv[snv,])
+}) #works but kinda weird
 
 ```
 
@@ -69,32 +75,7 @@ brain_cancer_achilles=na.omit(brain_cancer_achilles) #remove the entire cell lin
 for(i in 1:ncol(brain_cancer)){
   brain_cancer[is.na(brain_cancer[,i]), i] <- mean(brain_cancer[,i], na.rm = TRUE)
 }
-
 brain_cancer=brain_cancer[ , colSums(is.na(brain_cancer)) == 0]
-```
-
-## Brain_cancer distribution visualising
-
-```{r}
-max=apply(brain_cancer,2,max)
-min=apply(brain_cancer,2,min)
-mean=apply(brain_cancer,2,mean)
-median=apply(brain_cancer,2,median)
-#add quantiles to the dataframe?
-
-drug_summary=data.frame(max, min, mean, median)
-sum(is.na(drug_summary$mean))
-
-hist(drug_summary$mean,main= "Distribution of means of each drug",xlab= "means of drugs", freq= F, breaks = 100)
-abline(v = quantile(drug_summary$mean, c(0.25,0.5,0.75)), col = "blue", lwd = 2)
-#what would be the type of this distribution? Poisson? Negative binominal?
-
-median(drug_summary$mean) # 0.3 criteria from PRISM paper makes sense since it covers more than a half of the drugs
-mean(drug_summary$mean) 
-
-qqnorm(drug_summary$mean) #data not normally distributed
-abline(a = 0, b = 0.33) #however one part of it seems to match the normal distribution, starting from -1 sample quantile
-
 ```
 
 # Question 1: How can we distinguish the most effective drugs?
@@ -113,6 +94,7 @@ dd8=grep("::2.5::", colnames(brain_cancer))
 #positions of the respective doses in the dataframe 
 doses=c(dd1,dd2,dd3,dd4,dd5,dd6,dd7,dd8)
 
+
 d1=brain_cancer[,dd1]
 d2=brain_cancer[,dd2]
 d3=brain_cancer[,dd3]
@@ -128,66 +110,63 @@ sum(length(dd1), length(dd2), length(dd3), length(dd4),length(dd5), length(dd6),
 deviation=brain_cancer[,-doses] #lets see what we missed-> these are the doses that are not exact and have some kind of a deviation
 
 questionable_drugs=prism.treat[colnames(deviation),]#we dont know if we can use these drugs, may be their doses deviate too far from the standard
+dim(questionable_drugs)
 ```
 
-## Working on drugs that do not fit the standart doses
+## Working on drugs that do not fit the standard doses
 
 ```{r}
-#rest of the doeses are all different. What do we do with them?
+#Stefan's suggestion: assigning the outliers to closest standard doses
 
-#lets keep from "deviation" only the ones that have a deviation less than "10%" from original
+#Calculation of all differences between questionable drugs and standard doses
+std_doses <- c(0.00061034,0.0024414,0.00976562,0.0390625,0.15625,0.625,10,2.5) #vector with standard dosages
 
-#to do: make a distribution test for a non normal distribution to justify the 10%
-#filtering the doses that deviate less than 10%
+#Picking dosages from dosages that have to be assigned to standard dosages
+doses_to_assign=as.numeric(questionable_drugs$dose)
 
-keep_d1=which (0.00061034-0.1*0.00061034 <=questionable_drugs[,2] & 0.00061034+0.1*0.00061034 >=questionable_drugs[,2]) #apply the 10% gap and find which genes are that qualify for it
-d1_extra=brain_cancer[,rownames(questionable_drugs[keep_d1,])] #create a dataframe with these genes 
-d1=cbind(d1,d1_extra) #merge the obtained dataframe with the standard dose one
+#Creating data frame for the differences between standard dosages and questionable drugs
+extra_drugs <-data.frame(matrix(nrow = 8,ncol = length(doses_to_assign)),row.names = std_doses)
+colnames(extra_drugs)=rownames(questionable_drugs)
 
-keep_d2=which (0.0024414-0.1*0.0024414 <= questionable_drugs[,2] & 0.0024414+0.1*0.0024414 >=questionable_drugs[,2])
-d2_extra=brain_cancer[,rownames(questionable_drugs[keep_d2,])]
-d2=cbind(d2,d2_extra)
+for (i in 1:length(doses_to_assign)){
+    extra_drugs[,i]=abs(std_doses - doses_to_assign[i])
+}
 
-keep_d3=which (0.00976562-0.1*0.00976562 <= questionable_drugs[,2] & 0.00976562+0.1*0.00976562 >=questionable_drugs[,2])
-d3_extra=brain_cancer[,rownames(questionable_drugs[keep_d3,])]
-d3=cbind(d3,d3_extra)
+#Assigning the drugs to the closest standard dosage 
+to_which_dose=apply(extra_drugs, 2, which.min) #function of which.min: gives row number of min value of column. In comparison just apply: gives min difference
 
-keep_d4=which (0.0390625-0.1*0.0390625 < questionable_drugs[,2] & 0.0390625+0.1*0.0390625 >questionable_drugs[,2])
-d4_extra=brain_cancer[,rownames(questionable_drugs[keep_d4,])]
-d4=cbind(d4,d4_extra)
+d1_extra=which(to_which_dose==1)
+d2_extra=which(to_which_dose==2)
+d3_extra=which(to_which_dose==3)
+d4_extra=which(to_which_dose==4)
+d5_extra=which(to_which_dose==5)
+d6_extra=which(to_which_dose==6)
+d7_extra=which(to_which_dose==7)
+d8_extra=which(to_which_dose==8)
 
-keep_d5=which (0.15625-0.1*0.15625 <= questionable_drugs[,2] & 0.15625+0.1*0.15625 >=questionable_drugs[,2])
-d5_extra=brain_cancer[,rownames(questionable_drugs[keep_d5,])]
-d5=cbind(d5,d5_extra)
+#just a quick check how many doses there are in total: must be all dosages after NA removal
+not_standard_doses=c(d1_extra,d2_extra,d3_extra,d4_extra,d5_extra,d6_extra,d7_extra,d8_extra)
+length(not_standard_doses)#in comparison with dimension from questionable_drugs right!
 
-keep_d6=which (0.625-0.1*0.625 <= questionable_drugs[,2] & 0.625+0.1*0.625 >=questionable_drugs[,2])
-d6_extra=brain_cancer[,rownames(questionable_drugs[keep_d6,])]
-d6=cbind(d6,d6_extra)
+#Adding new assigned dosages to small data frames of standard dosages 
+add_extra_doses=function(x,y){cbind(brain_cancer[,unique(grep(paste(colnames(extra_drugs[,x]),collapse="|"), colnames(brain_cancer)))], y)}
 
-keep_d7=which (10-0.1*10 <= questionable_drugs[,2] & 10+0.1*10 >=questionable_drugs[,2])
-d7_extra=brain_cancer[,rownames(questionable_drugs[keep_d7,])]
-d7=cbind(d7,d7_extra)
+d1=add_extra_doses(d1_extra,d1)
+d2=add_extra_doses(d2_extra,d2)
+d3=add_extra_doses(d3_extra,d3)
+d4=add_extra_doses(d4_extra,d4)
+d5=add_extra_doses(d5_extra,d5)
+d6=add_extra_doses(d6_extra,d6)
+d7=add_extra_doses(d7_extra,d7)
+d8=add_extra_doses(d8_extra,d8)
 
-keep_d8=which (2.5-0.1*2.5 <= questionable_drugs[,2] & 2.5+0.1*2.5 >=questionable_drugs[,2])
-d8_extra=brain_cancer[,rownames(questionable_drugs[keep_d8,])]
-d8=cbind(d8,d8_extra)
 
+#Resumé: new data sets for each dosage with assigned outliers to closest deviation
 
-#look at the drugs we did not keep
-keep=c(keep_d1, keep_d2, keep_d3, keep_d4,keep_d5,keep_d6,keep_d7,keep_d8)
-doses_outliers=deviation[,-keep]
-
-mean(apply(deviation[,-keep],2,mean))#curioisty
-
+ncol(d2)+ncol(d1)+ncol(d3)+ncol(d4)+ncol(d5)+ncol(d6)+ncol(d7)+ncol(d8)
+ncol(brain_cancer)
 ```
 
-## Selecting relevant drugs
-
-```{r}
-no_keep_drugs=colnames(doses_outliers)#vector with NAMES of drugs we dont want
-no_keep_drugs=unique (grep(paste(no_keep_drugs,collapse="|"), colnames(brain_cancer)))#vector of POSITIONS of drugs we dont want in dataframe brain_cancer
-brain_cancer=brain_cancer[,-no_keep_drugs]#removing the drugs we dont want
-```
 
 ## Filter effective drugs in each dose group
 
@@ -213,14 +192,22 @@ all_effective_drugs=c(colnames(effective_d1),colnames(effective_d2),colnames(eff
 length(all_effective_drugs)
 length(which(apply(brain_cancer,2,mean)<=0.3)) #this is the amount of drugs that we keep in total. We compare these 2 length to make sure that that we do not select the same drug twice. If it was the case the first length would be bigger than the second one
 ```
-##Select the drugs that are effective in multiple doses
+
+##Select the drugs that are effective in all doses
 
 ```{r}
 new_colnames<-function(x){
   a<-gsub(pattern = "::.*", replacement = "", colnames(x))
   return(a)
 }
+colnames(effective_d1)<-new_colnames(effective_d1)
+colnames(effective_d2)<-new_colnames(effective_d2)
 colnames(effective_d3)<-new_colnames(effective_d3)
+colnames(effective_d4)<-new_colnames(effective_d4)
+colnames(effective_d5)<-new_colnames(effective_d5)
+colnames(effective_d6)<-new_colnames(effective_d6)
+colnames(effective_d7)<-new_colnames(effective_d7)
+colnames(effective_d8)<-new_colnames(effective_d8)
 ## remove everything but the drug information from colnames and make them new colnames of the dataframes
 
 save_new_colnames=function(y){
@@ -229,22 +216,85 @@ save_new_colnames=function(y){
 save_new_colnames(effective_d4)
 #does not work
 
-d1_and_d2=setdiff(colnames(effective_d1), colnames(effective_d2))
-#identify which are the drug names that are different in these 2 dataframes
-d1_and_d2=unique(grep(paste(d1_and_d2,collapse="|"), colnames(effective_d1)))
-View(effective_d1[,-d1_and_d2])
+  
+common_drugs<-function(x,y){
+  different<-setdiff(colnames(x), colnames(y))
+  
+  different<-unique(grep(paste(different,collapse="|"), colnames(x)))
+  
+  colnames(x[,-different])
+}
+#function returns the names of the common drugs between 2 dataframes
 
-d2_and_d1=setdiff(colnames(effective_d2), colnames(effective_d1))
-d2_and_d1=unique(grep(paste(d2_and_d1,collapse="|"), colnames(effective_d2)))
-View(effective_d2[,-d2_and_d1])
-#gives us identical dataframes, so all correct. 321 drugs from d1 are present in d2
+d1_d2=common_drugs(effective_d1,effective_d2)
+d2_d1=common_drugs(effective_d2,effective_d1)
+#both are equal, so the function works correctly
 
-d1_and_d8=setdiff(colnames(effective_d1), colnames(effective_d8)) #all of the drugs in effective_d1 are present in effective_d8
-d1_and_d8=unique(grep(paste(d1_and_d8,collapse="|"), colnames(effective_d1)))
-View(effective_d1[,-d1_and_d8])#this is an empty dataframe
 
-#try to make it work as a function
+d1_d3=common_drugs(effective_d1,effective_d3)
+d1_d4=common_drugs(effective_d1,effective_d4)
+d1_d5=common_drugs(effective_d1,effective_d5)
+d1_d6=common_drugs(effective_d1,effective_d6)
+d1_d7=common_drugs(effective_d1,effective_d7)
+d1_d8=common_drugs(effective_d1,effective_d8)
 
+#which drugs are present in all 8 doses?
+
+present_in_all_doses<-function(a,b,c,d,e,f,g){
+ bb<-setdiff(a, b)
+ a<-a [! a %in% bb]
+ 
+ cc<-setdiff(a, c)
+ a<-a [! a %in% cc]
+ 
+ dd<-setdiff(a, d)
+ a<-a [! a %in% dd]
+ 
+ ee<-setdiff(a, e)
+ a<-a [! a %in% ee]
+ 
+ ff<-setdiff(a, f)
+ a<-a [! a %in% ff]
+ 
+ gg<-setdiff(a, g)
+ a<-a [! a %in% gg]
+ 
+ return(a)
+}
+
+effective_in_all_doses=present_in_all_doses(d1_d2,d1_d3,d1_d4,d1_d5,d1_d6,d1_d7,d1_d8)
+#160 drugs are effective in all doses
+
+present_in_6_doses<-function(a,b,c,d,e){
+ bb<-setdiff(a, b)
+ a<-a [! a %in% bb]
+ 
+ cc<-setdiff(a, c)
+ a<-a [! a %in% cc]
+ 
+ dd<-setdiff(a, d)
+ a<-a [! a %in% dd]
+ 
+ ee<-setdiff(a, e)
+ a<-a [! a %in% ee]
+ 
+ return(a)
+}
+
+effective_in_6_doses=present_in_6_doses(d1_d2,d1_d3,d1_d4,d1_d5,d1_d6)
+#164 drugs are effective in 6 smallest doses
+
+present_in_4_doses<-function(a,b,c){
+ bb<-setdiff(a, b)
+ a<-a [! a %in% bb]
+ 
+ cc<-setdiff(a, c)
+ a<-a [! a %in% cc]
+ 
+ return(a)
+}
+effective_in_4_doses=present_in_4_doses(d1_d2,d1_d3,d1_d4)
+#247 drugs are effective in 4 smallest doses
 ```
 
 # Question 2: What are the targets of the effective drugs?
