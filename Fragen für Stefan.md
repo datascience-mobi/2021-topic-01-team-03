@@ -4,6 +4,7 @@
 - Wie erstellt man einen Vektor mit Einträgen aus einem for loop?
 - Wie speichert man eine neue Variable von einem loop oder apply?
 - Threshold 0 oder 0,3?
+- What do we do with the repeated drug?
 
 **19.03.21**
 - Cedrik pull and push
