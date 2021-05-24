@@ -12,7 +12,6 @@ Till 31.05
 - [x] Select the drugs that are effective in multiple doses. **Ilya**
 - [ ] Select drug targets. **Ilya**
 - [ ] Why is the threshold 0,3 and not 0? **Lea**
-- [ ] 
 
 
 
