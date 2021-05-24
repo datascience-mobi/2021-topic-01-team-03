@@ -10,13 +10,13 @@ load("../2021-topic-01-team-03/dataset/cellline_datasets.rda")
 ```
 
 ```{r}
-View(prism)
-View(prism.cl)
-View(prism.achilles)
-View(prism.cnv)
-View(prism.exp)
-View(prism.snv)
-View(prism.treat)
+#View(prism)
+#View(prism.cl)
+#View(prism.achilles)
+#View(prism.cnv)
+#View(prism.exp)
+#View(prism.snv)
+#View(prism.treat)
 ```
 
 
