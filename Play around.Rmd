@@ -193,6 +193,20 @@ length(all_effective_drugs)
 length(which(apply(brain_cancer,2,mean)<=0.3)) #this is the amount of drugs that we keep in total. We compare these 2 length to make sure that that we do not select the same drug twice. If it was the case the first length would be bigger than the second one
 ```
 
+## Apllying efective doses filtering on prism.treat
+
+```{r}
+brain_cancer_treat=prism.treat[colnames(brain_cancer),] #selecting only the drugs we previously filtered out from brain_cancer
+
+effective_t1=brain_cancer_treat[colnames(effective_d1),]
+effective_t2=brain_cancer_treat[colnames(effective_d2),]
+effective_t3=brain_cancer_treat[colnames(effective_d3),]
+effective_t4=brain_cancer_treat[colnames(effective_d4),]
+effective_t5=brain_cancer_treat[colnames(effective_d5),]
+effective_t6=brain_cancer_treat[colnames(effective_d6),]
+effective_t7=brain_cancer_treat[colnames(effective_d7),]
+effective_t8=brain_cancer_treat[colnames(effective_d8),]
+```
 ##Select the drugs that are effective in all doses
 
 ```{r}
@@ -299,25 +313,45 @@ effective_in_4_doses=present_in_4_doses(d1_d2,d1_d3,d1_d4)
 
 # Question 2: What are the targets of the effective drugs?
 
-## Apllying the dosis separation of dataset brain_cancer on prism.treat
+##What are the targets of the effective drugs?
 
 ```{r}
-brain_cancer_treat=prism.treat[colnames(brain_cancer),] #selecting only the drugs we previously filtered out from brain_cancer
+new_rownames<-function(x){
+  a<-gsub(pattern = "::.*", replacement = "", rownames(x))
+  return(a)
+}
+rownames(effective_t1)<-new_rownames(effective_t1)#has two drugs that repeat themselves
 
-dt1=brain_cancer_treat[colnames(d1),]
-dt2=brain_cancer_treat[colnames(d2),]
-dt3=brain_cancer_treat[colnames(d3),]
-dt4=brain_cancer_treat[colnames(d4),]
-dt5=brain_cancer_treat[colnames(d5),]
-dt6=brain_cancer_treat[colnames(d6),]
-dt7=brain_cancer_treat[colnames(d7),]
-dt8=brain_cancer_treat[colnames(d8),]
+duplicated(new_rownames(effective_t3))
+colnames(effective_d1)[c(8,9)]
+rownames(effective_t1)[c(8,9)]
+grep("BRD-A72716251-001-01-5", colnames(extra_drugs))
+View((extra_drugs)[,(77:84)])
+colnames(extra_drugs)[c(77,78)]
+grep("BRD-A72716251-001-01-5::0.000222486::HTS002", colnames(brain_cancer))
+grep("BRD-A72716251-001-01-5::0.000889944::HTS002", colnames(brain_cancer))
+brain_cancer[,1229]/brain_cancer[,1230]
+View(brain_cancer[,c(1229,1230)])
+#identifying the duplicants and seewing if they have the same effect on the cells, which they dont
 
-#not sure this sorting makes sense now for the brain_cancer_treat, but now we have it in case we need it in the future
 
-summary(brain_cancer_treat)#can be useful to identify trends or come up with some new ideas for filtering, interesting columns can be looked at separetely, for example:
-summary(brain_cancer_treat$disease.area)
 
+
+rownames(effective_t2)<-new_rownames(effective_t2)
+rownames(effective_t3)<-new_rownames(effective_t3)
+rownames(effective_t4)<-new_rownames(effective_t4)
+rownames(effective_t5)<-new_rownames(effective_t5)
+rownames(effective_t6)<-new_rownames(effective_t6)
+rownames(effective_t7)<-new_rownames(effective_t7)
+rownames(effective_t8)<-new_rownames(effective_t8)
+
+
+
+
+
+treat_4_doses=brain_cancer_treat[effective_in_4_doses,]
+treat_6_doses=brain_cancer_treat[effective_in_6_doses,]
+treat_all_doses=brain_cancer_treat[effective_in_all_doses,]
 ```
 
 # Question 3: Are there any genetic markers that are specific for brain cancer subtypes?
