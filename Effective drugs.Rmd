@@ -1,0 +1,152 @@
+---
+title: "Effective drugs"
+author: "Lennard"
+date: "24/5/2021"
+output: html_document
+---
+``` {r}
+load("../2021-topic-01-team-03/dataset/prism_datasets.rda")
+load("../2021-topic-01-team-03/dataset/cellline_datasets.rda")
+```
+
+```{r}
+View(prism)
+View(prism.cl)
+View(prism.achilles)
+View(prism.cnv)
+View(prism.exp)
+View(prism.snv)
+View(prism.treat)
+```
+
+
+Assumption: Effective drugs should have the same effect as cancer drugs
+```{r}
+
+#selecting the rows of the cancer drugs
+cancer.drugs <-prism.treat[grep("oncology", prism.treat$disease.area),]
+#sample names of the cancer drugs
+cancer.drugs.samples <- row.names(cancer.drugs)
+#selecting all prism values of the cancer drugs
+cancer.drugs.prism <- matrix( rep( 0, len=length(cancer.drugs.samples)*nrow(prism)), ncol = length(cancer.drugs.samples))
+j <- 1
+for ( i in cancer.drugs.samples) {
+  cancer.drugs.prism[,j] <- prism[,grep(i,colnames(prism))]
+  j<-j+1
+}
+
+```
+
+```{r}
+#position of the sample names in cancer.drugs.samples in regarding there dose
+dd1=grep("::0.00061034::", cancer.drugs.samples)
+dd2=grep("::0.0024414::", cancer.drugs.samples)
+dd3=grep("::0.00976562::", cancer.drugs.samples)
+dd4=grep("::0.0390625::", cancer.drugs.samples)
+dd5=grep("::0.15625::", cancer.drugs.samples)
+dd6=grep("::0.625::", cancer.drugs.samples)
+dd7=grep("::10::", cancer.drugs.samples)
+dd8=grep("::2.5::", cancer.drugs.samples)
+
+#picking the corresponding sample names
+d1=cancer.drugs.samples[dd1]
+d2=cancer.drugs.samples[dd2]
+d3=cancer.drugs.samples[dd3]
+d4=cancer.drugs.samples[dd4]
+d5=cancer.drugs.samples[dd5]
+d6=cancer.drugs.samples[dd6]
+d7=cancer.drugs.samples[dd7]
+d8=cancer.drugs.samples[dd8]
+
+#missing samples 
+length(cancer.drugs.samples)- sum(length(dd1), length(dd2), length(dd3), length(dd4),length(dd5), length(dd6),length(dd7),length(dd8))
+#proportion of dose
+(length(d1)/length(cancer.drugs.samples))*100
+(length(d2)/length(cancer.drugs.samples))*100
+(length(d3)/length(cancer.drugs.samples))*100
+(length(d4)/length(cancer.drugs.samples))*100
+(length(d5)/length(cancer.drugs.samples))*100
+(length(d6)/length(cancer.drugs.samples))*100
+(length(d7)/length(cancer.drugs.samples))*100
+(length(d8)/length(cancer.drugs.samples))*100
+
+sum((length(d1)/length(cancer.drugs.samples))*100,(length(d2)/length(cancer.drugs.samples))*100,(length(d3)/length(cancer.drugs.samples))*100,(length(d4)/length(cancer.drugs.samples))*100,(length(d5)/length(cancer.drugs.samples))*100,(length(d6)/length(cancer.drugs.samples))*100,(length(d7)/length(cancer.drugs.samples))*100,(length(d8)/length(cancer.drugs.samples))*100)
+
+((length(cancer.drugs.samples)- sum(length(dd1), length(dd2), length(dd3), length(dd4),length(dd5), length(dd6),length(dd7),length(dd8)))/length(cancer.drugs.samples))*100
+```
+```{r}
+#matrix with all values of cancer drugs qith d1
+cancer.drugs.prism.d1 <- matrix( rep( 0, len=length(d1)*nrow(prism)), ncol = length(d1))
+j <- 1
+for ( i in d1) {
+  cancer.drugs.prism.d1[,j] <- prism[,grep(i,colnames(prism))]
+  j<-j+1
+}
+#matrix with all values of cancer drugs qith d2
+cancer.drugs.prism.d2 <- matrix( rep( 0, len=length(d2)*nrow(prism)), ncol = length(d2))
+j <- 1
+for ( i in d2) {
+  cancer.drugs.prism.d2[,j] <- prism[,grep(i,colnames(prism))]
+  j<-j+1
+}
+#matrix with all values of cancer drugs qith d3
+cancer.drugs.prism.d3 <- matrix( rep( 0, len=length(d3)*nrow(prism)), ncol = length(d3))
+j <- 1
+for ( i in d3) {
+  cancer.drugs.prism.d3[,j] <- prism[,grep(i,colnames(prism))]
+  j<-j+1
+}
+#matrix with all values of cancer drugs qith d4
+cancer.drugs.prism.d4 <- matrix( rep( 0, len=length(d4)*nrow(prism)), ncol = length(d4))
+j <- 1
+for ( i in d4) {
+  cancer.drugs.prism.d4[,j] <- prism[,grep(i,colnames(prism))]
+  j<-j+1
+}
+#matrix with all values of cancer drugs qith d5
+cancer.drugs.prism.d5 <- matrix( rep( 0, len=length(d5)*nrow(prism)), ncol = length(d5))
+j <- 1
+for ( i in d5) {
+  cancer.drugs.prism.d5[,j] <- prism[,grep(i,colnames(prism))]
+  j<-j+1
+}
+#matrix with all values of cancer drugs qith d6
+cancer.drugs.prism.d6 <- matrix( rep( 0, len=length(d6)*nrow(prism)), ncol = length(d6))
+j <- 1
+for ( i in d6) {
+  cancer.drugs.prism.d6[,j] <- prism[,grep(i,colnames(prism))]
+  j<-j+1
+}
+#matrix with all values of cancer drugs qith d7
+cancer.drugs.prism.d7 <- matrix( rep( 0, len=length(d7)*nrow(prism)), ncol = length(d7))
+j <- 1
+for ( i in d7) {
+  cancer.drugs.prism.d7[,j] <- prism[,grep(i,colnames(prism))]
+  j<-j+1
+}
+#matrix with all values of cancer drugs qith d8
+cancer.drugs.prism.d8 <- matrix( rep( 0, len=length(d8)*nrow(prism)), ncol = length(d8))
+j <- 1
+for ( i in d8) {
+  cancer.drugs.prism.d8[,j] <- prism[,grep(i,colnames(prism))]
+  j<-j+1
+}
+
+hist(cancer.drugs.prism.d1)
+hist(cancer.drugs.prism.d2)
+hist(cancer.drugs.prism.d3)
+hist(cancer.drugs.prism.d4)
+hist(cancer.drugs.prism.d5)
+hist(cancer.drugs.prism.d6)
+hist(cancer.drugs.prism.d7,breaks = 100)
+hist(cancer.drugs.prism.d8,breaks = 100)
+summary(as.vector(cancer.drugs.prism.d1))
+summary(as.vector(cancer.drugs.prism.d2))
+summary(as.vector(cancer.drugs.prism.d3))
+summary(as.vector(cancer.drugs.prism.d4))
+summary(as.vector(cancer.drugs.prism.d5))
+summary(as.vector(cancer.drugs.prism.d6))
+summary(as.vector(cancer.drugs.prism.d7))
+summary(as.vector(cancer.drugs.prism.d8))
+```
+
