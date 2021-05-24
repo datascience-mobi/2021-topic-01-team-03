@@ -2,7 +2,7 @@
 
 Till 24.05
 - [x] Establish how big can be the deviation of non-standard doses, from the standard ones. **Teamwork Xenia & Ilya <3**
-- [ ] Establish the threshold for effective drugs. **Lea+Lennard**
+- [x] Establish the threshold for effective drugs. **Lea+Lennard**
 - [x] Create another file which includes all steps that are planned or have been done concerning the questions, small summary. **Ilya**
 - [ ] Removing irrelevant colums/rows from datasets. **Cedrik**
 
@@ -11,7 +11,11 @@ Till 31.05
 - [x] Solve the "Filter effective drugs" problem. **Ilya**
 - [x] Select the drugs that are effective in multiple doses. **Ilya**
 - [ ] Select drug targets. **Ilya**
-- [ ] Research which doses are aplicable on humans. Who?
+- [ ] Why is the threshold 0,3 and not 0? **Lea**
+- [ ] 
+
+
 
 For future:
-- trying to find a way to store long codes in loops just to make it more professional (when enough time for it)
+- [ ] trying to find a way to store long codes in loops just to make it more professional (when enough time for it)
+- [ ] what happens with drugs which are effective but dose dependant?
