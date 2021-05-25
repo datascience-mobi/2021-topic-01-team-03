@@ -13,8 +13,15 @@ Till 31.05
 - [x] Select drug targets. **Ilya**
 - [ ] Why is the threshold 0,3 and not 0? **Lea**
 
+Till 7.06
+- [ ] What to do with the drug targets? Examine gene targets of the effective drugs (prism.treat + prism.achilles). Who?
+- [ ] Determine specific drugs for each brain cancer subtype. Who?
+- [ ] Find a relationship between gene targets and brain cancer subtypes
+
+Till 14.06
+- [ ] Wilcoxon Signed Rank Test. Who?
 
 
-For future:
-- [ ] trying to find a way to store long codes in loops just to make it more professional (when enough time for it)
-- [ ] what happens with drugs which are effective but dose dependant?
+In the pipeline:
+- [ ] Try to find a way to store long codes in loops just to make it more professional (when enough time for it)
+- [ ] What happens with drugs which are effective but dose dependant?
