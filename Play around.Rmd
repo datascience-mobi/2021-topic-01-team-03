@@ -322,6 +322,9 @@ rownames(brain_cancer_treat)<-brain_cancer_treat[,1]
 brain_cancer_treat=brain_cancer_treat[,-c(1,2,3)]
 effective_bc_treat=brain_cancer_treat[effective_in_all_doses,]
 
+summary(effective_bc_treat$target)
+summary(effective_bc_treat$moa)
+
 #an interesting extra:
 colnames(effective_d1)[c(8,9)]
 rownames(effective_t1)[c(8,9)]
@@ -335,6 +338,19 @@ View(brain_cancer[,c(1229,1230)])
 #identifying the duplicants and seewing if they have the same effect on the cells, which they dont
 
 ```
+
+##Looking for a relationship between the drug targets and gene expression in cell lines
+
+```{r}
+mtor_cnv=(brain_cancer_cnv[,grep("MTOR", colnames(brain_cancer_cnv))])
+mtor_exp=(brain_cancer_exp[,grep("MTOR", colnames(brain_cancer_exp))])
+mtor_achilles=(brain_cancer_achilles[,grep("MTOR", colnames(brain_cancer_achilles))])
+
+apply(mtor_cnv, 2, mean) #all values show a deletion of these genes in our cell lines
+apply(mtor_exp, 2, mean) #however all of them seem to be over expressed
+apply(mtor_achilles, 2, mean)
+```
+
 
 # Question 3: Are there any genetic markers that are specific for brain cancer subtypes?
 
