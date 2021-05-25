@@ -10,7 +10,7 @@ Till 31.05
 - [ ] Do we want to select just effective drugs in all 34 cell lines or we want to select effective drugs specifically for each of 4 subtypes? Somebody needs to look into it and see if it is worth it or not. **Xenia**
 - [x] Solve the "Filter effective drugs" problem. **Ilya**
 - [x] Select the drugs that are effective in multiple doses. **Ilya**
-- [ ] Select drug targets. **Ilya**
+- [x] Select drug targets. **Ilya**
 - [ ] Why is the threshold 0,3 and not 0? **Lea**
 
 
