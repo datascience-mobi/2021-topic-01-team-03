@@ -12,16 +12,19 @@ Till 31.05
 - [x] Select the drugs that are effective in multiple doses. **Ilya**
 - [x] Select drug targets. **Ilya**
 - [ ] Why is the threshold 0,3 and not 0? **Lea**
+- [ ] Look into how effective_in_all_doses drugs vary in their effect on cell proliferation, depending on the dose (in brain_cancer data frame). Look for trends and create groups from drugs that have similarities. Who?
 
 Till 7.06
-- [ ] What to do with the drug targets? Examine gene targets of the effective drugs (prism.treat + prism.achilles). Who?
+- [ ] **Everyone should dedicate more time to the project, take more tasks and give more effort!**
+- [ ] **What to do with the drug targets? How to examine gene targets of the effective drugs and what to do with them? How do we work further? (prism.treat + prism.achilles + prism.cnv)**
+- [ ] **Do we need to have a person who will constantly visualise our results?**
 - [ ] Determine specific drugs for each brain cancer subtype. Who?
 - [ ] Find a relationship between gene targets and brain cancer subtypes. Who?
-- [ ] Choose a person who will constantly visualise our results. Who?
+- [ ] Work on brain_cancer_treat and brain_cancer_cnv. See what is the norm there is. Generate general information and visualisation of this dataframs. Who?
+- [ ] Work on brain_cancer_treat and brain_cancer_cnv. See how gene targets of drugs perform in our cell lines Who?
+- [ ] Work on brain_cancer_treat and brain_cancer_cnv. See if there is any specific characteristics for the cancer subtypes. Who?
 
 Till 14.06
-- [ ] Work on brain_cancer_treat and brain_cancer_cnv. See what is the norm there and if our cell lines deviate from the norm. See how gene targets of drugs perfor in our cell lines Who?
-- [ ] Work on brain_cancer_treat and brain_cancer_cnv. See if there is any specific characteristics for the cancer subtypes. Who?
 - [ ] Wilcoxon Signed Rank Test. Who?
 
 
