@@ -16,10 +16,12 @@ Till 31.05
 Till 7.06
 - [ ] What to do with the drug targets? Examine gene targets of the effective drugs (prism.treat + prism.achilles). Who?
 - [ ] Determine specific drugs for each brain cancer subtype. Who?
-- [ ] Find a relationship between gene targets and brain cancer subtypes
+- [ ] Find a relationship between gene targets and brain cancer subtypes. Who?
 - [ ] Choose a person who will constantly visualise our results. Who?
 
 Till 14.06
+- [ ] Work on brain_cancer_treat and brain_cancer_cnv. See what is the norm there and if our cell lines deviate from the norm. See how gene targets of drugs perfor in our cell lines Who?
+- [ ] Work on brain_cancer_treat and brain_cancer_cnv. See if there is any specific characteristics for the cancer subtypes. Who?
 - [ ] Wilcoxon Signed Rank Test. Who?
 
 
