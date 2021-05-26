@@ -16,6 +16,7 @@
 
 - What is moa in prism.treat?
 + **Pick one?**
++ **Dosenzahl weniger zu machen?**
 
 + **Nicht der wichtigste dataframe**
 + **Was sind die wirkung von drugs auf die gene** 
