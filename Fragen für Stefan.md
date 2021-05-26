@@ -9,10 +9,16 @@
 + **Make clusters, look in more detail if there is more subgroups to identify**
 + **Gucken ob median von datansatz 0 ist**
 + **Gut begründen warum wir ein threshold aussuchen**
++ **Clusters in brain cancer cells**
++ **Schauen ob da irgendwelche trends in genexpression von cell lines gibt**
 
 - What do we do with the repeated drug?
+
 - What is moa in prism.treat?
-+ ** **
++ **Pick one?**
+
++ **Nicht der wichtigste dataframe**
++ **Was sind die wirkung von drugs auf die gene** 
 
 **19.03.21**
 - Cedrik pull and push
