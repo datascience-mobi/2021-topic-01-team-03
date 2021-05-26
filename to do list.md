@@ -13,6 +13,7 @@ Till 31.05
 - [x] Select drug targets. **Ilya**
 - [ ] Why is the threshold 0,3 and not 0? **Lea**
 - [ ] Look into how effective_in_all_doses drugs vary in their effect on cell proliferation, depending on the dose (in brain_cancer data frame). Look for trends and create groups from drugs that have similarities. Who?
+- [ ] Which cell lines miss from achilles? Who?
 
 Till 7.06
 - [ ] **Everyone should dedicate more time to the project, take more tasks and give more effort!**
