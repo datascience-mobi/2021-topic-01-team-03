@@ -21,9 +21,6 @@
 + Variablennamen Strukturieren -> z.B. bei dd1 und dafür einen Dataframe erstellen damit es nicht flach im Code vorkommt 
 + Struktur zur Benennung von Variablen 
 
-- Was ist prism.snv? Was sind die columns und rows?
-- Emails von Stephan
-
 - Wie sieht das Enddokument aus?
 + in dem pdf muss kein Code enthalten sein
 + Ergebnisse sollen wissenschaftliche Erkenntnisse repräsentieren
