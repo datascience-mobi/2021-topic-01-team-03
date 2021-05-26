@@ -1,0 +1,226 @@
+---
+title: "Clustering of drug concentrations"
+author: "Cedrik Neber"
+date: "5/11/2021"
+output: html_document
+---
+
+```{r}
+load("../2021-topic-01-team-03/dataset/prism_datasets.rda")
+load("../2021-topic-01-team-03/dataset/cellline_datasets.rda")
+```
+
+#Guidelines
+
+prism: effect of the treatment (columns) on cell growth of cell lines (rows).For example, BRD-A00077618-236-07-6::0.0024414::HTS002 indicates treatment with the drug BRD-A00077618-236-07-6, with a dose of 2.4 nM, in assay HTS002. Values represent log fold changes with respect to a control DMSO experiment.
+
+prism.treat:information about the treatment (row) and the drug used
+
+prism.cl: cell lines' info
+
+prism.exp: gene TPM (transcripts per million) values. Indicate over/underexpression. Rows = cell lines, columns = genes
+
+prism.cnv: gene copy number (CN) values. In absolute terms, CN = 2, since there are two alleles per genes. In cancer, genes might be amplified CN > 2 or deleted CN < 2
+
+prism.snv: observed mutations in a sample. The isDeleterious flag specifies if mutation has a functional effect or not.
+
+prism.achilles: gene KO scores, a measure of how essential/important is a particular gene for the cell survival
+
+IDEA: use same indications as in PRISM paper to start filtering for relevant genes, cell lines? 
+
+#Cleaning
+
+##Selecting brain cancer specific cell lines in all data sets
+```{r}
+brain_cancer_cl=subset.data.frame(prism.cl, disease == 	"Brain Cancer") #identify the brain cancer cell lines' names
+
+names=brain_cancer_cl[,1] #saving the names as names
+
+#select wanted cell lines from all datasets
+brain_cancer=prism[names,]
+brain_cancer_achilles=prism.achilles[names,]
+brain_cancer_cnv=prism.cnv[names,]
+brain_cancer_exp=prism.exp[names,]
+#brain_cancer_snv=prism.snv[names,] #does not make sense no cell line info, other type of filtering required
+#brain_cancer_treat=prism.treat[names,] #does not make sense no cell line info, other type of filtering required
+```
+
+##NA removal
+```{r}
+#brain_cancer_achilles=na.omit(brain_cancer_achilles) #remove the entire cell lines from everywhere without KO scores?
+```
+
+##NA for mean substituition
+```{r}
+for(i in 1:ncol(brain_cancer)){
+  brain_cancer[is.na(brain_cancer[,i]), i] <- mean(brain_cancer[,i], na.rm = TRUE)
+}
+
+brain_cancer=brain_cancer[ , colSums(is.na(brain_cancer)) == 0]
+```
+
+##Deviding drugs in doses groups
+```{r}
+dd1=grep("0.00061034", colnames(brain_cancer))
+dd2=grep("0.0024414", colnames(brain_cancer))
+dd3=grep("0.00976562", colnames(brain_cancer))
+dd4=grep("0.0390625", colnames(brain_cancer))
+dd5=grep("0.15625", colnames(brain_cancer))
+dd6=grep("0.625", colnames(brain_cancer))
+dd7=grep("10:", colnames(brain_cancer))
+dd8=grep("2.5:", colnames(brain_cancer))
+#positions of the respective doses in the dataframe 
+doses=c(dd1,dd2,dd3,dd4,dd5,dd6,dd7,dd8)
+
+d1=brain_cancer[,dd1]
+d2=brain_cancer[,dd2]
+d3=brain_cancer[,dd3]
+d4=brain_cancer[,dd4]
+d5=brain_cancer[,dd5]
+d6=brain_cancer[,dd6]
+d7=brain_cancer[,dd7]
+d8=brain_cancer[,dd8]
+#these are the standard doses summed up into seperate dataframes
+
+sum(length(dd1), length(dd2), length(dd3), length(dd4),length(dd5), length(dd6),length(dd7),length(dd8)) #ups something missing
+
+deviation=brain_cancer[,-doses] #lets see what we missed-> these are the doses that are not exact and have some kind of a deviation
+
+#rest of the doeses are all different. What do we do with them?
+
+#lets keep from "deviation" only the ones that have a deviation less than "10%" from original
+
+#to do: make a distribution test for a non normal distribution to justify the 10%
+
+questionable_drugs=prism.treat[colnames(deviation),]#we dont know if we can use these drugs, may be their doses deviate too far from the standard
+
+#filtering the doses that deviate less than 10%
+
+keep_d1=which (0.00061034-0.1*0.00061034 < questionable_drugs[,2] & 0.00061034+0.1*0.00061034 >questionable_drugs[,2]) #apply the 10% gap and find which genes are that qualify for it
+d1_extra=brain_cancer[,rownames(questionable_drugs[keep_d1,])] #create a dataframe with these genes 
+d1=cbind(d1,d1_extra) #merge the obtained dataframe with the standard dose one
+
+keep_d2=which (0.0024414-0.1*0.0024414 < questionable_drugs[,2] & 0.0024414+0.1*0.0024414 >questionable_drugs[,2])
+d2_extra=brain_cancer[,rownames(questionable_drugs[keep_d2,])]
+d2=cbind(d2,d2_extra)
+
+keep_d3=which (0.00976562-0.1*0.00976562 < questionable_drugs[,2] & 0.00976562+0.1*0.00976562 >questionable_drugs[,2])
+d3_extra=brain_cancer[,rownames(questionable_drugs[keep_d3,])]
+d3=cbind(d3,d3_extra)
+
+keep_d4=which (0.0390625-0.1*0.0390625 < questionable_drugs[,2] & 0.0390625+0.1*0.0390625 >questionable_drugs[,2])
+d4_extra=brain_cancer[,rownames(questionable_drugs[keep_d4,])]
+d4=cbind(d4,d4_extra)
+
+keep_d5=which (0.15625-0.1*0.15625 < questionable_drugs[,2] & 0.15625+0.1*0.15625 >questionable_drugs[,2])
+d5_extra=brain_cancer[,rownames(questionable_drugs[keep_d5,])]
+d5=cbind(d5,d5_extra)
+
+keep_d6=which (0.625-0.1*0.625 < questionable_drugs[,2] & 0.625+0.1*0.625 >questionable_drugs[,2])
+d6_extra=brain_cancer[,rownames(questionable_drugs[keep_d6,])]
+d6=cbind(d6,d6_extra)
+
+keep_d7=which (10-0.1*10 < questionable_drugs[,2] & 10+0.1*10 >questionable_drugs[,2])
+d7_extra=brain_cancer[,rownames(questionable_drugs[keep_d7,])]
+d7=cbind(d7,d7_extra)
+
+keep_d8=which (2.5-0.1*2.5 < questionable_drugs[,2] & 2.5+0.1*2.5 >questionable_drugs[,2])
+d8_extra=brain_cancer[,rownames(questionable_drugs[keep_d8,])]
+d8=cbind(d8,d8_extra)
+
+
+#look at the drugs we did not keep
+keep=c(keep_d1, keep_d2, keep_d3, keep_d4,keep_d5,keep_d6,keep_d7,keep_d8)
+doses_outliers=deviation[,-keep]
+
+mean(apply(deviation[,-keep],2,mean))#curioisty
+```
+
+##Dividing cell lines into subgroups
+```{r}
+medulloblastoma=brain_cancer_cl$DepMap_ID[grep("Medulloblastoma", brain_cancer_cl$disease_subtype)]#we obtain the names of the cell lines that are classified as medulloblastoma
+
+glioblastoma=brain_cancer_cl$DepMap_ID[grep("Glioblastoma", brain_cancer_cl$disease_subtype)]
+
+glioma=brain_cancer_cl$DepMap_ID[grep("Glioma", brain_cancer_cl$disease_subtype)]
+
+astrocytoma=brain_cancer_cl$DepMap_ID[grep("Astrocytoma", brain_cancer_cl$disease_subtype)]
+
+disease_subtypes=c(medulloblastoma,glioblastoma,glioma,astrocytoma)
+length(disease_subtypes)#making sure we didnt forget anything
+```
+
+##Dividing the d1-8 dataframes into subtype
+
+```{r}
+#for for the astrocytes 
+
+x = c("ACH-000137", "ACH-000232", "ACH-000323", "ACH-000329", "ACH-000437", "ACH-000609") 
+cancer_subtype = astrocytoma #filtering out the cell lines for this subtype 
+rows_astro = grep("ACH-000040", rownames(d1)) 
+            grep("ACH-000137", rownames(d1)) 
+            grep("ACH-000232", rownames(d1))
+            grep("ACH-000323", rownames(d1))
+            grep("ACH-000329", rownames(d1))
+            grep("ACH-000437", rownames(d1))
+            grep("ACH-000609", rownames(d1))
+rows = c(5, 8, 10, 14, 15, 19, 29)
+d1_astro = d1[rows, ]
+d1_astro #creating a new dataframe with only the astrocyte cell line and with the same concentration 
+```
+
+##Downloading relevant packages for the kmeans analysis 
+```{r}
+install.packages("stats") #relevant because it contains the kmeans function
+install.packages("dplyr") #data manipulation 
+install.packages("ggfortify") #gg to visualise the obtained clustering 
+install.packages("ggplot2")
+```
+
+## Noch ziemlich useless... 
+```{r}
+#load libraries of the packages 
+library("stats")
+library("dplyr")
+library("ggplot2")
+library("ggfortify")
+
+```
+
+##Determine the optimal number if clusters 
+
+```{r}
+set.seed(123)
+# function to compute total within-cluster sum of square 
+wss <- function(k) {
+  kmeans(d1_astro, k, nstart = 10 )$tot.withinss}
+
+# Compute and plot wss for k = 1 to k = 7
+k.values <- 1:6
+
+# extract wss for 2-15 clusters
+wss_values <- map_dbl(k.values, wss)
+plot(k.values, wss_values,
+       type="b", pch = 19, frame = FALSE, 
+       xlab="Number of clusters K",
+       ylab="Total within-clusters sum of squares")
+```
+##General plots for the astrozytome cellines with d1 concentrations 
+
+```{r}
+max=apply(d1_astro,1,max)
+min=apply(d1_astro,1,min)
+mean=apply(d1_astro,1,mean)
+median=apply(d1_astro,1,median)
+#add quantiles to the dataframe?
+
+astro_summary=data.frame(cancer_subtype, max, min, mean, median)
+hist(astro_summary$mean, breaks = 100)
+barplot(astro_summary$mean ~ astro_summary$cancer_subtype, data = astro_summary
+        , col = "blue", ylab = "Mean", xlab = "Cell lines", names.arg = cancer_subtype, cex.names = T)
+
+```
+```{r}
+boxplot(astro_summary, main = "Means of d1 astrocytes", )
+```
+
