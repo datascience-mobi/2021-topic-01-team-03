@@ -78,6 +78,21 @@ for(i in 1:ncol(brain_cancer)){
 brain_cancer=brain_cancer[ , colSums(is.na(brain_cancer)) == 0]
 ```
 
+## Dividing cell lines into subgroups
+
+```{r}
+medulloblastoma=brain_cancer_cl$DepMap_ID[grep("Medulloblastoma", brain_cancer_cl$disease_subtype)]#we obtain the names of the cell lines that are classified as medulloblastoma
+
+glioblastoma=brain_cancer_cl$DepMap_ID[grep("Glioblastoma", brain_cancer_cl$disease_subtype)]
+
+glioma=brain_cancer_cl$DepMap_ID[grep("Glioma", brain_cancer_cl$disease_subtype)]
+
+astrocytoma=brain_cancer_cl$DepMap_ID[grep("Astrocytoma", brain_cancer_cl$disease_subtype)]
+
+disease_subtypes=c(medulloblastoma,glioblastoma,glioma,astrocytoma)
+length(disease_subtypes)#making sure we didnt forget anything
+```
+
 # Question 1: How can we distinguish the most effective drugs?
 
 ## Deviding drugs in doses groups
@@ -339,9 +354,58 @@ View(brain_cancer[,c(1229,1230)])
 
 ```
 
-##Looking for a relationship between the drug targets and gene expression in cell lines
+##Looking at gene expression in brain cancer cells
 
 ```{r}
+# summary of brain_cancer_exp
+mat.prism.exp <- as.matrix(brain_cancer_exp)
+vec.prism.exp <- as.vector(mat.prism.exp)
+sum.prism.exp <- summary(vec.prism.exp)
+dim.prism.exp <- dim(prism.exp)
+datp.prism.exp <- dim.prism.exp[1] * dim.prism.exp[2]
+
+# prism histogram
+hist(mat.prism.exp, breaks = 100, xlim = range(0,10), ylim = range(0,200000), xlab = "prism.exp")
+abline(v = c(sum.prism.exp[2:5]), col = "red", lwd = 1, lty = 1)
+
+#Observation: 25% of genes are KO, around 50% have an expression over 2,5 TPM. 
+
+#Which TPM is considered to be an overexpression?
+
+#Which genes are completely KO?
+KO_genes=colnames(brain_cancer_exp[,as.numeric(which(apply(brain_cancer_exp, 2, mean)==0))])
+```
+
+```{r}
+# brain_cancer_achilles data frame as vector
+mat.brain_cancer_achilles <- as.matrix(brain_cancer_achilles)
+vec.brain_cancer_achilles <- as.vector(mat.brain_cancer_achilles)
+sum.brain_cancer_achilles <- summary(vec.brain_cancer_achilles)
+dim.brain_cancer_achilles <- dim(brain_cancer_achilles)
+datp.brain_cancer_achilles <- dim.brain_cancer_achilles[1] * dim.brain_cancer_achilles[2]
+
+# prism histogram
+hist(mat.brain_cancer_achilles, breaks = 200, xlim = range(-2.5,1), xlab = "brain_cancer_achilles")
+abline(v = c(sum.brain_cancer_achilles[2:5]), col = "red", lwd = 1, lty = 1)
+
+```
+
+```{r}
+# summary of brain_cancer_cnv
+
+mat.prism.cnv <- as.matrix(brain_cancer_cnv)
+vec.prism.cnv <- as.vector(mat.prism.cnv)
+sum.prism.cnv <- summary(vec.prism.cnv)
+dim.prism.cnv <- dim(prism.cnv)
+datp.prism.cnv <- dim.prism.cnv[1] * dim.prism.cnv[2]
+
+# prism histogram
+hist(mat.prism.cnv, breaks = 200, xlim = range(0,3), xlab = "prism.cnv")
+abline(v = c(sum.prism.cnv[2:5]), col = "red", lwd = 1, lty = 1)
+```
+
+```{r}
+#jsut trying some stuff on a particular example
 mtor_cnv=(brain_cancer_cnv[,grep("MTOR", colnames(brain_cancer_cnv))])
 mtor_exp=(brain_cancer_exp[,grep("MTOR", colnames(brain_cancer_exp))])
 mtor_achilles=(brain_cancer_achilles[,grep("MTOR", colnames(brain_cancer_achilles))])
@@ -354,20 +418,6 @@ apply(mtor_achilles, 2, mean)
 
 # Question 3: Are there any genetic markers that are specific for brain cancer subtypes?
 
-## Dividing cell lines into subgroups
-
-```{r}
-medulloblastoma=brain_cancer_cl$DepMap_ID[grep("Medulloblastoma", brain_cancer_cl$disease_subtype)]#we obtain the names of the cell lines that are classified as medulloblastoma
-
-glioblastoma=brain_cancer_cl$DepMap_ID[grep("Glioblastoma", brain_cancer_cl$disease_subtype)]
-
-glioma=brain_cancer_cl$DepMap_ID[grep("Glioma", brain_cancer_cl$disease_subtype)]
-
-astrocytoma=brain_cancer_cl$DepMap_ID[grep("Astrocytoma", brain_cancer_cl$disease_subtype)]
-
-disease_subtypes=c(medulloblastoma,glioblastoma,glioma,astrocytoma)
-length(disease_subtypes)#making sure we didnt forget anything
-```
 
 # Question 4: What other factors contribute to drug effectiveness prediction?
 
