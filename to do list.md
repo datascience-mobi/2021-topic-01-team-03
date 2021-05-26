@@ -12,7 +12,7 @@ Till 31.05
 - [x] Select the drugs that are effective in multiple doses. **Ilya**
 - [ ] Select drug targets. **Ilya**
 - [x] Why is the threshold 0,3 and not 0? **Lea**
-- [ ] Look into how effective_in_all_doses drugs vary in their effect on cell proliferation, depending on the dose (in brain_cancer data frame). Look for trends and create groups from drugs that have similarities. Who?
+- [ ] Look into how effective_in_all_doses drugs vary in their effect on cell proliferation, depending on the dose (in brain_cancer data frame). Look for trends and create groups from drugs that have similarities. **Lea**
 - [ ] Which cell lines miss from achilles? Who? **Cedrik**
 - [ ] Find a way to justify the 0,3. **Lennard**
 - [ ] Clustering 0,3 threshold and 160 cell line. **Cedrik**
