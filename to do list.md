@@ -15,7 +15,7 @@ Till 31.05
 - [ ] Look into how effective_in_all_doses drugs vary in their effect on cell proliferation, depending on the dose (in brain_cancer data frame). Look for trends and create groups from drugs that have similarities. Who?
 - [ ] Which cell lines miss from achilles? Who? **Cedrik**
 - [ ] Find a way to justify the 0,3. **Lennard**
-- [ ] Clustering 0,3 threshold and 160 cell line. **Cedrik
+- [ ] Clustering 0,3 threshold and 160 cell line. **Cedrik**
 
 Till 7.06
 - [ ] **What to do with the drug targets? How to examine gene targets of the effective drugs and what to do with them? How do we work further? (prism.treat + prism.achilles + prism.cnv)**
