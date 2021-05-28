@@ -78,6 +78,21 @@ for(i in 1:ncol(brain_cancer)){
 brain_cancer=brain_cancer[ , colSums(is.na(brain_cancer)) == 0]
 ```
 
+## Dividing cell lines into subgroups
+
+```{r}
+medulloblastoma=brain_cancer_cl$DepMap_ID[grep("Medulloblastoma", brain_cancer_cl$disease_subtype)]#we obtain the names of the cell lines that are classified as medulloblastoma
+
+glioblastoma=brain_cancer_cl$DepMap_ID[grep("Glioblastoma", brain_cancer_cl$disease_subtype)]
+
+glioma=brain_cancer_cl$DepMap_ID[grep("Glioma", brain_cancer_cl$disease_subtype)]
+
+astrocytoma=brain_cancer_cl$DepMap_ID[grep("Astrocytoma", brain_cancer_cl$disease_subtype)]
+
+disease_subtypes=c(medulloblastoma,glioblastoma,glioma,astrocytoma)
+length(disease_subtypes)#making sure we didnt forget anything
+```
+
 # Question 1: How can we distinguish the most effective drugs?
 
 ## Deviding drugs in doses groups
@@ -144,7 +159,7 @@ d6_extra=which(to_which_dose==6)
 d7_extra=which(to_which_dose==7)
 d8_extra=which(to_which_dose==8)
 
-#just a quick check how many doses there are in total: must be all dosages after NA removal
+#just a quick check how many doses there are in total
 not_standard_doses=c(d1_extra,d2_extra,d3_extra,d4_extra,d5_extra,d6_extra,d7_extra,d8_extra)
 length(not_standard_doses)#in comparison with dimension from questionable_drugs right!
 
@@ -207,7 +222,8 @@ effective_t6=brain_cancer_treat[colnames(effective_d6),]
 effective_t7=brain_cancer_treat[colnames(effective_d7),]
 effective_t8=brain_cancer_treat[colnames(effective_d8),]
 ```
-##Select the drugs that are effective in all doses
+
+##Select drugs that are effective in all doses
 
 ```{r}
 new_colnames<-function(x){
@@ -316,13 +332,15 @@ effective_in_4_doses=present_in_4_doses(d1_d2,d1_d3,d1_d4)
 ##What are the targets of the effective drugs?
 
 ```{r}
-new_rownames<-function(x){
-  a<-gsub(pattern = "::.*", replacement = "", rownames(x))
-  return(a)
-}
-rownames(effective_t1)<-new_rownames(effective_t1)#has two drugs that repeat themselves
+brain_cancer_treat=brain_cancer_treat[!duplicated(brain_cancer_treat$broad_id),]
+rownames(brain_cancer_treat)<-brain_cancer_treat[,1]
+brain_cancer_treat=brain_cancer_treat[,-c(1,2,3)]
+effective_bc_treat=brain_cancer_treat[effective_in_all_doses,]
 
-duplicated(new_rownames(effective_t3))
+summary(effective_bc_treat$target)
+summary(effective_bc_treat$moa)
+
+#an interesting extra:
 colnames(effective_d1)[c(8,9)]
 rownames(effective_t1)[c(8,9)]
 grep("BRD-A72716251-001-01-5", colnames(extra_drugs))
@@ -334,42 +352,72 @@ brain_cancer[,1229]/brain_cancer[,1230]
 View(brain_cancer[,c(1229,1230)])
 #identifying the duplicants and seewing if they have the same effect on the cells, which they dont
 
-
-
-
-rownames(effective_t2)<-new_rownames(effective_t2)
-rownames(effective_t3)<-new_rownames(effective_t3)
-rownames(effective_t4)<-new_rownames(effective_t4)
-rownames(effective_t5)<-new_rownames(effective_t5)
-rownames(effective_t6)<-new_rownames(effective_t6)
-rownames(effective_t7)<-new_rownames(effective_t7)
-rownames(effective_t8)<-new_rownames(effective_t8)
-
-
-
-
-
-treat_4_doses=brain_cancer_treat[effective_in_4_doses,]
-treat_6_doses=brain_cancer_treat[effective_in_6_doses,]
-treat_all_doses=brain_cancer_treat[effective_in_all_doses,]
 ```
+
+##Looking at gene expression in brain cancer cells
+
+```{r}
+# summary of brain_cancer_exp
+mat.prism.exp <- as.matrix(brain_cancer_exp)
+vec.prism.exp <- as.vector(mat.prism.exp)
+sum.prism.exp <- summary(vec.prism.exp)
+dim.prism.exp <- dim(prism.exp)
+datp.prism.exp <- dim.prism.exp[1] * dim.prism.exp[2]
+
+# prism histogram
+hist(mat.prism.exp, breaks = 100, xlim = range(0,10), ylim = range(0,200000), xlab = "prism.exp")
+abline(v = c(sum.prism.exp[2:5]), col = "red", lwd = 1, lty = 1)
+
+#Observation: 25% of genes are KO, around 50% have an expression over 2,5 TPM. 
+
+#Which TPM is considered to be an overexpression?
+
+#Which genes are completely KO?
+KO_genes=colnames(brain_cancer_exp[,as.numeric(which(apply(brain_cancer_exp, 2, mean)==0))])
+```
+
+```{r}
+# brain_cancer_achilles data frame as vector
+mat.brain_cancer_achilles <- as.matrix(brain_cancer_achilles)
+vec.brain_cancer_achilles <- as.vector(mat.brain_cancer_achilles)
+sum.brain_cancer_achilles <- summary(vec.brain_cancer_achilles)
+dim.brain_cancer_achilles <- dim(brain_cancer_achilles)
+datp.brain_cancer_achilles <- dim.brain_cancer_achilles[1] * dim.brain_cancer_achilles[2]
+
+# prism histogram
+hist(mat.brain_cancer_achilles, breaks = 200, xlim = range(-2.5,1), xlab = "brain_cancer_achilles")
+abline(v = c(sum.brain_cancer_achilles[2:5]), col = "red", lwd = 1, lty = 1)
+
+```
+
+```{r}
+# summary of brain_cancer_cnv
+
+mat.prism.cnv <- as.matrix(brain_cancer_cnv)
+vec.prism.cnv <- as.vector(mat.prism.cnv)
+sum.prism.cnv <- summary(vec.prism.cnv)
+dim.prism.cnv <- dim(prism.cnv)
+datp.prism.cnv <- dim.prism.cnv[1] * dim.prism.cnv[2]
+
+# prism histogram
+hist(mat.prism.cnv, breaks = 200, xlim = range(0,3), xlab = "prism.cnv")
+abline(v = c(sum.prism.cnv[2:5]), col = "red", lwd = 1, lty = 1)
+```
+
+```{r}
+#jsut trying some stuff on a particular example
+mtor_cnv=(brain_cancer_cnv[,grep("MTOR", colnames(brain_cancer_cnv))])
+mtor_exp=(brain_cancer_exp[,grep("MTOR", colnames(brain_cancer_exp))])
+mtor_achilles=(brain_cancer_achilles[,grep("MTOR", colnames(brain_cancer_achilles))])
+
+apply(mtor_cnv, 2, mean) #all values show a deletion of these genes in our cell lines
+apply(mtor_exp, 2, mean) #however all of them seem to be over expressed
+apply(mtor_achilles, 2, mean)
+```
+
 
 # Question 3: Are there any genetic markers that are specific for brain cancer subtypes?
 
-## Dividing cell lines into subgroups
-
-```{r}
-medulloblastoma=brain_cancer_cl$DepMap_ID[grep("Medulloblastoma", brain_cancer_cl$disease_subtype)]#we obtain the names of the cell lines that are classified as medulloblastoma
-
-glioblastoma=brain_cancer_cl$DepMap_ID[grep("Glioblastoma", brain_cancer_cl$disease_subtype)]
-
-glioma=brain_cancer_cl$DepMap_ID[grep("Glioma", brain_cancer_cl$disease_subtype)]
-
-astrocytoma=brain_cancer_cl$DepMap_ID[grep("Astrocytoma", brain_cancer_cl$disease_subtype)]
-
-disease_subtypes=c(medulloblastoma,glioblastoma,glioma,astrocytoma)
-length(disease_subtypes)#making sure we didnt forget anything
-```
 
 # Question 4: What other factors contribute to drug effectiveness prediction?
 
