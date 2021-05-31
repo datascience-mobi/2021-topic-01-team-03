@@ -5,10 +5,12 @@
 - Abspaltung der Glioma von den anderen subtypes 
 - Threshold für die effectivity 
 - Definition der over und underexpression 
+- TPM
+- Wie können wir weiter arbeiten? Was könnten unsere weitere Schritte mit Genexpression sein?
 
 
 
-**26.03.21**
+**26.05.21**
 - Wie erstellt man einen Vektor mit Einträgen aus einem for loop?
 - Wie speichert man eine neue Variable von einem loop oder apply?
 
@@ -29,7 +31,7 @@
 + **Nicht der wichtigste dataframe**
 + **Was sind die wirkung von drugs auf die gene** 
 
-**19.03.21**
+**19.05.21**
 - Cedrik pull and push
 + **späteres Meeting zusammen**
 
