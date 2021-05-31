@@ -1,5 +1,13 @@
 # 2021-topic-01-team-03
 
+**31.05.21** 
+- Glioma: Effektivität und Unterschied zu den anderen Subtypen 
+- Abspaltung der Glioma von den anderen subtypes 
+- Threshold für die effectivity 
+- 
+
+
+
 **26.03.21**
 - Wie erstellt man einen Vektor mit Einträgen aus einem for loop?
 - Wie speichert man eine neue Variable von einem loop oder apply?
