@@ -63,15 +63,24 @@ i)
 
 ```
 
+## replacing NAs 
+
+```{r}
+lines=row.names(brain_cancer)
+row.names(brain_cancer_achilles) = lines
+```
+
+
 ## NA removal from brain_cancer_achilles
 
 ```{r}
-brain_cancer_achilles=na.omit(brain_cancer_achilles) #remove the entire cell lines from everywhere without KO scores
+brain_cancer_achilles_no_NA=na.omit(brain_cancer_achilles) #remove the entire cell lines from everywhere without KO scores
 ```
 
-## NA for mean substituition in brain_cancer
+
 
 ```{r}
+## NA for mean substituition in brain_cancer
 for(i in 1:ncol(brain_cancer)){
   brain_cancer[is.na(brain_cancer[,i]), i] <- mean(brain_cancer[,i], na.rm = TRUE)
 }
