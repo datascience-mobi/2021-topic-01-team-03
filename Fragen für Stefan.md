@@ -4,7 +4,7 @@
 - Glioma: Effektivität und Unterschied zu den anderen Subtypen 
 - Abspaltung der Glioma von den anderen subtypes 
 - Threshold für die effectivity 
-- 
+- Definition der over und underexpression 
 
 
 
