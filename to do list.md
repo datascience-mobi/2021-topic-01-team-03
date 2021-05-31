@@ -4,18 +4,18 @@ Till 24.05
 - [x] Establish how big can be the deviation of non-standard doses, from the standard ones. **Teamwork Xenia & Ilya <3**
 - [x] Establish the threshold for effective drugs. **Lea+Lennard**
 - [x] Create another file which includes all steps that are planned or have been done concerning the questions, small summary. **Ilya**
-- [ ] Removing irrelevant colums/rows from datasets. **Cedrik**
+- [ ] Removing irrelevant colums/rows from datasets. **Ilya**
 
 Till 31.05
-- [ ] Do we want to select just effective drugs in all 34 cell lines or we want to select effective drugs specifically for each of 4 subtypes? Somebody needs to look into it and see if it is worth it or not. **Xenia**
+- [x] Do we want to select just effective drugs in all 34 cell lines or we want to select effective drugs specifically for each of 4 subtypes? Somebody needs to look into it and see if it is worth it or not. **Xenia**
 - [x] Solve the "Filter effective drugs" problem. **Ilya**
 - [x] Select the drugs that are effective in multiple doses. **Ilya**
 - [x] Select drug targets. **Ilya**
 - [x] Why is the threshold 0,3 and not 0? **Lea**
-- [ ] Look into how effective_in_all_doses drugs vary in their effect on cell proliferation, depending on the dose (in brain_cancer data frame). Look for trends and create groups from drugs that have similarities. **Lea**
+- [ ] Look into how effective_in_all_doses drugs vary in their effect on cell proliferation, depending on the dose (in brain_cancer data frame). Look for trends and create groups from drugs that have similarities. **Lea + Ilya**
 - [x] Which cell lines miss from achilles? **Cedrik**
-- [ ] Find a way to justify the 0,3. **Lennard**
-- [ ] Clustering 0,3 threshold and 160 cell line. **Cedrik**
+- [x] Find a way to justify the 0,3. **Lennard**
+- [ ] Clustering 0,2 threshold and 51 cell line. **Cedrik**
 
 Till 7.06
 - [ ] **What to do with the drug targets? How to examine gene targets of the effective drugs and what to do with them? How do we work further? (prism.treat + prism.achilles + prism.cnv) As I understood Stefan meant that it tis not worth it and that the whole idea of repurpusing is that these drugs act differently and not like they are supposed it. So the effect is not attributed to the designed drug target**
