@@ -4,7 +4,7 @@ Till 24.05
 - [x] Establish how big can be the deviation of non-standard doses, from the standard ones. **Teamwork Xenia & Ilya <3**
 - [x] Establish the threshold for effective drugs. **Lea+Lennard**
 - [x] Create another file which includes all steps that are planned or have been done concerning the questions, small summary. **Ilya**
-- [ ] Removing irrelevant colums/rows from datasets. **Ilya**
+- [x] Removing irrelevant colums/rows from datasets. **Ilya**
 
 Till 31.05
 - [x] Do we want to select just effective drugs in all 34 cell lines or we want to select effective drugs specifically for each of 4 subtypes? Somebody needs to look into it and see if it is worth it or not. **Xenia**
