@@ -3,6 +3,7 @@
 **31.05.21** 
 - Glioma: Effektivität und Unterschied zu den anderen Subtypen 
 - Abspaltung der Glioma von den anderen subtypes 
+- Wir wollen schauen ob von unseren effectiven drogen irgendwelche ubterschied in Wirksamkeit nach cancer subtyp gibt. Müssen wir es in allen dosen vergleichen oder nur in eine? Macht es ein wesentlicheres unterschied welche dose wir für diese Verglech nehmen. 
 - Threshold für die effectivity 
 - Definition der over und underexpression 
 - TPM
