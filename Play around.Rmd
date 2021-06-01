@@ -363,6 +363,62 @@ View(brain_cancer[,c(1229,1230)])
 
 ```
 
+## Drugs and subtypes relationship
+
+```{r}
+ae_d7 <-data.frame(matrix(nrow = 34,ncol = length(effective_in_all_doses)),row.names = rownames(brain_cancer))
+colnames(ae_d7)=effective_in_all_doses
+
+for (i in 1:length(effective_in_all_doses)){
+  ae_d7[,i]=effective_d7[,grep(effective_in_all_doses[i], colnames(effective_d7))]
+}
+
+glioma_ae_d7=ae_d7[glioma,]
+
+glioblastoma_ae_d7=ae_d7[glioblastoma,]
+
+astrocytoma_ae_d7=ae_d7[astrocytoma,]
+
+medulloblastoma_ae_d7=ae_d7[medulloblastoma,]
+
+compare_subtypes<-data.frame(matrix(nrow = 4,ncol = length(effective_in_all_doses)),row.names = c("glioma", "glioblastoma", "astrocytoma", "medulloblastoma"))
+colnames(compare_subtypes)=effective_in_all_doses
+
+compare_subtypes[1,]<-apply(glioma_ae_d7, 2, mean)
+compare_subtypes[2,]<-apply(glioblastoma_ae_d7, 2, mean)
+compare_subtypes[3,]<-apply(astrocytoma_ae_d7, 2, mean)
+compare_subtypes[4,]<-apply(medulloblastoma_ae_d7, 2, mean)
+
+View(apply(compare_subtypes, 2, plot))
+```
+
+```{r}
+ae_d4 <-data.frame(matrix(nrow = 34,ncol = length(effective_in_all_doses)),row.names = rownames(brain_cancer))
+colnames(ae_d4)=effective_in_all_doses
+
+for (i in 1:length(effective_in_all_doses)){
+  ae_d4[,i]=effective_d4[,grep(effective_in_all_doses[i], colnames(effective_d4))]
+}
+
+glioma_ae_d4=ae_d4[glioma,]
+
+glioblastoma_ae_d4=ae_d4[glioblastoma,]
+
+astrocytoma_ae_d4=ae_d4[astrocytoma,]
+
+medulloblastoma_ae_d4=ae_d4[medulloblastoma,]
+
+compare_subtypes2<-data.frame(matrix(nrow = 4,ncol = length(effective_in_all_doses)),row.names = c("glioma", "glioblastoma", "astrocytoma", "medulloblastoma"))
+colnames(compare_subtypes2)=effective_in_all_doses
+
+compare_subtypes2[1,]<-apply(glioma_ae_d4, 2, mean)
+compare_subtypes2[2,]<-apply(glioblastoma_ae_d4, 2, mean)
+compare_subtypes2[3,]<-apply(astrocytoma_ae_d4, 2, mean)
+compare_subtypes2[4,]<-apply(medulloblastoma_ae_d4, 2, mean)
+
+apply(compare_subtypes2, 2, plot)
+```
+
 ##Looking at gene expression in brain cancer cells
 
 ```{r}
