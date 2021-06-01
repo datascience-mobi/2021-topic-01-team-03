@@ -70,14 +70,11 @@ lines=row.names(brain_cancer)
 row.names(brain_cancer_achilles) = lines
 ```
 
-
-## NA removal from brain_cancer_achilles
+## NA removal
 
 ```{r}
 brain_cancer_achilles_no_NA=na.omit(brain_cancer_achilles) #remove the entire cell lines from everywhere without KO scores
 ```
-
-
 
 ```{r}
 ## NA for mean substituition in brain_cancer
@@ -85,6 +82,12 @@ for(i in 1:ncol(brain_cancer)){
   brain_cancer[is.na(brain_cancer[,i]), i] <- mean(brain_cancer[,i], na.rm = TRUE)
 }
 brain_cancer=brain_cancer[ , colSums(is.na(brain_cancer)) == 0]
+```
+
+## Useless columns removal
+
+```{r}
+brain_cancer_cl=brain_cancer_cl[,-c(4,6,7,8,9,11,12,15,17,19,23,24,26,28,29,30,31,32,33)]
 ```
 
 ## Dividing cell lines into subgroups
@@ -197,7 +200,7 @@ ncol(brain_cancer)
 ```{r}
 #Lets say for now that our threshold is 0,3 so we can see how many drugs meet this criteria in each dose group
 effective_drugs<-function(x){
-  effective_x<-x[,which(apply(x,2,mean)<=0.3)]
+  effective_x<-x[,which(apply(x,2,mean)<=0.2)]
   return(effective_x)
 }
 
@@ -214,7 +217,7 @@ effective_d8=effective_drugs(d8)
 all_effective_drugs=c(colnames(effective_d1),colnames(effective_d2),colnames(effective_d3),colnames(effective_d4),colnames(effective_d5),colnames(effective_d6),colnames(effective_d7),colnames(effective_d8))
 
 length(all_effective_drugs)
-length(which(apply(brain_cancer,2,mean)<=0.3)) #this is the amount of drugs that we keep in total. We compare these 2 length to make sure that that we do not select the same drug twice. If it was the case the first length would be bigger than the second one
+length(which(apply(brain_cancer,2,mean)<=0.2)) #this is the amount of drugs that we keep in total. We compare these 2 length to make sure that that we do not select the same drug twice. If it was the case the first length would be bigger than the second one
 ```
 
 ## Apllying efective doses filtering on prism.treat
@@ -345,9 +348,6 @@ brain_cancer_treat=brain_cancer_treat[!duplicated(brain_cancer_treat$broad_id),]
 rownames(brain_cancer_treat)<-brain_cancer_treat[,1]
 brain_cancer_treat=brain_cancer_treat[,-c(1,2,3)]
 effective_bc_treat=brain_cancer_treat[effective_in_all_doses,]
-
-summary(effective_bc_treat$target)
-summary(effective_bc_treat$moa)
 
 #an interesting extra:
 colnames(effective_d1)[c(8,9)]
