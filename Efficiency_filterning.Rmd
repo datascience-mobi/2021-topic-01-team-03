@@ -184,7 +184,7 @@ ac8=d8[astrocytoma,]
 #Lets say for now that our threshold is 0,3 so we can see how many drugs meet this criteria in each dose group
 
 effective_drugs<-function(x){
-  effective_x<-x[,which(apply(x,2,mean)<=0.3)]
+  effective_x<-x[,which(apply(x,2,mean)<=0.2)]
   return(effective_x)
 }
 
@@ -528,6 +528,25 @@ present_in_all_doses<-function(a,b,c,d,e,f,g){
 effective_in_all_doses_ac=present_in_all_doses(ac1_ac2,ac1_ac3,ac1_ac4,ac1_ac5,ac1_ac6,ac1_ac7,ac1_ac8)
 length(effective_in_all_doses_ac)
 
-# 228 drugs are effective in all doses in astrocytoma subtype
+# 89 drugs are effective in all doses in astrocytoma subtype
+```
+
+## Clustering of the effective drugs 
+
+
+```{r}
+if ( (i %in% row.names(brain_cancer) &  (i %in% effective_in_all_doses_ac[ , 2]) ) 
+     {values <- i}
+    else 
+      {rm(i)}
+
+  print(values) 
+}
+            
+```
+```{r}
+drug_lines_ac <- t(effective_in_all_doses_ac)
+astrocytoma_bc[ , cell_lines[1]]
+
 ```
 
