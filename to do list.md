@@ -26,6 +26,7 @@ Till 7.06
 - [ ] Which TPM is considered to be an overexpression? **Lea**
 
 Till 14.06
+- [ ] **We need some kind of a test and do more clustering. How do we work with genes?**
 - [ ] Wilcoxon Signed Rank Test. Who?
 
 
