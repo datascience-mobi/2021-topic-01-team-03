@@ -529,24 +529,69 @@ effective_in_all_doses_ac=present_in_all_doses(ac1_ac2,ac1_ac3,ac1_ac4,ac1_ac5,a
 length(effective_in_all_doses_ac)
 
 # 89 drugs are effective in all doses in astrocytoma subtype
+## should be 51
 ```
 
-## Clustering of the effective drugs 
+# Clustering of the effective drugs 
 
+## K-means for the d7 sets 
 
 ```{r}
-if ( (i %in% row.names(brain_cancer) &  (i %in% effective_in_all_doses_ac[ , 2]) ) 
-     {values <- i}
-    else 
-      {rm(i)}
-
-  print(values) 
-}
-            
+## Compute k-means with k = 6
+set.seed(123)
+km_astrocytoma_d7 <- kmeans(astrocytoma_ae_d7, 1, nstart = 25)
+print(km_astrocytoma_d7)
 ```
 ```{r}
-drug_lines_ac <- t(effective_in_all_doses_ac)
-astrocytoma_bc[ , cell_lines[1]]
+value <- colMeans(astrocytoma_ae_d7)
+hist(value, breaks = 500)
+
+boxplot(astrocytoma_ae_d7, xlba="Efficiency", ylab="Drug")
+boxplot(glioma_ae_d7, xlba="Efficiency", ylab="Drug")
+boxplot(glioblastoma_ae_d7, xlba="Efficiency", ylab="Drug")
+boxplot(medulloblastoma_ae_d7, xlba="Efficiency", ylab="Drug")
+
+astrocytoma_ae_d7_mean = colMeans(astrocytoma_ae_d7)
+plot(astrocytoma_ae_d7_mean)
+
+glioma_ae_d7_mean = colMeans(glioma_ae_d7)
+plot(glioma_ae_d7_mean)
+
+glioblastoma_ae_d7_mean = colMeans(glioblastoma_ae_d7)
+plot(glioblastoma_ae_d7_mean)
+
+medulloblastoma_ae_d7_mean = colMeans(medulloblastoma_ae_d7)
+plot(medulloblastoma_ae_d7_mean, col = "blue") 
+
+means_eff <- data.frame(astrocytoma_ae_d7_mean, glioma_ae_d7_mean, glioblastoma_ae_d7_mean, medulloblastoma_ae_d7_mean)
+
+ggplot(means_eff, aes(means_eff)) +                    
+  geom_line(aes(y=astrocytoma_ae_d7_mean), colour="red") +  
+  geom_line(aes(y=glioblastoma_ae_d7_mean), colour="green")
+  geom_line(aes(y=glioma_ae_d7_mean), colour="blue") +  
+  geom_line(aes(y=medulloblastoma_ae_d7_mean), colour="yellow")
 
 ```
+
+
+## determine optimal cluster size 
+
+```{r}
+#Elbow Method for finding the optimal number of clusters
+set.seed(123)
+# Compute and plot wss for k = 2 to k = 15.
+k.max <- 15
+wss <- sapply(1:k.max, 
+              function(k){kmeans(astrocytoma_ae_d7, 2, nstart=50,iter.max = 15 )$tot.withinss})
+wss
+plot(1:k.max, wss,
+     type="b", pch = 19, frame = FALSE, 
+     xlab="Number of clusters K",
+     ylab="Total within-clusters sum of squares")
+
+```
+
+
+
+
 
