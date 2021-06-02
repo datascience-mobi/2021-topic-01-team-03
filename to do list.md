@@ -19,8 +19,8 @@ Till 31.05
 
 Till 7.06
 - [ ] **What to do with the drug targets? How to examine gene targets of the effective drugs and what to do with them? How do we work further? (prism.treat + prism.achilles + prism.cnv) As I understood Stefan meant that it tis not worth it and that the whole idea of repurpusing is that these drugs act differently and not like they are supposed it. So the effect is not attributed to the designed drug target**
-- [ ] Select one dose to continue working on. **Ilya**
-- [ ] Determine specific drugs for each brain cancer subtype or is there any trend between cell lines and drugs. Basically: are there any drugs that are more effective for certain cells? **Ilya**
+- [x] Select one dose to continue working on. **Ilya**
+- [ ] Determine specific drugs for each brain cancer subtype or is there any trend between cell lines and drugs. Basically: are there any drugs that are more effective for certain cells? **Cedrik + Ilya**
 - [ ] See what is the norm is in brain_cancer_treat and brain_cancer_cnv and brain_cancer_achilles. Generate general information and visualisation of this dataframs. **Lennard**
 - [ ] See if there is any specific characteristics on gene expression for the cancer subtypes. Or are there in general any tendencies between certain cell lines. **Xenia**
 - [ ] Which TPM is considered to be an overexpression? **Lea**
