@@ -220,21 +220,6 @@ length(all_effective_drugs)
 length(which(apply(brain_cancer,2,mean)<=0.2)) #this is the amount of drugs that we keep in total. We compare these 2 length to make sure that that we do not select the same drug twice. If it was the case the first length would be bigger than the second one
 ```
 
-## Apllying efective doses filtering on prism.treat
-
-```{r}
-brain_cancer_treat=prism.treat[colnames(brain_cancer),] #selecting only the drugs we previously filtered out from brain_cancer
-
-effective_t1=brain_cancer_treat[colnames(effective_d1),]
-effective_t2=brain_cancer_treat[colnames(effective_d2),]
-effective_t3=brain_cancer_treat[colnames(effective_d3),]
-effective_t4=brain_cancer_treat[colnames(effective_d4),]
-effective_t5=brain_cancer_treat[colnames(effective_d5),]
-effective_t6=brain_cancer_treat[colnames(effective_d6),]
-effective_t7=brain_cancer_treat[colnames(effective_d7),]
-effective_t8=brain_cancer_treat[colnames(effective_d8),]
-```
-
 ##Select drugs that are effective in all doses
 
 ```{r}
@@ -344,23 +329,14 @@ effective_in_4_doses=present_in_4_doses(d1_d2,d1_d3,d1_d4)
 ##What are the targets of the effective drugs?
 
 ```{r}
+brain_cancer_treat=prism.treat[colnames(brain_cancer),] #selecting only the drugs we previously filtered out from brain_cancer
 brain_cancer_treat=brain_cancer_treat[!duplicated(brain_cancer_treat$broad_id),]
 rownames(brain_cancer_treat)<-brain_cancer_treat[,1]
-brain_cancer_treat=brain_cancer_treat[,-c(1,2,3)]
-effective_bc_treat=brain_cancer_treat[effective_in_all_doses,]
+effective_bc_treat=brain_cancer_treat[effective_in_all_doses,-c(1,2,3,4,10)]
 
-#an interesting extra:
-colnames(effective_d1)[c(8,9)]
-rownames(effective_t1)[c(8,9)]
-grep("BRD-A72716251-001-01-5", colnames(extra_drugs))
-View((extra_drugs)[,(77:84)])
-colnames(extra_drugs)[c(77,78)]
-grep("BRD-A72716251-001-01-5::0.000222486::HTS002", colnames(brain_cancer))
-grep("BRD-A72716251-001-01-5::0.000889944::HTS002", colnames(brain_cancer))
-brain_cancer[,1229]/brain_cancer[,1230]
-View(brain_cancer[,c(1229,1230)])
-#identifying the duplicants and seewing if they have the same effect on the cells, which they dont
-
+summary(effective_bc_treat$target)
+summary(effective_bc_treat$moa)
+#expression of these genes would be interesting to look into our cell lines
 ```
 
 ## Select one relevant dose
@@ -407,55 +383,7 @@ compare_subtypes[4,]<-apply(medulloblastoma_ae_d7, 2, mean)
 
 ```
 
-##Looking at gene expression in brain cancer cells
-
-```{r}
-# summary of brain_cancer_exp
-mat.prism.exp <- as.matrix(brain_cancer_exp)
-vec.prism.exp <- as.vector(mat.prism.exp)
-sum.prism.exp <- summary(vec.prism.exp)
-dim.prism.exp <- dim(prism.exp)
-datp.prism.exp <- dim.prism.exp[1] * dim.prism.exp[2]
-
-# prism histogram
-hist(mat.prism.exp, breaks = 100, xlim = range(0,10), ylim = range(0,200000), xlab = "prism.exp")
-abline(v = c(sum.prism.exp[2:5]), col = "red", lwd = 1, lty = 1)
-
-#Observation: 25% of genes are KO, around 50% have an expression over 2,5 TPM. 
-
-#Which TPM is considered to be an overexpression?
-
-#Which genes are completely KO?
-KO_genes=colnames(brain_cancer_exp[,as.numeric(which(apply(brain_cancer_exp, 2, mean)==0))])
-```
-
-```{r}
-# brain_cancer_achilles data frame as vector
-mat.brain_cancer_achilles <- as.matrix(brain_cancer_achilles)
-vec.brain_cancer_achilles <- as.vector(mat.brain_cancer_achilles)
-sum.brain_cancer_achilles <- summary(vec.brain_cancer_achilles)
-dim.brain_cancer_achilles <- dim(brain_cancer_achilles)
-datp.brain_cancer_achilles <- dim.brain_cancer_achilles[1] * dim.brain_cancer_achilles[2]
-
-# prism histogram
-hist(mat.brain_cancer_achilles, breaks = 200, xlim = range(-2.5,1), xlab = "brain_cancer_achilles")
-abline(v = c(sum.brain_cancer_achilles[2:5]), col = "red", lwd = 1, lty = 1)
-
-```
-
-```{r}
-# summary of brain_cancer_cnv
-
-mat.prism.cnv <- as.matrix(brain_cancer_cnv)
-vec.prism.cnv <- as.vector(mat.prism.cnv)
-sum.prism.cnv <- summary(vec.prism.cnv)
-dim.prism.cnv <- dim(prism.cnv)
-datp.prism.cnv <- dim.prism.cnv[1] * dim.prism.cnv[2]
-
-# prism histogram
-hist(mat.prism.cnv, breaks = 200, xlim = range(0,3), xlab = "prism.cnv")
-abline(v = c(sum.prism.cnv[2:5]), col = "red", lwd = 1, lty = 1)
-```
+##Looking at targets of our effective drugs
 
 ```{r}
 #jsut trying some stuff on a particular example
