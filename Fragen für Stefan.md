@@ -11,6 +11,7 @@
 - **Median genommen: klingt gut, Stefan approved**
 - Definition der over und underexpression 
 - TPM
+- **packages um verteilung herauszufinden. DISEC2; LIMNA; EDGER;**
 - Wie können wir weiter arbeiten? Was könnten unsere weitere Schritte mit Genexpression sein?
 -**Summary statistiks from prism.treat von unseren targets von drugs. Kein muster: expressionsdaten PCA auf daten punkten, scatterplott. oder Kmeans clustering von allen cell lines nach expression/cnv clustern. Oder heatmap hierarchisches clustering. Vieleicht überlegen neue subtypen definieren** 
 
