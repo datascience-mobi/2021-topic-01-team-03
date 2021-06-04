@@ -539,12 +539,15 @@ length(effective_in_all_doses_ac)
 
 ```{r}
 
-# testing the number of clusters 
+# testing the number of clusters by elbow-plot
+
+
+
 
 wss <- sapply(1:8, function(k){
-  kmeans(x=t(medulloblastoma_ae_d7), centers = k)$tot.withinss
+  kmeans(x=t(gb7), centers = k)$tot.withinss
 })
-plot(1:8,wss,type = 'b',pch = 19, main = "Medulloblastoma", xlab = "Number of clusters K",
+plot(1:8,wss,type = 'b',pch = 19, main = "Glioblastoma", xlab = "Number of clusters K",
      ylab = "Total within-clusters sum of squares")
 
 wss <- sapply(1:8, function(k){
@@ -566,10 +569,8 @@ effective_mb7=effective_drugs(mb7)
 effective_g7=effective_drugs(g7)
 effective_ac7=effective_drugs(ac7)
 
-effective_gb7_mean = colMeans(effective_gb7)
-effective_mb7_mean = colMeans(effective_mb7)
-effective_g7_mean = colMeans(effective_g7)
-effective_ac7_mean = colMeans(effective_ac7)
+
+# and for the non-effective drugs 
 
 not_effective_drugs <- function(x){
   not_effective_x<- x[,which(apply(x,2,mean)>0.2)]
@@ -581,22 +582,34 @@ not_effective_mb7=not_effective_drugs(mb7)
 not_effective_g7=not_effective_drugs(g7)
 not_effective_ac7=not_effective_drugs(ac7)
 
+# I am not sure, if i need the means of the effective or non-effective drugs 
+
+effective_gb7_mean = colMeans(effective_gb7)
+#effective_mb7_mean = colMeans(effective_mb7)
+#effective_g7_mean = colMeans(effective_g7)
+#effective_ac7_mean = colMeans(effective_ac7)
+
 not_effective_gb7_mean = colMeans(not_effective_gb7)
-not_effective_mb7_mean = colMeans(not_effective_mb7)
-not_effective_g7_mean = colMeans(not_effective_g7)
-not_effective_ac7_mean = colMeans(not_effective_ac7)
+#not_effective_mb7_mean = colMeans(not_effective_mb7)
+#not_effective_g7_mean = colMeans(not_effective_g7)
+#not_effective_ac7_mean = colMeans(not_effective_ac7)
+
+#gb7_mean = colMeans(gb7)
 
 # Performing k-means clustering
 
-mb_cluster <-  kmeans(x=t(gb7), centers = 2, nstart =10)
-class(mb_cluster)
-#mb_cluster$cluster
+set.seed(123)
+gb_cluster <-  kmeans(x=t(gb7), centers = 2, nstart =10)
+gb_cluster_df = data.frame(Cluster = gb_cluster$cluster)
+
+#gb_cluster$cluster
 
 # Visualization via ggplots
 
 library(ggplot2)
-ggplot() +
-  geom_point(mapping = aes(x = effective_g7_mean, y = not_effective_g7_mean))
+#ggplot(data = gb_cluster_df) +
+  #geom_point(aes(x=, y=)
+
 
 ```
 
