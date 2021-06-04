@@ -49,10 +49,9 @@ disease_subtypes=c(medulloblastoma,glioblastoma,glioma,astrocytoma)
 
 ```{r}
 #dividing brain_cancer dataset into subtypes
-# I think this was not neccesary
+# I think this was not necessary
 
 glioblastoma_bc <- brain_cancer[glioblastoma,]
-View(glioblastoma_bc)
 
 # Check that everything went correctly
 nrow(glioblastoma_bc)
@@ -127,7 +126,6 @@ length(not_standard_doses)#in comparison with dimension from questionable_drugs 
 add_extra_doses=function(x,y){cbind(brain_cancer[,unique(grep(paste(colnames(extra_drugs[,x]),collapse="|"), colnames(brain_cancer)))], y)}
 
 d1=add_extra_doses(d1_extra,d1)
-View(d1)
 d2=add_extra_doses(d2_extra,d2)
 d3=add_extra_doses(d3_extra,d3)
 d4=add_extra_doses(d4_extra,d4)
@@ -178,10 +176,12 @@ ac7=d7[astrocytoma,]
 ac8=d8[astrocytoma,]
 ```
 
+
+
 # Filter effective drugs in each dose group
 
 ```{r}
-#Lets say for now that our threshold is 0,3 so we can see how many drugs meet this criteria in each dose group
+#Lets say for now that our threshold is 0,2 so we can see how many drugs meet this criteria in each dose group
 
 effective_drugs<-function(x){
   effective_x<-x[,which(apply(x,2,mean)<=0.2)]
@@ -226,7 +226,7 @@ effective_mb8=effective_drugs(mb8)
 
 # Comparison
 # number of treatments is constantly higher
-# doses 7 is nearly the same number (by 5 higher in medullablastoma)
+# doses 7 is nearly the same number (by 5 higher in medulloblastoma)
 # reminder: only two cell lines belong to medulloblastoma
 # they both have to respond similar 
 # length of all effective treatments within medulloblastoma: 7824
@@ -341,6 +341,7 @@ effective_in_all_doses_gb=present_in_all_doses(gb1_gb2,gb1_gb3,gb1_gb4,gb1_gb5,g
 length(effective_in_all_doses_gb)
 #119 drugs are effective in all doses in glioblastoma subtype
 #in comparison in all cell lines: 160 
+# edit: with new threshold 48
 ```
 
 # Now for all the other subtypes
@@ -405,6 +406,7 @@ present_in_all_doses<-function(a,b,c,d,e,f,g){
 effective_in_all_doses_mb=present_in_all_doses(mb1_mb2,mb1_mb3,mb1_mb4,mb1_mb5,mb1_mb6,mb1_mb7,mb1_mb8)
 length(effective_in_all_doses_mb)
 #220 drugs are effective in all doses for medulloblastoma subtype
+# edit with new threshold: 98
 ```
 
 ```{r}
@@ -466,6 +468,7 @@ present_in_all_doses<-function(a,b,c,d,e,f,g){
 effective_in_all_doses_g=present_in_all_doses(g1_g2,g1_g3,g1_g4,g1_g5,g1_g6,g1_g7,g1_g8)
 length(effective_in_all_doses_g)
 # 76 drugs are effective in all doses for glioma subtype
+# edit new threshold: 35
 ```
 
 ```{r}
@@ -532,6 +535,76 @@ length(effective_in_all_doses_ac)
 ## should be 51
 ```
 
+# Xenia´s clustering
+
+```{r}
+
+# testing the number of clusters 
+
+wss <- sapply(1:8, function(k){
+  kmeans(x=t(medulloblastoma_ae_d7), centers = k)$tot.withinss
+})
+plot(1:8,wss,type = 'b',pch = 19, main = "Medulloblastoma", xlab = "Number of clusters K",
+     ylab = "Total within-clusters sum of squares")
+
+wss <- sapply(1:8, function(k){
+  kmeans(x=t(glioma_ae_d7), centers = k)$tot.withinss
+})
+plot(1:8,wss,type = 'b',pch = 19, main = "Glioma", xlab = "Number of clusters K",
+     ylab = "Total within-clusters sum of squares")
+
+# I want to visualize the binary question drug response against no drug response. For that reason I have to take the normal d7 datasets without filtering for the effective drugs 
+
+
+effective_drugs<-function(x){
+  effective_x<- x[,which(apply(x,2,mean)<=0.2)]
+  return(effective_x)
+}
+
+effective_gb7=effective_drugs(gb7)
+effective_mb7=effective_drugs(mb7)
+effective_g7=effective_drugs(g7)
+effective_ac7=effective_drugs(ac7)
+
+effective_gb7_mean = colMeans(effective_gb7)
+effective_mb7_mean = colMeans(effective_mb7)
+effective_g7_mean = colMeans(effective_g7)
+effective_ac7_mean = colMeans(effective_ac7)
+
+not_effective_drugs <- function(x){
+  not_effective_x<- x[,which(apply(x,2,mean)>0.2)]
+  return(not_effective_x)
+}
+
+not_effective_gb7=not_effective_drugs(gb7)
+not_effective_mb7=not_effective_drugs(mb7)
+not_effective_g7=not_effective_drugs(g7)
+not_effective_ac7=not_effective_drugs(ac7)
+
+not_effective_gb7_mean = colMeans(not_effective_gb7)
+not_effective_mb7_mean = colMeans(not_effective_mb7)
+not_effective_g7_mean = colMeans(not_effective_g7)
+not_effective_ac7_mean = colMeans(not_effective_ac7)
+
+# Performing k-means clustering
+
+mb_cluster <-  kmeans(x=t(gb7), centers = 2, nstart =10)
+class(mb_cluster)
+#mb_cluster$cluster
+
+# Visualization via ggplots
+
+library(ggplot2)
+ggplot() +
+  geom_point(mapping = aes(x = effective_g7_mean, y = not_effective_g7_mean))
+
+```
+
+
+
+
+
+# Cedrik´s clustering
 # Clustering of the effective drugs 
 
 ## K-means for the d7 sets 
@@ -539,6 +612,17 @@ length(effective_in_all_doses_ac)
 ```{r}
 ## Compute k-means with k = 6
 set.seed(123)
+ae_d7 <-data.frame(matrix(nrow = 34,ncol = length(effective_in_all_doses)),row.names = rownames(brain_cancer))
+for (i in 1:length(effective_in_all_doses)){
+  ae_d7[,i]=effective_d7[,grep(effective_in_all_doses[i], colnames(effective_d7))]
+}
+astrocytoma_ae_d7=ae_d7[astrocytoma,]
+glioma_ae_d7=ae_d7[glioma,]
+glioblastoma_ae_d7=ae_d7[glioblastoma,]
+medulloblastoma_ae_d7=ae_d7[medulloblastoma,]
+
+colnames(ae_d7)=effective_in_all_doses
+
 km_astrocytoma_d7 <- kmeans(astrocytoma_ae_d7, 1, nstart = 25)
 print(km_astrocytoma_d7)
 ```
@@ -547,7 +631,7 @@ value <- colMeans(astrocytoma_ae_d7)
 hist(value, breaks = 500)
 
 boxplot(astrocytoma_ae_d7, xlba="Efficiency", ylab="Drug")
-boxplot(glioma_ae_d7, xlba="Efficiency", ylab="Drug")
+boxplot(glioma_ae_d7, xlab="Efficiency", ylab="Drug")
 boxplot(glioblastoma_ae_d7, xlba="Efficiency", ylab="Drug")
 boxplot(medulloblastoma_ae_d7, xlba="Efficiency", ylab="Drug")
 
@@ -564,6 +648,8 @@ medulloblastoma_ae_d7_mean = colMeans(medulloblastoma_ae_d7)
 plot(medulloblastoma_ae_d7_mean, col = "blue") 
 
 means_eff <- data.frame(astrocytoma_ae_d7_mean, glioma_ae_d7_mean, glioblastoma_ae_d7_mean, medulloblastoma_ae_d7_mean)
+
+library(ggplot2)
 
 ggplot(means_eff, aes(means_eff)) +                    
   geom_line(aes(y=astrocytoma_ae_d7_mean), colour="red") +  
