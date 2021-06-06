@@ -339,6 +339,13 @@ summary(effective_bc_treat$moa)
 #expression of these genes would be interesting to look into our cell lines
 ```
 
+#What gene expression is characteristic for subtypes? Maybe related to drug response?
+
+```{r}
+
+```
+
+
 ## Select one relevant dose
 
 ```{r}
