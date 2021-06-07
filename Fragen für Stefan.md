@@ -1,5 +1,10 @@
 # 2021-topic-01-team-03
 
+**09.06.21** 
+- Visualisierung von effective_drugs. 1 oder 2 Koordinaten?
+- Wilcoxon Test. Was kriegen wir damit?
+- Auf welche dataset war Wilcoxon test ist bezogen? exp oder cnv?
+
 **31.05.21** 
 - Glioma: Effektivität und Unterschied zu den anderen Subtypen
 - **schauen ob wir kandidatengene gegeneinander plotten. Untershied von genexpression bestimmen. mit 0 hypothese und einem test (alle cell lines sind homogen). CLUSTERING MACHEN von genetische information; PCA von expression und copy anzahl: respondet auf besonderere wenig drugs (z.B)** 
