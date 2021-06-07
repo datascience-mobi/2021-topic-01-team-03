@@ -114,7 +114,6 @@ dd8=grep("::2.5::", colnames(brain_cancer))
 #positions of the respective doses in the dataframe 
 doses=c(dd1,dd2,dd3,dd4,dd5,dd6,dd7,dd8)
 
-
 d1=brain_cancer[,dd1]
 d2=brain_cancer[,dd2]
 d3=brain_cancer[,dd3]
