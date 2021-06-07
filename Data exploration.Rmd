@@ -10,13 +10,13 @@ load("../2021-topic-01-team-03/dataset/cellline_datasets.rda")
 ```
 
 ```{r}
-View(prism)
-View(prism.cl)
-View(prism.achilles)
-View(prism.cnv)
-View(prism.exp)
-View(prism.snv)
-View(prism.treat)
+#View(prism)
+#View(prism.cl)
+#View(prism.achilles)
+#View(prism.cnv)
+#View(prism.exp)
+#View(prism.snv)
+#View(prism.treat)
 ```
 
 
@@ -165,4 +165,48 @@ brain_cancer_exp=brain_cancer_exp[ , colSums(is.na(brain_cancer_exp)) == 0]
 heatmap(as.matrix(brain_cancer_exp))
 ```
 
+
+Futher exploration of cnv and achilles
+
+```{r}
+##cnv
+brain_cancer_cnv.mean <- apply(brain_cancer_cnv,2,mean)
+bccm.sum <- summary(brain_cancer_cnv.mean)
+bccm.sum
+#small
+bccst <- bccm.sum[4]-((bccm.sum[4]-bccm.sum[1])/2)
+brain_cancer_cnv.small <- brain_cancer_cnv.mean[which(brain_cancer_cnv.mean<bccst)]
+length(brain_cancer_cnv.small)
+(length(brain_cancer_cnv.small)/dim(brain_cancer_cnv)[2])*100
+summary(brain_cancer_cnv.small)
+#View(brain_cancer_cnv.small)
+#big
+bccbt <- bccm.sum[4]+((bccm.sum[6]-bccm.sum[4])/2)
+brain_cancer_cnv.big <- brain_cancer_cnv.mean[which(brain_cancer_cnv.mean>bccbt)]
+length(brain_cancer_cnv.big)
+(length(brain_cancer_cnv.big)/dim(brain_cancer_cnv)[2])*100
+summary(brain_cancer_cnv.big)
+#View(brain_cancer_cnv.big)
+```
+
+```{r}
+##achilles
+brain_cancer_achilles.mean <- apply(brain_cancer_achilles,2,mean)
+bcam.sum <- summary(brain_cancer_achilles.mean)
+bcam.sum
+#small
+bcast <- bcam.sum[4]-((bcam.sum[4]-bcam.sum[1])/2)
+brain_cancer_achilles.small <- brain_cancer_achilles.mean[which(brain_cancer_achilles.mean<bcast)]
+length(brain_cancer_achilles.small)
+(length(brain_cancer_achilles.small)/dim(brain_cancer_achilles)[2])*100
+summary(brain_cancer_achilles.small)
+#View(brain_cancer_achilles.small)
+#big
+bcabt <- bcam.sum[4]+((bcam.sum[6]-bcam.sum[4])/2)
+brain_cancer_achilles.big <- brain_cancer_achilles.mean[which(brain_cancer_achilles.mean>bcabt)]
+length(brain_cancer_achilles.big)
+(length(brain_cancer_achilles.big)/dim(brain_cancer_achilles)[2])*100
+summary(brain_cancer_achilles.big)
+#View(brain_cancer_achilles.big)
+```
 
