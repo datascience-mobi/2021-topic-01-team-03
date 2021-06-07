@@ -27,8 +27,8 @@ Till 14.06
 - [ ] **We need some kind of a test and do more clustering. How do we work with genes?**
 - [ ] Wilcoxon Signed Rank Test. Who?
 - [ ] Maybe somebody could make our code more structured according to Stefan's suggestions
-- [ ] See if there is any specific characteristics on gene expression for the cancer subtypes. Or are there in general any tendencies between certain cell lines. **Xenia**
-
+- [ ] See if there is any specific characteristics on gene expression for the cancer subtypes. Or are there in general any tendencies between certain cell lines. -> Via Wilcoxon Test **Xenia**
+- [ ] Visualization eg heatmap of the effective drugs **Cedrik**
 
 In the pipeline:
 - [ ] Try to find a way to store long codes in loops just to make it more professional (when enough time for it)
