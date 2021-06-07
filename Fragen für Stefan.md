@@ -3,6 +3,7 @@
 **09.06.21** 
 - Visualisierung von effective_drugs. 1 oder 2 Koordinaten?
 - Wilcoxon Test. Was kriegen wir damit?
+- Auf welche dataset war Wilcoxon test ist bezogen? exp oder cnv?
 
 **31.05.21** 
 - Glioma: Effektivität und Unterschied zu den anderen Subtypen
