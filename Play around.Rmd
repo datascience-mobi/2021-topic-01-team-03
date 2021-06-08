@@ -123,9 +123,6 @@ d6=brain_cancer[,dd6]
 d7=brain_cancer[,dd7]
 d8=brain_cancer[,dd8]
 
-# Listing subsets of dosages to make them easier to use 
-doses_subsets=list(d1,d2,d3,d4,d5,d6,d7)
-
 #these are the standard doses summed up into seperate dataframes
 sum(length(dd1), length(dd2), length(dd3), length(dd4),length(dd5), length(dd6),length(dd7),length(dd8)) #ups something missing
 
@@ -197,6 +194,10 @@ effective_drugs<-function(x){
   effective_x<-x[,which(apply(x,2,mean)<=0.2)]
   return(effective_x)
 }
+
+doses_subsets <- list(d1 = d1, d2 = d2, d3 = d3, d4 = d4, d5 = d5, d6 = d6, d7 = d7, d8 = d8)
+effective_test_stuff <- lapply(doses_subsets, effective_drugs)
+View(effective_test_stuff[[1]])
 
 effective_d1=effective_drugs(d1)
 effective_d2=effective_drugs(d2)
