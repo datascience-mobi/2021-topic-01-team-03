@@ -196,8 +196,7 @@ effective_drugs<-function(x){
 }
 
 doses_subsets <- list(d1 = d1, d2 = d2, d3 = d3, d4 = d4, d5 = d5, d6 = d6, d7 = d7, d8 = d8)
-effective_test_stuff <- lapply(doses_subsets, effective_drugs)
-View(effective_test_stuff[[1]])
+effective_drugs<- lapply(doses_subsets, effective_drugs)
 
 effective_d1=effective_drugs(d1)
 effective_d2=effective_drugs(d2)
@@ -208,6 +207,7 @@ effective_d6=effective_drugs(d6)
 effective_d7=effective_drugs(d7)
 effective_d8=effective_drugs(d8)
 
+ncol(all_effective_drugs[[1]])+ncol(all_effective_drugs[[2]])+ncol(all_effective_drugs[[3]])+ncol(all_effective_drugs[[4]])+ncol(all_effective_drugs[[5]])+ncol(all_effective_drugs[[6]])+ncol(all_effective_drugs[[7]])+ncol(all_effective_drugs[[8]])
 
 all_effective_drugs=c(colnames(effective_d1),colnames(effective_d2),colnames(effective_d3),colnames(effective_d4),colnames(effective_d5),colnames(effective_d6),colnames(effective_d7),colnames(effective_d8))
 
