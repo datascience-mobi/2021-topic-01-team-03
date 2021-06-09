@@ -541,9 +541,6 @@ length(effective_in_all_doses_ac)
 
 # testing the number of clusters by elbow-plot
 
-
-
-
 wss <- sapply(1:8, function(k){
   kmeans(x=t(gb7), centers = k)$tot.withinss
 })
@@ -620,9 +617,28 @@ library(ggplot2)
 # Cedrik´s clustering
 # Clustering of the effective drugs 
 
-## K-means for the d7 sets 
+## d7 sets 
 
 ```{r}
+
+## Compute k-means with k = x 
+x <- 6 
+
+km_astrocytoma_ae_d7 = kmeans(t(astrocytoma_ae_d7), centers = x) 
+
+y <- 4 ## cut off height was choosen as 8 from previous dendogramm 
+
+clust_km <- km_astrocytoma_ae_d7$cluster 
+
+# Create a new data frame storing these results
+km_astrocytoma_ae_d7_complete <- mutate(as.data.frame(t(astrocytoma_ae_d7)), cluster = clust_km)
+
+plot(km_astrocytoma_ae_d7_complete)
+
+# Plot the positions of the players and color them using their cluster for height = 20
+ggplot(astrocytoma_ae_d7_mean, aes(x = x), color = factor) +
+  geom_scatter()
+
 ## Compute k-means with k = 6
 set.seed(123)
 ae_d7 <-data.frame(matrix(nrow = 34,ncol = length(effective_in_all_doses)),row.names = rownames(brain_cancer))
@@ -638,7 +654,20 @@ colnames(ae_d7)=effective_in_all_doses
 
 km_astrocytoma_d7 <- kmeans(astrocytoma_ae_d7, 1, nstart = 25)
 print(km_astrocytoma_d7)
+
 ```
+
+
+```{r}
+clusters_x <- cutree(clust_astro_ae_d7, k=x) ## 4 clusters could be ideal 
+astro_ae_d7_complete <- mutate(astrocytoma_ae_d7, cluster = clusters_x)
+
+ggplot(astro_ae_d7_complete, aes(x = x, y = y, color = factor(cluster))) +
+  geom_point()
+```
+
+
+
 ```{r}
 value <- colMeans(astrocytoma_ae_d7)
 hist(value, breaks = 500)
@@ -648,32 +677,78 @@ boxplot(glioma_ae_d7, xlab="Efficiency", ylab="Drug")
 boxplot(glioblastoma_ae_d7, xlba="Efficiency", ylab="Drug")
 boxplot(medulloblastoma_ae_d7, xlba="Efficiency", ylab="Drug")
 
+## calculate the means for each drug in a subtype 
 astrocytoma_ae_d7_mean = colMeans(astrocytoma_ae_d7)
-plot(astrocytoma_ae_d7_mean)
-
 glioma_ae_d7_mean = colMeans(glioma_ae_d7)
-plot(glioma_ae_d7_mean)
-
 glioblastoma_ae_d7_mean = colMeans(glioblastoma_ae_d7)
-plot(glioblastoma_ae_d7_mean)
-
 medulloblastoma_ae_d7_mean = colMeans(medulloblastoma_ae_d7)
-plot(medulloblastoma_ae_d7_mean, col = "blue") 
 
-means_eff <- data.frame(astrocytoma_ae_d7_mean, glioma_ae_d7_mean, glioblastoma_ae_d7_mean, medulloblastoma_ae_d7_mean)
+## create a combined data frame with all the means from each subtype 
 
-library(ggplot2)
+means_eff <- data.frame(Astrocytoma = astrocytoma_ae_d7_mean,
+                        Glioma = glioma_ae_d7_mean, 
+                        Glioblastoma = glioblastoma_ae_d7_mean,  
+                        Medulloblastoma = medulloblastoma_ae_d7_mean, 
+                        Drugs = effective_in_all_doses)
+```
 
-ggplot(means_eff, aes(means_eff)) +                    
-  geom_line(aes(y=astrocytoma_ae_d7_mean), colour="red") +  
-  geom_line(aes(y=glioblastoma_ae_d7_mean), colour="green")
-  geom_line(aes(y=glioma_ae_d7_mean), colour="blue") +  
-  geom_line(aes(y=medulloblastoma_ae_d7_mean), colour="yellow")
+## Plotting all of the individual subtyp means 
+
+```{r}
+par(mfrow=c(2,2))
+ggplot(means_eff, aes(x = Drugs , y = Astrocytoma)) + 
+        geom_point()
+
+ggplot(means_eff, aes(x = Drugs , y = Glioma)) + 
+          geom_point()
+         
+ggplot(means_eff, aes(x = Drugs , y = Glioblastoma)) +   
+         geom_point()
+
+ggplot(means_eff, aes(x = Drugs , y = Medulloblastoma)) +   
+         geom_point()
+
+
+
+new_means_eff <- data.frame(x = means_eff$Drugs, 
+                            y = c(means_eff$Astrocytoma, means_eff$Glioma, means_eff$Glioblastoma, means_eff$Medulloblastoma), 
+                            subtype = c(rep("Astrocytoma", nrow(means_eff)),
+                                      rep("Glioma", nrow(means_eff)),
+                                      rep("Glioblastoma", nrow(means_eff)),
+                                      rep("Medulloblastoma", nrow(means_eff))))
+ggplot(new_means_eff, aes(x = x, y = y, color = subtype)) + 
+                         ggtitle("Means of subtypes") +
+                          xlab("Drugs") + 
+                          ylab("Efficiency") + 
+  geom_point()
 
 ```
 
 
-## determine optimal cluster size 
+# Clustering of the effective drugs 
+
+## d7 sets 
+
+```{r}
+## Compute k-means with k = x 
+x <- 6 
+
+km_astrocytoma_ae_d7 = kmeans(t(astrocytoma_ae_d7), centers = x) 
+
+y <- 4 ## cut off height was choosen as 8 from previous dendogramm 
+
+clust_km <- km_astrocytoma_ae_d7$cluster 
+
+# Create a new data frame storing these results
+km_astrocytoma_ae_d7_complete <- mutate(as.data.frame(t(astrocytoma_ae_d7)), cluster = clust_km)
+
+plot(km_astrocytoma_ae_d7_complete)
+
+# Plot the positions of the players and color them using their cluster for height = 20
+ggplot(astrocytoma_ae_d7_mean, aes(x = x), color = factor) +
+  geom_scatter()
+```
+
 
 ```{r}
 #Elbow Method for finding the optimal number of clusters
@@ -690,6 +765,15 @@ plot(1:k.max, wss,
 
 ```
 
+
+
+```{r}
+clusters_x <- cutree(clust_astro_ae_d7, k=x) ## 4 clusters could be ideal 
+astro_ae_d7_complete <- mutate(astrocytoma_ae_d7, cluster = clusters_x)
+
+ggplot(astro_ae_d7_complete, aes(x = x, y = y, color = factor(cluster))) +
+  geom_point()
+```
 
 
 
