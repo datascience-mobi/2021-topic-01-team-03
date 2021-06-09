@@ -195,9 +195,6 @@ effective_drugs<-function(x){
   return(effective_x)
 }
 
-doses_subsets <- list(d1 = d1, d2 = d2, d3 = d3, d4 = d4, d5 = d5, d6 = d6, d7 = d7, d8 = d8)
-effective_drugs<- lapply(doses_subsets, effective_drugs)
-
 effective_d1=effective_drugs(d1)
 effective_d2=effective_drugs(d2)
 effective_d3=effective_drugs(d3)
@@ -207,9 +204,10 @@ effective_d6=effective_drugs(d6)
 effective_d7=effective_drugs(d7)
 effective_d8=effective_drugs(d8)
 
-ncol(all_effective_drugs[[1]])+ncol(all_effective_drugs[[2]])+ncol(all_effective_drugs[[3]])+ncol(all_effective_drugs[[4]])+ncol(all_effective_drugs[[5]])+ncol(all_effective_drugs[[6]])+ncol(all_effective_drugs[[7]])+ncol(all_effective_drugs[[8]])
+doses_subsets <- list(d1 = d1, d2 = d2, d3 = d3, d4 = d4, d5 = d5, d6 = d6, d7 = d7, d8 = d8)
+all_effective_drugs<- lapply(doses_subsets, effective_drugs)
 
-all_effective_drugs=c(colnames(effective_d1),colnames(effective_d2),colnames(effective_d3),colnames(effective_d4),colnames(effective_d5),colnames(effective_d6),colnames(effective_d7),colnames(effective_d8))
+ncol(all_effective_drugs[[1]])+ncol(all_effective_drugs[[2]])+ncol(all_effective_drugs[[3]])+ncol(all_effective_drugs[[4]])+ncol(all_effective_drugs[[5]])+ncol(all_effective_drugs[[6]])+ncol(all_effective_drugs[[7]])+ncol(all_effective_drugs[[8]])
 
 length(all_effective_drugs)
 length(which(apply(brain_cancer,2,mean)<=0.2)) #this is the amount of drugs that we keep in total. We compare these 2 length to make sure that that we do not select the same drug twice. If it was the case the first length would be bigger than the second one
@@ -218,26 +216,23 @@ length(which(apply(brain_cancer,2,mean)<=0.2)) #this is the amount of drugs that
 ##Select drugs that are effective in all doses
 
 ```{r}
-new_colnames<-function(x){
+save_new_colnames<-function(x){
   a<-gsub(pattern = "::.*", replacement = "", colnames(x))
-  return(a)
+  colnames(x)<-a
+  return(x)
 }
-colnames(effective_d1)<-new_colnames(effective_d1)
-colnames(effective_d2)<-new_colnames(effective_d2)
-colnames(effective_d3)<-new_colnames(effective_d3)
-colnames(effective_d4)<-new_colnames(effective_d4)
-colnames(effective_d5)<-new_colnames(effective_d5)
-colnames(effective_d6)<-new_colnames(effective_d6)
-colnames(effective_d7)<-new_colnames(effective_d7)
-colnames(effective_d8)<-new_colnames(effective_d8)
+
+effective_d1<-save_new_colnames(effective_d1)
+effective_d2<-save_new_colnames(effective_d2)
+effective_d3<-save_new_colnames(effective_d3)
+effective_d4<-save_new_colnames(effective_d4)
+effective_d5<-save_new_colnames(effective_d5)
+effective_d6<-save_new_colnames(effective_d6)
+effective_d7<-save_new_colnames(effective_d7)
+effective_d8<-save_new_colnames(effective_d8)
+
+all_effective_drugs<-lapply(all_effective_drugs, save_new_colnames)
 ## remove everything but the drug information from colnames and make them new colnames of the dataframes
-
-save_new_colnames=function(y){
-  colnames(y)<-new_colnames(y)
-}
-save_new_colnames(effective_d4)
-#does not work
-
   
 common_drugs<-function(x,y){
   different<-setdiff(colnames(x), colnames(y))
@@ -251,7 +246,6 @@ common_drugs<-function(x,y){
 d1_d2=common_drugs(effective_d1,effective_d2)
 d2_d1=common_drugs(effective_d2,effective_d1)
 #both are equal, so the function works correctly
-
 
 d1_d3=common_drugs(effective_d1,effective_d3)
 d1_d4=common_drugs(effective_d1,effective_d4)
@@ -355,14 +349,14 @@ bc_cnv_norm = which(bc_cnv_shap_res > 0.95) # genes which do have a normally dis
 
 ```{r}
 #we need to select the dose with the biggest variance
-var(apply(effective_d1,2,mean))
-var(apply(effective_d2,2,mean))
-var(apply(effective_d3,2,mean))
-var(apply(effective_d4,2,mean))
-var(apply(effective_d5,2,mean))
-var(apply(effective_d6,2,mean))
-var(apply(effective_d7,2,mean))
-var(apply(effective_d8,2,mean))
+var(apply(all_effective_drugs[[1]],2,mean))
+var(apply(all_effective_drugs[[2]],2,mean))
+var(apply(all_effective_drugs[[3]],2,mean))
+var(apply(all_effective_drugs[[4]],2,mean))
+var(apply(all_effective_drugs[[5]],2,mean))
+var(apply(all_effective_drugs[[6]],2,mean))
+var(apply(all_effective_drugs[[7]],2,mean))
+var(apply(all_effective_drugs[[8]],2,mean))
 
 #dose 7 has the biggest variance so we will work with it
 ```
