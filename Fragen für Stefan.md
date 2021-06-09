@@ -1,15 +1,24 @@
 # 2021-topic-01-team-03
 
+**09.06.21** 
+- Visualisierung von effective_drugs. 1 oder 2 Koordinaten?
+- Wilcoxon Test. Was kriegen wir damit?
+- Auf welche dataset war Wilcoxon test ist bezogen? exp oder cnv?
+
 **31.05.21** 
-- Glioma: Effektivität und Unterschied zu den anderen Subtypen 
+- Glioma: Effektivität und Unterschied zu den anderen Subtypen
+- **schauen ob wir kandidatengene gegeneinander plotten. Untershied von genexpression bestimmen. mit 0 hypothese und einem test (alle cell lines sind homogen). CLUSTERING MACHEN von genetische information; PCA von expression und copy anzahl: respondet auf besonderere wenig drugs (z.B)** 
 - Abspaltung der Glioma von den anderen subtypes 
+- **Vieleicht unsere Glioma ist mehr drugresistent. Hierarchisches clustering oder kmeans zu machen**
 - Wir wollen schauen ob von unseren effectiven drogen irgendwelche ubterschied in Wirksamkeit nach cancer subtyp gibt. Müssen wir es in allen dosen vergleichen oder nur in eine? Macht es ein wesentlicheres unterschied welche dose wir für diese Verglech nehmen. 
+- **mittlere dosis nehmen. Varianz von dosen ausrechnen. Große Varianz aussuchen, da es mehr info dargestellt ist. Validieren welche dose wir nehmen. Mit einer dose einfach weiter arbeiten**
 - Threshold für die effectivity 
+- **Median genommen: klingt gut, Stefan approved**
 - Definition der over und underexpression 
 - TPM
+- **packages um verteilung herauszufinden. DISEC2; LIMNA; EDGER;**
 - Wie können wir weiter arbeiten? Was könnten unsere weitere Schritte mit Genexpression sein?
-
-
+-**Summary statistiks from prism.treat von unseren targets von drugs. Kein muster: expressionsdaten PCA auf daten punkten, scatterplott. oder Kmeans clustering von allen cell lines nach expression/cnv clustern. Oder heatmap hierarchisches clustering. Vieleicht überlegen neue subtypen definieren** 
 
 **26.05.21**
 - Wie erstellt man einen Vektor mit Einträgen aus einem for loop?

@@ -29,11 +29,17 @@ prism.achilles: gene KO scores, a measure of how essential/important is a partic
 
 IDEA: use same indications as in PRISM paper to start filtering for relevant genes, cell lines? 
 
+# Packages 
+
+```{r Packages}
+# here is the place where we can put external packages
+```
+
 # Cleaning
 
 ## Selecting brain cancer specific cell lines in all data sets
 
-```{r}
+```{r Selection of cell lines}
 brain_cancer_cl=subset.data.frame(prism.cl, disease == 	"Brain Cancer") #identify the brain cancer cell lines' names
 
 names=brain_cancer_cl[,1] #saving the names as names
@@ -43,54 +49,32 @@ brain_cancer=prism[names,]
 brain_cancer_achilles=prism.achilles[names,]
 brain_cancer_cnv=prism.cnv[names,]
 brain_cancer_exp=prism.exp[names,]
-
 ```
 
-##Selecting relevant info from prism.snv
+## Working on NAs
 
-```{r
-for (i in names){
- result<-which(prism.snv$DepMap_ID == 	
-i)
-}
-result #only delivers results for one of 34 cell lines. without saving it as result it works on all cell lines
-
-sapply(names, function(i){
-  snv<-which(prism.snv$DepMap_ID == 	
-i)
-  View(prism.snv[snv,])
-}) #works but kinda weird
-
-```
-
-## replacing NAs 
-
-```{r}
+```{r Working on NAs}
+# replacing NAs 
 lines=row.names(brain_cancer)
 row.names(brain_cancer_achilles) = lines
-```
 
-## NA removal
-
-```{r}
+# NA removal 
 brain_cancer_achilles_no_NA=na.omit(brain_cancer_achilles) #remove the entire cell lines from everywhere without KO scores
-```
 
-```{r}
-## NA for mean substituition in brain_cancer
+# NA substitution for mean in brain_cancer
 for(i in 1:ncol(brain_cancer)){
   brain_cancer[is.na(brain_cancer[,i]), i] <- mean(brain_cancer[,i], na.rm = TRUE)
 }
 brain_cancer=brain_cancer[ , colSums(is.na(brain_cancer)) == 0]
 ```
 
-## Useless columns removal
+## Removal of useless columns 
 
 ```{r}
 brain_cancer_cl=brain_cancer_cl[,-c(4,6,7,8,9,11,12,15,17,19,23,24,26,28,29,30,31,32,33)]
 ```
 
-## Dividing cell lines into subgroups
+## Dividing cell lines into subtypes
 
 ```{r}
 medulloblastoma=brain_cancer_cl$DepMap_ID[grep("Medulloblastoma", brain_cancer_cl$disease_subtype)]#we obtain the names of the cell lines that are classified as medulloblastoma
@@ -101,13 +85,22 @@ glioma=brain_cancer_cl$DepMap_ID[grep("Glioma", brain_cancer_cl$disease_subtype)
 
 astrocytoma=brain_cancer_cl$DepMap_ID[grep("Astrocytoma", brain_cancer_cl$disease_subtype)]
 
+#making sure we didnt forget anything 
+
 disease_subtypes=c(medulloblastoma,glioblastoma,glioma,astrocytoma)
-length(disease_subtypes)#making sure we didnt forget anything
+length(disease_subtypes)
+
+# Converting them into dataframes [IS THIS RELEVANT?]
+glioblastoma_bc <- brain_cancer[glioblastoma,]
+medulloblastoma_bc <- brain_cancer[medulloblastoma,]
+glioma_bc <- brain_cancer[glioma,]
+astrocytoma_bc <- brain_cancer[astrocytoma,]
 ```
+
 
 # Question 1: How can we distinguish the most effective drugs?
 
-## Deviding drugs in doses groups
+## Dividing drugs in doses groups
 
 ```{r}
 dd1=grep("::0.00061034::", colnames(brain_cancer))
@@ -120,7 +113,6 @@ dd7=grep("::10::", colnames(brain_cancer))
 dd8=grep("::2.5::", colnames(brain_cancer))
 #positions of the respective doses in the dataframe 
 doses=c(dd1,dd2,dd3,dd4,dd5,dd6,dd7,dd8)
-
 
 d1=brain_cancer[,dd1]
 d2=brain_cancer[,dd2]
@@ -137,7 +129,6 @@ sum(length(dd1), length(dd2), length(dd3), length(dd4),length(dd5), length(dd6),
 deviation=brain_cancer[,-doses] #lets see what we missed-> these are the doses that are not exact and have some kind of a deviation
 
 questionable_drugs=prism.treat[colnames(deviation),]#we dont know if we can use these drugs, may be their doses deviate too far from the standard
-dim(questionable_drugs)
 ```
 
 ## Working on drugs that do not fit the standard doses
@@ -204,6 +195,9 @@ effective_drugs<-function(x){
   return(effective_x)
 }
 
+doses_subsets <- list(d1 = d1, d2 = d2, d3 = d3, d4 = d4, d5 = d5, d6 = d6, d7 = d7, d8 = d8)
+effective_drugs<- lapply(doses_subsets, effective_drugs)
+
 effective_d1=effective_drugs(d1)
 effective_d2=effective_drugs(d2)
 effective_d3=effective_drugs(d3)
@@ -213,26 +207,12 @@ effective_d6=effective_drugs(d6)
 effective_d7=effective_drugs(d7)
 effective_d8=effective_drugs(d8)
 
+ncol(all_effective_drugs[[1]])+ncol(all_effective_drugs[[2]])+ncol(all_effective_drugs[[3]])+ncol(all_effective_drugs[[4]])+ncol(all_effective_drugs[[5]])+ncol(all_effective_drugs[[6]])+ncol(all_effective_drugs[[7]])+ncol(all_effective_drugs[[8]])
 
 all_effective_drugs=c(colnames(effective_d1),colnames(effective_d2),colnames(effective_d3),colnames(effective_d4),colnames(effective_d5),colnames(effective_d6),colnames(effective_d7),colnames(effective_d8))
 
 length(all_effective_drugs)
 length(which(apply(brain_cancer,2,mean)<=0.2)) #this is the amount of drugs that we keep in total. We compare these 2 length to make sure that that we do not select the same drug twice. If it was the case the first length would be bigger than the second one
-```
-
-## Apllying efective doses filtering on prism.treat
-
-```{r}
-brain_cancer_treat=prism.treat[colnames(brain_cancer),] #selecting only the drugs we previously filtered out from brain_cancer
-
-effective_t1=brain_cancer_treat[colnames(effective_d1),]
-effective_t2=brain_cancer_treat[colnames(effective_d2),]
-effective_t3=brain_cancer_treat[colnames(effective_d3),]
-effective_t4=brain_cancer_treat[colnames(effective_d4),]
-effective_t5=brain_cancer_treat[colnames(effective_d5),]
-effective_t6=brain_cancer_treat[colnames(effective_d6),]
-effective_t7=brain_cancer_treat[colnames(effective_d7),]
-effective_t8=brain_cancer_treat[colnames(effective_d8),]
 ```
 
 ##Select drugs that are effective in all doses
@@ -344,23 +324,47 @@ effective_in_4_doses=present_in_4_doses(d1_d2,d1_d3,d1_d4)
 ##What are the targets of the effective drugs?
 
 ```{r}
+brain_cancer_treat=prism.treat[colnames(brain_cancer),] #selecting only the drugs we previously filtered out from brain_cancer
 brain_cancer_treat=brain_cancer_treat[!duplicated(brain_cancer_treat$broad_id),]
 rownames(brain_cancer_treat)<-brain_cancer_treat[,1]
-brain_cancer_treat=brain_cancer_treat[,-c(1,2,3)]
-effective_bc_treat=brain_cancer_treat[effective_in_all_doses,]
+effective_bc_treat=brain_cancer_treat[effective_in_all_doses,-c(1,2,3,4,10)]
+summary(effective_bc_treat$target)
+summary(effective_bc_treat$moa)
+#expression of these genes would be interesting to look into our cell lines
+```
 
-#an interesting extra:
-colnames(effective_d1)[c(8,9)]
-rownames(effective_t1)[c(8,9)]
-grep("BRD-A72716251-001-01-5", colnames(extra_drugs))
-View((extra_drugs)[,(77:84)])
-colnames(extra_drugs)[c(77,78)]
-grep("BRD-A72716251-001-01-5::0.000222486::HTS002", colnames(brain_cancer))
-grep("BRD-A72716251-001-01-5::0.000889944::HTS002", colnames(brain_cancer))
-brain_cancer[,1229]/brain_cancer[,1230]
-View(brain_cancer[,c(1229,1230)])
-#identifying the duplicants and seewing if they have the same effect on the cells, which they dont
+#What gene expression is characteristic for subtypes? Maybe related to drug response?
 
+General consideration: Characteristic genes are genes that have a small variance in a subtype which is not present in another subtype. 
+
+```{r}
+# Finding candidate genes by hypothesis testing
+
+## checking data for normality by applying a shapiro test on each column 
+
+bc_cnv_shap = apply(brain_cancer_cnv,2,shapiro.test)
+bc_cnv_shap_res = sapply(bc_cnv_shap,`[`,  c("p.value"))
+bc_cnv_norm = which(bc_cnv_shap_res > 0.95) # genes which do have a normally distributed expression -> these are not interesting for us 
+
+# Should be removed; than Wilcoxon test
+
+```
+
+
+## Select one relevant dose
+
+```{r}
+#we need to select the dose with the biggest variance
+var(apply(effective_d1,2,mean))
+var(apply(effective_d2,2,mean))
+var(apply(effective_d3,2,mean))
+var(apply(effective_d4,2,mean))
+var(apply(effective_d5,2,mean))
+var(apply(effective_d6,2,mean))
+var(apply(effective_d7,2,mean))
+var(apply(effective_d8,2,mean))
+
+#dose 7 has the biggest variance so we will work with it
 ```
 
 ## Drugs and subtypes relationship
@@ -389,85 +393,9 @@ compare_subtypes[2,]<-apply(glioblastoma_ae_d7, 2, mean)
 compare_subtypes[3,]<-apply(astrocytoma_ae_d7, 2, mean)
 compare_subtypes[4,]<-apply(medulloblastoma_ae_d7, 2, mean)
 
-View(apply(compare_subtypes, 2, plot))
 ```
 
-```{r}
-ae_d4 <-data.frame(matrix(nrow = 34,ncol = length(effective_in_all_doses)),row.names = rownames(brain_cancer))
-colnames(ae_d4)=effective_in_all_doses
-
-for (i in 1:length(effective_in_all_doses)){
-  ae_d4[,i]=effective_d4[,grep(effective_in_all_doses[i], colnames(effective_d4))]
-}
-
-glioma_ae_d4=ae_d4[glioma,]
-
-glioblastoma_ae_d4=ae_d4[glioblastoma,]
-
-astrocytoma_ae_d4=ae_d4[astrocytoma,]
-
-medulloblastoma_ae_d4=ae_d4[medulloblastoma,]
-
-compare_subtypes2<-data.frame(matrix(nrow = 4,ncol = length(effective_in_all_doses)),row.names = c("glioma", "glioblastoma", "astrocytoma", "medulloblastoma"))
-colnames(compare_subtypes2)=effective_in_all_doses
-
-compare_subtypes2[1,]<-apply(glioma_ae_d4, 2, mean)
-compare_subtypes2[2,]<-apply(glioblastoma_ae_d4, 2, mean)
-compare_subtypes2[3,]<-apply(astrocytoma_ae_d4, 2, mean)
-compare_subtypes2[4,]<-apply(medulloblastoma_ae_d4, 2, mean)
-
-apply(compare_subtypes2, 2, plot)
-```
-
-##Looking at gene expression in brain cancer cells
-
-```{r}
-# summary of brain_cancer_exp
-mat.prism.exp <- as.matrix(brain_cancer_exp)
-vec.prism.exp <- as.vector(mat.prism.exp)
-sum.prism.exp <- summary(vec.prism.exp)
-dim.prism.exp <- dim(prism.exp)
-datp.prism.exp <- dim.prism.exp[1] * dim.prism.exp[2]
-
-# prism histogram
-hist(mat.prism.exp, breaks = 100, xlim = range(0,10), ylim = range(0,200000), xlab = "prism.exp")
-abline(v = c(sum.prism.exp[2:5]), col = "red", lwd = 1, lty = 1)
-
-#Observation: 25% of genes are KO, around 50% have an expression over 2,5 TPM. 
-
-#Which TPM is considered to be an overexpression?
-
-#Which genes are completely KO?
-KO_genes=colnames(brain_cancer_exp[,as.numeric(which(apply(brain_cancer_exp, 2, mean)==0))])
-```
-
-```{r}
-# brain_cancer_achilles data frame as vector
-mat.brain_cancer_achilles <- as.matrix(brain_cancer_achilles)
-vec.brain_cancer_achilles <- as.vector(mat.brain_cancer_achilles)
-sum.brain_cancer_achilles <- summary(vec.brain_cancer_achilles)
-dim.brain_cancer_achilles <- dim(brain_cancer_achilles)
-datp.brain_cancer_achilles <- dim.brain_cancer_achilles[1] * dim.brain_cancer_achilles[2]
-
-# prism histogram
-hist(mat.brain_cancer_achilles, breaks = 200, xlim = range(-2.5,1), xlab = "brain_cancer_achilles")
-abline(v = c(sum.brain_cancer_achilles[2:5]), col = "red", lwd = 1, lty = 1)
-
-```
-
-```{r}
-# summary of brain_cancer_cnv
-
-mat.prism.cnv <- as.matrix(brain_cancer_cnv)
-vec.prism.cnv <- as.vector(mat.prism.cnv)
-sum.prism.cnv <- summary(vec.prism.cnv)
-dim.prism.cnv <- dim(prism.cnv)
-datp.prism.cnv <- dim.prism.cnv[1] * dim.prism.cnv[2]
-
-# prism histogram
-hist(mat.prism.cnv, breaks = 200, xlim = range(0,3), xlab = "prism.cnv")
-abline(v = c(sum.prism.cnv[2:5]), col = "red", lwd = 1, lty = 1)
-```
+##Looking at targets of our effective drugs
 
 ```{r}
 #jsut trying some stuff on a particular example
@@ -488,70 +416,50 @@ apply(mtor_achilles, 2, mean)
 
 # Random: place to try out things
 
-## Clustering
+```{r random}
+# just trying something out
 
-```{r}
+#in efficiency filtering, I realized that glioma is more resistent to treatments than the other subtypes are. One prediction is that the reason for it is that glioma is not actually a subtype but could mean alot of different subtypes. Maybe IDH1 expression is a reason for differences in treatment. 
 
-brain.km <- kmeans(scale(brain_cancer[, -5]), 6, nstart = 100)
-# K-means clusters showing the group of each individuals
-brain.km$cluster
+IDH1_cnv=(brain_cancer_cnv[,grep("IDH1", colnames(brain_cancer_cnv))])
 
+# Removing additional gene 
+library(dplyr)
+IDH1_cnv= select(IDH1_cnv, -c(IDH1.AS1)) # no great variance between values
+
+#IDH1_cnv[,-which(colnames(IDH1_cnv) %in% c("IDH1.AS1"))] #This would be a better alternative because no additional package is involved, but isn't working the way I want it because rownames (here cell lines) are also removes
 ```
 
-## PCA for brain_cancer dataset
-```{r}
-library("factoextra")
-dim(brain_cancer)
-pca = prcomp(brain_cancer, center = TRUE, scale. = TRUE)
+##Selecting relevant info from prism.snv
 
-brain.pca <- prcomp(brain_cancer[, -5],  scale = TRUE)
-# Coordinates of individuals
-coordinates <- as.data.frame(get_pca_ind(brain.pca)$coord)
-# Add clusters obtained using the K-means algorithm
-coordinates$cluster <- factor(brain.km$cluster)
-# Data inspection
-head(coordinates)
+```{r
+for (i in names){
+ result<-which(prism.snv$DepMap_ID == 	
+i)
+}
+result #only delivers results for one of 34 cell lines. without saving it as result it works on all cell lines
 
-```
-
-## Analyse the variance of the eigenvalues
-```{r}
-# Percentage of variance explained by dimensions
-eigenvalue <- round(get_eigenvalue(brain.pca), 1)
-variance.percent <- eigenvalue$variance.percent
-head(eigenvalue)
-```
-
-
-```{r}
-library(ggpubr)
-ggscatter(
-  coordinates, x = "Dim.1", y = "Dim.2",
-  color = "cluster", palette = "npg", ellipse = TRUE, ellipse.type = "convex",
-  size = 1.5,
-  legend = "right",
-  ggtheme = theme_bw(),
-  xlab = paste0("Dim 1 (", variance.percent[1], "% )" ),
-  ylab = paste0("Dim 2 (", variance.percent[2], "% )" )
-) +
-  stat_mean(aes(color = cluster), size = 3)
+sapply(names, function(i){
+  snv<-which(prism.snv$DepMap_ID == 	
+i)
+  View(prism.snv[snv,])
+}) #works but kinda weird
 
 ```
 
 ```{r}
+# maybe later relevant
 
-# Compute and plot wss for k = 2 to k = 12
-k.max <- 12
-data <- coordinates
-wss <- sapply(1:k.max,
-              function(k){kmeans(data, k, nstart=50,iter.max = 12 )$tot.withinss})
-wss
-plot(1:k.max, wss,
-     type="b", pch = 19, frame = FALSE,
-     xlab="Number of clusters K",
-     ylab="Total within-clusters sum of squares")
+# Dividing prism.cnv in sets of subtypes
+
+glioblastoma_bc <- brain_cancer[glioblastoma,]
+medulloblastoma_bc <- brain_cancer[medulloblastoma,]
+glioma_bc <- brain_cancer[glioma,]
+astrocytoma_bc <- brain_cancer[astrocytoma,]
+
+gb_bc_cnv=brain_cancer_cnv[rownames(glioblastoma_bc),]
+mb_bc_cnv=brain_cancer_cnv[rownames(medulloblastoma_bc),]
+g_bc_cnv=brain_cancer_cnv[rownames(glioma_bc),]
+ac_bc_cnv=brain_cancer_cnv[rownames(astrocytoma_bc),]
 ```
-
-
-
 
