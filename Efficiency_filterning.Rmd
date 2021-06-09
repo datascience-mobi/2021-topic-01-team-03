@@ -708,9 +708,19 @@ ggplot(means_eff, aes(x = Drugs , y = Glioblastoma)) +
 ggplot(means_eff, aes(x = Drugs , y = Medulloblastoma)) +   
          geom_point()
 
-ggplot(means_eff, aes(x = Drugs , y, col = variable)) + 
-        geom_point()
 
+
+new_means_eff <- data.frame(x = means_eff$Drugs, 
+                            y = c(means_eff$Astrocytoma, means_eff$Glioma, means_eff$Glioblastoma, means_eff$Medulloblastoma), 
+                            subtype = c(rep("Astrocytoma", nrow(means_eff)),
+                                      rep("Glioma", nrow(means_eff)),
+                                      rep("Glioblastoma", nrow(means_eff)),
+                                      rep("Medulloblastoma", nrow(means_eff))))
+ggplot(new_means_eff, aes(x = x, y = y, color = subtype)) + 
+                         ggtitle("Means of subtypes") +
+                          xlab("Drugs") + 
+                          ylab("Efficiency") + 
+  geom_point()
 
 ```
 
