@@ -631,13 +631,13 @@ y <- 4 ## cut off height was choosen as 8 from previous dendogramm
 clust_km <- km_astrocytoma_ae_d7$cluster 
 
 # Create a new data frame storing these results
-km_astrocytoma_ae_d7_complete <- mutate(as.data.frame(t(astrocytoma_ae_d7)), cluster = clust_km)
+# km_astrocytoma_ae_d7_complete <- mutate(as.data.frame(t(astrocytoma_ae_d7)), cluster = clust_km)
 
 plot(km_astrocytoma_ae_d7_complete)
 
 # Plot the positions of the players and color them using their cluster for height = 20
-ggplot(astrocytoma_ae_d7_mean, aes(x = x), color = factor) +
-  geom_scatter()
+# ggplot(astrocytoma_ae_d7_mean, aes(x = x), color = factor) +
+ # geom_scatter()
 
 ## Compute k-means with k = 6
 set.seed(123)
@@ -660,7 +660,7 @@ print(km_astrocytoma_d7)
 
 ```{r}
 clusters_x <- cutree(clust_astro_ae_d7, k=x) ## 4 clusters could be ideal 
-astro_ae_d7_complete <- mutate(astrocytoma_ae_d7, cluster = clusters_x)
+#astro_ae_d7_complete <- mutate(astrocytoma_ae_d7, cluster = clusters_x)
 
 ggplot(astro_ae_d7_complete, aes(x = x, y = y, color = factor(cluster))) +
   geom_point()
@@ -723,6 +723,22 @@ ggplot(new_means_eff, aes(x = x, y = y, color = subtype)) +
   
   geom_point()
 
+
+```
+```{r}
+new_means_eff <- data.frame(x = means_eff$Drugs, 
+                            y = c(means_eff$Glioma, means_eff$Medulloblastoma), 
+                            subtype = c(
+                                      rep("Glioma", nrow(means_eff)),
+                                      rep("Medulloblastoma", nrow(means_eff))))
+ggplot(new_means_eff, aes(x = x, y = y, color = subtype)) + 
+                         ggtitle("Means of subtypes") +
+                          xlab("Drugs") + 
+                          ylab("Efficiency") + 
+  
+  geom_point()
+
+## in 38 von 51 Fällen sind die Drogen auf die Medulloblastoma wirksamer als auf die Glioma  
 
 ```
 
