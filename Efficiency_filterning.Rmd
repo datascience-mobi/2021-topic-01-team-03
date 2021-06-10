@@ -723,6 +723,8 @@ ggplot(new_means_eff, aes(x = x, y = y, color = subtype)) +
   
   geom_point()
 
+##auffallend sind die Medulloblastoma, die in 31 von 51 Fällen effektiver sind als alle anderen Drogen!!!  Drogen 24, 26, 32 und 33 
+
 
 ```
 ```{r}
@@ -739,6 +741,36 @@ ggplot(new_means_eff, aes(x = x, y = y, color = subtype)) +
   geom_point()
 
 ## in 38 von 51 Fällen sind die Drogen auf die Medulloblastoma wirksamer als auf die Glioma  
+
+new_means_eff <- data.frame(x = means_eff$Drugs, 
+                            y = c(means_eff$Glioblastoma, means_eff$Medulloblastoma), 
+                            subtype = c(
+                                      rep("Glioblastoma", nrow(means_eff)),
+                                      rep("Medulloblastoma", nrow(means_eff))))
+ggplot(new_means_eff, aes(x = x, y = y, color = subtype)) + 
+                         ggtitle("Means of subtypes") +
+                          xlab("Drugs") + 
+                          ylab("Efficiency") + 
+  
+  geom_point()
+
+## in 37 von 51 Fällen sind die Drogen auf die Medulloblastoma wirksamer als auf die Glioblastoma 
+
+
+new_means_eff <- data.frame(x = means_eff$Drugs, 
+                            y = c(means_eff$Astrocytoma, means_eff$Medulloblastoma), 
+                            subtype = c(
+                                      rep("Astrocytoma", nrow(means_eff)),
+                                      rep("Medulloblastoma", nrow(means_eff))))
+ggplot(new_means_eff, aes(x = x, y = y, color = subtype)) + 
+                         ggtitle("Means of subtypes") +
+                          xlab("Drugs") + 
+                          ylab("Efficiency") + 
+  
+  geom_point()
+
+## in 38 von 51 Fällen sind die Drogen auf die Medulloblastoma wirksamer als auf die Astrocytoma  
+```
 
 ```
 
