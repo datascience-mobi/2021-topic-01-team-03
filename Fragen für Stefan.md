@@ -2,8 +2,14 @@
 
 **09.06.21** 
 - Visualisierung von effective_drugs. 1 oder 2 Koordinaten?
+- **Clustering: x drugs, dimensionen cell line effizienz.**
 - Wilcoxon Test. Was kriegen wir damit?
-- Auf welche dataset war Wilcoxon test ist bezogen? exp oder cnv?
+- **Gene die signifikant unterschiedlich sind. Clustern-> klare grupen->relevante Korrespondens-> wie unterscheiden sie sich/copy number variation? Können auch paired test machen. Sind die drugs in bestimmten zellen/gruppen effektiv**
+- **Regression model mit Drogen dosen machen?**
+- **Unterschiede in effektivität unter subsets/dose response curves finden**
+- **Slide 13**
+- Auf welche dataset war Wilcoxon test ist bezogen? exp oder cnv? 
+- **Exp?**
 
 **31.05.21** 
 - Glioma: Effektivität und Unterschied zu den anderen Subtypen
@@ -59,5 +65,5 @@
 + **in dem pdf muss kein Code enthalten sein**
 + **Ergebnisse sollen wissenschaftliche Erkenntnisse repräsentieren**
 + **Plots oder Tests können enthalten sein(?)**
-+ **wenn Code aussagekräftiger ist als Text dann könnte evtl auch Code eingebaut werden**
++ **Wenn Code aussagekräftiger ist als Text dann könnte evtl auch Code eingebaut werden**
 

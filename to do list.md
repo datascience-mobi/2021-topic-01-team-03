@@ -33,3 +33,7 @@ Till 14.06
 In the pipeline:
 - [ ] Try to find a way to store long codes in loops just to make it more professional (when enough time for it)
 - [ ] What happens with drugs which are effective but dose dependant?
+
+
+Idea how to continue:
+- subdivision of drugs and gene expression -> is there a match? 
