@@ -720,7 +720,9 @@ ggplot(new_means_eff, aes(x = x, y = y, color = subtype)) +
                          ggtitle("Means of subtypes") +
                           xlab("Drugs") + 
                           ylab("Efficiency") + 
+  
   geom_point()
+
 
 ```
 
