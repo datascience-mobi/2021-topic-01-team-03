@@ -170,9 +170,18 @@ Futher exploration of cnv and achilles
 
 ```{r}
 ##cnv
-brain_cancer_cnv.mean <- apply(brain_cancer_cnv,2,mean)
-bccm.sum <- summary(brain_cancer_cnv.mean)
+brain_cancer_cnv.mean <- apply(brain_cancer_cnv,2,mean) #mean
+hist(brain_cancer_cnv.mean, breaks = 200)
+qqnorm(brain_cancer_cnv.mean)
+bccm.sum <- summary(brain_cancer_cnv.mean) #summary mean
 bccm.sum
+brain_cancer_cnv.var <- apply(brain_cancer_cnv,2,var)#variance
+bccv.sum <- summary(brain_cancer_cnv.var) #summary var
+bccv.sum
+hist(brain_cancer_cnv.var, xlim = c(0,0.2), breaks = 300)
+# tests
+#shapiro.test(brain_cancer_cnv.var) set too big
+qqnorm(brain_cancer_cnv.var)
 #small
 bccst <- bccm.sum[4]-((bccm.sum[4]-bccm.sum[1])/2)
 brain_cancer_cnv.small <- brain_cancer_cnv.mean[which(brain_cancer_cnv.mean<bccst)]
@@ -192,8 +201,17 @@ summary(brain_cancer_cnv.big)
 ```{r}
 ##achilles
 brain_cancer_achilles.mean <- apply(brain_cancer_achilles,2,mean)
+hist(brain_cancer_achilles.mean, breaks = 200)
+qqnorm(brain_cancer_achilles.mean)
 bcam.sum <- summary(brain_cancer_achilles.mean)
 bcam.sum
+brain_cancer_achilles.var <- apply(brain_cancer_achilles,2,var)#variance
+bcav.sum <- summary(brain_cancer_achilles.var) #summary var
+bcav.sum
+hist(brain_cancer_achilles.var, xlim = c(0,0.2), breaks = 300)
+# tests
+#shapiro.test(brain_cancer_cnv.var) #set too big
+qqnorm(brain_cancer_cnv.var)
 #small
 bcast <- bcam.sum[4]-((bcam.sum[4]-bcam.sum[1])/2)
 brain_cancer_achilles.small <- brain_cancer_achilles.mean[which(brain_cancer_achilles.mean<bcast)]
