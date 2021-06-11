@@ -405,6 +405,16 @@ apply(mtor_achilles, 2, mean)
 
 # Question 3: Are there any genetic markers that are specific for brain cancer subtypes?
 
+##look for genes that flactuate a lot in cell lines
+```{r}
+hist(apply(brain_cancer_exp,2,var),breaks=100,xlim = range(0,6))
+hist(apply(brain_cancer_cnv,2,var),breaks=100,xlim = range(0,2))
+
+median(apply(brain_cancer_exp,2,var))
+
+length(which(apply(brain_cancer_exp,2,var)>2.5))
+```
+
 
 # Question 4: What other factors contribute to drug effectiveness prediction?
 
