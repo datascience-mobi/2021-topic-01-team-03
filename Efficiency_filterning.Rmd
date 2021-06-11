@@ -721,7 +721,7 @@ ggplot(new_means_eff, aes(x = x, y = y, color = subtype)) +
                           xlab("Drugs") + 
                           ylab("Efficiency") + 
   
-  geom_point()
+  geom_point(aes(shape=subtype, size = -y))
 
 ##auffallend sind die Medulloblastoma, die in 31 von 51 Fällen effektiver sind als alle anderen Drogen!!!  Drogen 24, 26, 32 und 33 
 
@@ -738,7 +738,7 @@ ggplot(new_means_eff, aes(x = x, y = y, color = subtype)) +
                           xlab("Drugs") + 
                           ylab("Efficiency") + 
   
-  geom_point()
+  geom_point(aes(shape=subtype))
 
 ## in 38 von 51 Fällen sind die Drogen auf die Medulloblastoma wirksamer als auf die Glioma  
 
@@ -752,7 +752,7 @@ ggplot(new_means_eff, aes(x = x, y = y, color = subtype)) +
                           xlab("Drugs") + 
                           ylab("Efficiency") + 
   
-  geom_point()
+  geom_point(aes(shape=subtype))
 
 ## in 37 von 51 Fällen sind die Drogen auf die Medulloblastoma wirksamer als auf die Glioblastoma 
 
@@ -767,15 +767,14 @@ ggplot(new_means_eff, aes(x = x, y = y, color = subtype)) +
                           xlab("Drugs") + 
                           ylab("Efficiency") + 
   
-  geom_point()
+  geom_point(aes(shape=subtype))
 
 ## in 38 von 51 Fällen sind die Drogen auf die Medulloblastoma wirksamer als auf die Astrocytoma  
 ```
 
-```
 
 
-# Clustering of the effective drugs 
+# Cedriks clustering 
 
 ## d7 sets 
 
