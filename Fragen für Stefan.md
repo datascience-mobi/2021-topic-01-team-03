@@ -1,5 +1,8 @@
 # 2021-topic-01-team-03
 
+**16.06.21***
+- Wie relativieren wir die Größe der unterschiedlichen Subtypes? Können wir sagen, dass Medulloblastoma so viel effektiver behandelt werden können, weil mit Abstand die kleinste Stichprobe ist (Vorschlag von Lennard: Gene dahinter betrachten und versuchen die Effektivität auf genetische Ursachen zurückzuführen)
+
 **09.06.21** 
 - Visualisierung von effective_drugs. 1 oder 2 Koordinaten?
 - **Clustering: x drugs, dimensionen cell line effizienz.**
