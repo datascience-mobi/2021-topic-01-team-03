@@ -164,8 +164,25 @@ brain_cancer_exp=brain_cancer_exp[ , colSums(is.na(brain_cancer_exp)) == 0]
 #heatmaping
 heatmap(as.matrix(brain_cancer_exp))
 ```
+brain_cancer_exp
+```{r}
+# prism.exp data frame as vector
+mat.prism.exp <- as.matrix(brain_cancer_exp)
+vec.prism.exp <- as.vector(mat.prism.exp)
+```
 
+```{r}
+# summary of prism.exp
+sum.prism.exp <- summary(vec.prism.exp)
+dim.prism.exp <- dim(prism.exp)
+datp.prism.exp <- dim.prism.exp[1] * dim.prism.exp[2]
 
+# prism histogram
+hist(mat.prism.exp, breaks = 200, xlim = range(0,15), ylim = range(0,50000), xlab = "prism.exp")
+abline(v = c(sum.prism.exp[2:5]), col = "red", lwd = 1, lty = 1)
+
+quantile(mat.prism.exp)
+```
 Futher exploration of cnv and achilles
 
 ```{r}

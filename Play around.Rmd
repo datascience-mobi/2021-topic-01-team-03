@@ -114,6 +114,16 @@ dd8=grep("::2.5::", colnames(brain_cancer))
 #positions of the respective doses in the dataframe 
 doses=c(dd1,dd2,dd3,dd4,dd5,dd6,dd7,dd8)
 
+
+
+doses_for_list=list("::0.00061034::","::0.0024414::","::0.00976562::","::0.0390625::","::0.15625::","::0.625::","::10::","::2.5::")
+select_doses=function(x){
+  brain_cancer[,grep(x, colnames(brain_cancer))]
+}
+doses_subsets_<-lapply(doses_for_list,select_doses)
+
+
+
 d1=brain_cancer[,dd1]
 d2=brain_cancer[,dd2]
 d3=brain_cancer[,dd3]
@@ -162,12 +172,25 @@ d6_extra=which(to_which_dose==6)
 d7_extra=which(to_which_dose==7)
 d8_extra=which(to_which_dose==8)
 
+
+to_which_dose_=list(apply(extra_drugs, 2, which.min))
+extra_drugs_<-(rep(to_which_dose_, 8))
+a<-function(x){
+  for(i in 1:8)
+  which(x==i)
+}
+k<-lapply(to_which_dose_, a)
+#find another way
+
+
 #just a quick check how many doses there are in total
 not_standard_doses=c(d1_extra,d2_extra,d3_extra,d4_extra,d5_extra,d6_extra,d7_extra,d8_extra)
 length(not_standard_doses)#in comparison with dimension from questionable_drugs right!
 
 #Adding new assigned dosages to small data frames of standard dosages 
-add_extra_doses=function(x,y){cbind(brain_cancer[,unique(grep(paste(colnames(extra_drugs[,x]),collapse="|"), colnames(brain_cancer)))], y)}
+add_extra_doses=function(x,y){
+  cbind(brain_cancer[,unique(grep(paste(colnames(extra_drugs[,x]),collapse="|"), colnames(brain_cancer)))], y)
+  }
 
 d1=add_extra_doses(d1_extra,d1)
 d2=add_extra_doses(d2_extra,d2)
@@ -177,6 +200,7 @@ d5=add_extra_doses(d5_extra,d5)
 d6=add_extra_doses(d6_extra,d6)
 d7=add_extra_doses(d7_extra,d7)
 d8=add_extra_doses(d8_extra,d8)
+
 
 
 #Resumé: new data sets for each dosage with assigned outliers to closest deviation
@@ -407,12 +431,17 @@ apply(mtor_achilles, 2, mean)
 
 ##look for genes that flactuate a lot in cell lines
 ```{r}
-hist(apply(brain_cancer_exp,2,var),breaks=100,xlim = range(0,6))
-hist(apply(brain_cancer_cnv,2,var),breaks=100,xlim = range(0,2))
+exp_var=apply(brain_cancer_exp,2,var)
+hist(exp_var,breaks=200,xlim = range(0,3))
 
-median(apply(brain_cancer_exp,2,var))
+quantile(exp_var,c(.85,.90,.95))
+quantile(exp_var)
+q95=quantile(exp_var,0.95)
 
-length(which(apply(brain_cancer_exp,2,var)>2.5))
+relevant_genes=which(exp_var>=q95)
+relevant_genes_exp=brain_cancer_exp[,relevant_genes]
+
+relevant_genes_exp_subtypes=list(relevant_genes_exp[glioma,],relevant_genes_exp[glioblastoma,],relevant_genes_exp[astrocytoma,],relevant_genes_exp[medulloblastoma,])
 ```
 
 
