@@ -442,6 +442,8 @@ relevant_genes=which(exp_var>=q95)
 relevant_genes_exp=brain_cancer_exp[,relevant_genes]
 
 relevant_genes_exp_subtypes=list(relevant_genes_exp[glioma,],relevant_genes_exp[glioblastoma,],relevant_genes_exp[astrocytoma,],relevant_genes_exp[medulloblastoma,])
+
+#now we have the genes with the most variance. We can now compare the same gene in different subtypes and see if there is significant difference in gene expression. Wilcoxon test?
 ```
 
 
