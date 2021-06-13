@@ -26,7 +26,7 @@ Till 7.06y
 Till 14.06
 - [ ] Trying to find a way to perform Wilcoxon **Xenia**
 - [ ] Visualization eg heatmap of the effective drugs **Cedrik**
-- [ ] Extracting genes with highest variance from .exp **Lennard** / .cnv **Ilya**
+- [ ] Extracting genes with highest variance from .exp **Ilya** / .cnv **Lennard**
 - [ ] Definition of a threshold 
 
 
