@@ -19,15 +19,27 @@ Till 31.05
 Till 7.06y
 - [ ] *What to do with the drug targets? How to examine gene targets of the effective drugs and what to do with them? How do we work further? (prism.treat + prism.achilles + prism.cnv) As I understood Stefan meant that it tis not worth it and that the whole idea of repurpusing is that these drugs act differently and not like they are supposed it. So the effect is not attributed to the designed drug target*
 - [x] Select one dose to continue working on. **Ilya**
-- [ ] Determine specific drugs for each brain cancer subtype or is there any trend between cell lines and drugs. Basically: are there any drugs that are more effective for certain cells? **Cedrik**
 - [x] See what is the norm is in brain_cancer_treat and brain_cancer_cnv and brain_cancer_achilles. Generate general information and visualisation of this dataframs. **Lennard**
 - [x] Which TPM is considered to be an overexpression? **Lea**
 
 Till 14.06
-- [ ] Trying to find a way to perform Wilcoxon **Xenia**
-- [ ] Visualization eg heatmap of the effective drugs **Cedrik**
-- [ ] Extracting genes with highest variance from .exp **Ilya** / .cnv **Lennard**
-- [ ] Definition of a threshold 
+- [x] Visualization eg heatmap of the effective drugs **Cedrik**
+- [x] Extracting genes with highest variance from .exp **Ilya**
+
+Till 21.06
+- [ ] Biologische Unterschiede zwischen Subtypes **Lea + Xenia**
+- [ ] Most effective drugs: study their targets. Look im code if the target genes are among the genes with high variance, look how is big the variance **Lea**
+- [ ] Extracting genes with highest variance from brain_cancer_cnv **Lennard**
+- [ ] Definition of a threshold for variance für exp bzw cnv **Ilya + Lennard**
+- [ ] Code optimieren **Ilya**
+- [ ] Trying to find a way to perform Wilcoxon. How can we apply it on our datasets? **Xenia + Ilya**
+- [ ] CLUSTERING: determine specific drugs for each brain cancer subtype or is there any trend between cell lines and drugs. Basically: are there any drugs that are more effective for certain cells? **Cedrik**
+
+
+- [ ] Start with report: General look and Q1 **Xenia + Cedrik**
+
+
+
 
 
 In the pipeline:
