@@ -434,11 +434,12 @@ apply(mtor_achilles, 2, mean)
 exp_var=apply(brain_cancer_exp,2,var)
 hist(exp_var,breaks=200,xlim = range(0,3))
 
+mean(exp_var)
 quantile(exp_var,c(.85,.90,.95))
 quantile(exp_var)
-q95=quantile(exp_var,0.95)
+q90=quantile(exp_var,0.90)
 
-relevant_genes=which(exp_var>=q95)
+relevant_genes=which(exp_var>=q90)
 relevant_genes_exp=brain_cancer_exp[,relevant_genes]
 
 relevant_genes_exp_subtypes=list(relevant_genes_exp[glioma,],relevant_genes_exp[glioblastoma,],relevant_genes_exp[astrocytoma,],relevant_genes_exp[medulloblastoma,])
