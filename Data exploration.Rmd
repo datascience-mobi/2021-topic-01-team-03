@@ -228,3 +228,34 @@ summary(brain_cancer_achilles.big)
 #View(brain_cancer_achilles.big)
 ```
 
+```{r}
+#exp
+## muss angepasst werden
+brain_cancer_achilles.mean <- apply(brain_cancer_achilles,2,mean)
+hist(brain_cancer_achilles.mean, breaks = 200)
+qqnorm(brain_cancer_achilles.mean)
+bcam.sum <- summary(brain_cancer_achilles.mean)
+bcam.sum
+brain_cancer_achilles.var <- apply(brain_cancer_achilles,2,var)#variance
+bcav.sum <- summary(brain_cancer_achilles.var) #summary var
+bcav.sum
+hist(brain_cancer_achilles.var, xlim = c(0,0.2), breaks = 300)
+# tests
+#shapiro.test(brain_cancer_cnv.var) #set too big
+qqnorm(brain_cancer_cnv.var)
+#small
+bcast <- bcam.sum[4]-((bcam.sum[4]-bcam.sum[1])/2)
+brain_cancer_achilles.small <- brain_cancer_achilles.mean[which(brain_cancer_achilles.mean<bcast)]
+length(brain_cancer_achilles.small)
+(length(brain_cancer_achilles.small)/dim(brain_cancer_achilles)[2])*100
+summary(brain_cancer_achilles.small)
+#View(brain_cancer_achilles.small)
+#big
+bcabt <- bcam.sum[4]+((bcam.sum[6]-bcam.sum[4])/2)
+brain_cancer_achilles.big <- brain_cancer_achilles.mean[which(brain_cancer_achilles.mean>bcabt)]
+length(brain_cancer_achilles.big)
+(length(brain_cancer_achilles.big)/dim(brain_cancer_achilles)[2])*100
+summary(brain_cancer_achilles.big)
+#View(brain_cancer_achilles.big)
+```
+
