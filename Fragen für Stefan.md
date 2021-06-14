@@ -3,7 +3,9 @@
 **16.06.21**
 - Wie relativieren wir die Größe der unterschiedlichen Subtypes? Können wir sagen, dass Medulloblastoma so viel effektiver behandelt werden können, weil mit Abstand die kleinste Stichprobe ist (Vorschlag von Lennard: Gene dahinter betrachten und versuchen die Effektivität auf genetische Ursachen zurückzuführen) (bezogen auf Cedriks Clustering)
 - is it cheating to use the relevant_genes_exp dataframe with high variance to perform a shapiro test?
-- 
+- Filtering for variance. Does our approach make sense?
+- How to define a threshold for the variance?
+- Wilcoxon: can we perform a paired test eg by comparing each cell line with all the others 
 
 **09.06.21** 
 - Visualisierung von effective_drugs. 1 oder 2 Koordinaten?
