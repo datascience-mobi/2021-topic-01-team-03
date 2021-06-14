@@ -33,6 +33,7 @@ IDEA: use same indications as in PRISM paper to start filtering for relevant gen
 
 ```{r Packages}
 # here is the place where we can put external packages
+library(dplyr)
 ```
 
 # Cleaning
@@ -351,22 +352,6 @@ effective_bc_treat=brain_cancer_treat[effective_in_all_doses,-c(1,2,3,4,10)]
 #expression of these genes would be interesting to look into our cell lines
 ```
 
-#What gene expression is characteristic for subtypes? Maybe related to drug response?
-
-General consideration: Characteristic genes are genes that have a small variance in a subtype which is not present in another subtype. 
-
-```{r}
-# Finding candidate genes by hypothesis testing
-
-## checking data for normality by applying a shapiro test on each column 
-
-bc_cnv_shap = apply(brain_cancer_cnv,2,shapiro.test)
-bc_cnv_shap_res = sapply(bc_cnv_shap,`[`,  c("p.value"))
-bc_cnv_norm = which(bc_cnv_shap_res > 0.95) # genes which do have a normally distributed expression -> these are not interesting for us 
-
-# Should be removed; than Wilcoxon test
-
-```
 
 
 ## Select one relevant dose
@@ -446,6 +431,38 @@ relevant_genes_exp_subtypes=list(relevant_genes_exp[glioma,],relevant_genes_exp[
 
 #now we have the genes with the most variance. We can now compare the same gene in different subtypes and see if there is significant difference in gene expression. Wilcoxon test?
 ```
+
+#What gene expression is characteristic for subtypes? Maybe related to drug response?
+
+General consideration: Characteristic genes are genes that have a huge variance and are present in a specific cell line/ subtype. 
+
+```{r}
+
+# Transposing dataframe
+
+brain_cancer_exp_t = as.data.frame(t(as.matrix(brain_cancer_exp)))
+
+# Filtering rows using the dplyr::filter function as Stefan suggested
+
+bc_exp_removed = apply(brain_cancer_exp, 2, function(x) min(x) == max(x))
+
+brain_cancer_exp_t[,-bc_exp_removed]
+
+# Transposing dataframe again
+
+brain_cancer_exp_t = as.data.frame(t(as.matrix(brain_cancer_exp_t)))
+
+# checking data for normality by applying a shapiro test on each column 
+
+bc_exp_shap = apply(brain_cancer_exp_t,2,shapiro.test)
+bc_exp_shap_res = sapply(brain_cancer_exp_t,`[`,  c("p.value")) # genes which do have a normal distributed expression; which threshold?
+bc_exp_norm = which(bc_cnv_shap_res > 0.95)
+
+# Removal of these columns
+
+
+# Wilcoxon test
+``` 
 
 
 # Question 4: What other factors contribute to drug effectiveness prediction?
