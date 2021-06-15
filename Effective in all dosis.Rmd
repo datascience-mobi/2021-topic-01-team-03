@@ -1,0 +1,517 @@
+---
+title: "eiad"
+author: "Lea Ahrens"
+date: "28 5 2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r}
+load("../2021-topic-01-team-03/dataset/prism_datasets.rda")
+load("../2021-topic-01-team-03/dataset/cellline_datasets.rda")
+```
+
+
+# Guidelines
+
+prism: effect of the treatment (columns) on cell growth of cell lines (rows).For example, BRD-A00077618-236-07-6::0.0024414::HTS002 indicates treatment with the drug BRD-A00077618-236-07-6, with a dose of 2.4 nM, in assay HTS002. Values represent log fold changes with respect to a control DMSO experiment.
+
+prism.treat:information about the treatment (row) and the drug used
+
+prism.cl: cell lines' info
+
+prism.exp: gene TPM (transcripts per million) values. Indicate over/underexpression. Rows = cell lines, columns = genes
+
+prism.cnv: gene copy number (CN) values. In absolute terms, CN = 2, since there are two alleles per genes. In cancer, genes might be amplified CN > 2 or deleted CN < 2
+
+prism.snv: observed mutations in a sample. The isDeleterious flag specifies if mutation has a functional effect or not. First column is genes. There is a column
+(DepMap_ID) with corresponding cell lines
+
+prism.achilles: gene KO scores, a measure of how essential/important is a particular gene for the cell survival
+
+IDEA: use same indications as in PRISM paper to start filtering for relevant genes, cell lines? 
+
+# Cleaning
+
+## Selecting brain cancer specific cell lines in all data sets
+
+```{r}
+brain_cancer_cl=subset.data.frame(prism.cl, disease == 	"Brain Cancer") #identify the brain cancer cell lines' names
+names=brain_cancer_cl[,1] #saving the names as names
+#select wanted cell lines from all datasets
+brain_cancer=prism[names,]
+brain_cancer_achilles=prism.achilles[names,]
+brain_cancer_cnv=prism.cnv[names,]
+brain_cancer_exp=prism.exp[names,]
+```
+
+##Selecting relevant info from prism.snv
+
+```{r
+for (i in names){
+ result<-which(prism.snv$DepMap_ID == 	
+i)
+}
+result #only delivers results for one of 34 cell lines. without saving it as result it works on all cell lines
+sapply(names, function(i){
+  snv<-which(prism.snv$DepMap_ID == 	
+i)
+  View(prism.snv[snv,])
+}) #works but kinda weird
+```
+
+## NA removal from brain_cancer_achilles
+
+```{r}
+brain_cancer_achilles=na.omit(brain_cancer_achilles) #remove the entire cell lines from everywhere without KO scores
+```
+
+## NA for mean substituition in brain_cancer
+
+```{r}
+for(i in 1:ncol(brain_cancer)){
+  brain_cancer[is.na(brain_cancer[,i]), i] <- mean(brain_cancer[,i], na.rm = TRUE)
+}
+brain_cancer=brain_cancer[ , colSums(is.na(brain_cancer)) == 0]
+```
+
+## Dividing cell lines into subgroups
+
+```{r}
+medulloblastoma=brain_cancer_cl$DepMap_ID[grep("Medulloblastoma", brain_cancer_cl$disease_subtype)]#we obtain the names of the cell lines that are classified as medulloblastoma
+glioblastoma=brain_cancer_cl$DepMap_ID[grep("Glioblastoma", brain_cancer_cl$disease_subtype)]
+glioma=brain_cancer_cl$DepMap_ID[grep("Glioma", brain_cancer_cl$disease_subtype)]
+astrocytoma=brain_cancer_cl$DepMap_ID[grep("Astrocytoma", brain_cancer_cl$disease_subtype)]
+disease_subtypes=c(medulloblastoma,glioblastoma,glioma,astrocytoma)
+length(disease_subtypes)#making sure we didnt forget anything
+```
+
+# Question 1: How can we distinguish the most effective drugs?
+
+## Deviding drugs in doses groups
+
+```{r}
+dd1=grep("::0.00061034::", colnames(brain_cancer))
+dd2=grep("::0.0024414::", colnames(brain_cancer))
+dd3=grep("::0.00976562::", colnames(brain_cancer))
+dd4=grep("::0.0390625::", colnames(brain_cancer))
+dd5=grep("::0.15625::", colnames(brain_cancer))
+dd6=grep("::0.625::", colnames(brain_cancer))
+dd7=grep("::10::", colnames(brain_cancer))
+dd8=grep("::2.5::", colnames(brain_cancer))
+#positions of the respective doses in the dataframe 
+doses=c(dd1,dd2,dd3,dd4,dd5,dd6,dd7,dd8)
+d1=brain_cancer[,dd1]
+d2=brain_cancer[,dd2]
+d3=brain_cancer[,dd3]
+d4=brain_cancer[,dd4]
+d5=brain_cancer[,dd5]
+d6=brain_cancer[,dd6]
+d7=brain_cancer[,dd7]
+d8=brain_cancer[,dd8]
+#these are the standard doses summed up into seperate dataframes
+sum(length(dd1), length(dd2), length(dd3), length(dd4),length(dd5), length(dd6),length(dd7),length(dd8)) #ups something missing
+deviation=brain_cancer[,-doses] #lets see what we missed-> these are the doses that are not exact and have some kind of a deviation
+questionable_drugs=prism.treat[colnames(deviation),]#we dont know if we can use these drugs, may be their doses deviate too far from the standard
+dim(questionable_drugs)
+```
+
+## Working on drugs that do not fit the standard doses
+
+```{r}
+#Stefan's suggestion: assigning the outliers to closest standard doses
+#Calculation of all differences between questionable drugs and standard doses
+std_doses <- c(0.00061034,0.0024414,0.00976562,0.0390625,0.15625,0.625,10,2.5) #vector with standard dosages
+#Picking dosages from dosages that have to be assigned to standard dosages
+doses_to_assign=as.numeric(questionable_drugs$dose)
+#Creating data frame for the differences between standard dosages and questionable drugs
+extra_drugs <-data.frame(matrix(nrow = 8,ncol = length(doses_to_assign)),row.names = std_doses)
+colnames(extra_drugs)=rownames(questionable_drugs)
+for (i in 1:length(doses_to_assign)){
+    extra_drugs[,i]=abs(std_doses - doses_to_assign[i])
+}
+#Assigning the drugs to the closest standard dosage 
+to_which_dose=apply(extra_drugs, 2, which.min) #function of which.min: gives row number of min value of column. In comparison just apply: gives min difference
+d1_extra=which(to_which_dose==1)
+d2_extra=which(to_which_dose==2)
+d3_extra=which(to_which_dose==3)
+d4_extra=which(to_which_dose==4)
+d5_extra=which(to_which_dose==5)
+d6_extra=which(to_which_dose==6)
+d7_extra=which(to_which_dose==7)
+d8_extra=which(to_which_dose==8)
+#just a quick check how many doses there are in total
+not_standard_doses=c(d1_extra,d2_extra,d3_extra,d4_extra,d5_extra,d6_extra,d7_extra,d8_extra)
+length(not_standard_doses)#in comparison with dimension from questionable_drugs right!
+#Adding new assigned dosages to small data frames of standard dosages 
+add_extra_doses=function(x,y){cbind(brain_cancer[,unique(grep(paste(colnames(extra_drugs[,x]),collapse="|"), colnames(brain_cancer)))], y)}
+d1=add_extra_doses(d1_extra,d1)
+d2=add_extra_doses(d2_extra,d2)
+d3=add_extra_doses(d3_extra,d3)
+d4=add_extra_doses(d4_extra,d4)
+d5=add_extra_doses(d5_extra,d5)
+d6=add_extra_doses(d6_extra,d6)
+d7=add_extra_doses(d7_extra,d7)
+d8=add_extra_doses(d8_extra,d8)
+#Resumé: new data sets for each dosage with assigned outliers to closest deviation
+ncol(d2)+ncol(d1)+ncol(d3)+ncol(d4)+ncol(d5)+ncol(d6)+ncol(d7)+ncol(d8)
+ncol(brain_cancer)
+```
+
+
+## Filter effective drugs in each dose group
+
+```{r}
+#Lets say for now that our threshold is 0,2 so we can see how many drugs meet this criteria in each dose group
+effective_drugs<-function(x){
+  effective_x<-x[,which(apply(x,2,mean)<=0.2)]
+  return(effective_x)
+}
+effective_d1=effective_drugs(d1)
+effective_d2=effective_drugs(d2)
+effective_d3=effective_drugs(d3)
+effective_d4=effective_drugs(d4)
+effective_d5=effective_drugs(d5)
+effective_d6=effective_drugs(d6)
+effective_d7=effective_drugs(d7)
+effective_d8=effective_drugs(d8)
+all_effective_drugs=c(colnames(effective_d1),colnames(effective_d2),colnames(effective_d3),colnames(effective_d4),colnames(effective_d5),colnames(effective_d6),colnames(effective_d7),colnames(effective_d8))
+length(all_effective_drugs)
+length(which(apply(brain_cancer,2,mean)<=0.2)) #this is the amount of drugs that we keep in total. We compare these 2 length to make sure that that we do not select the same drug twice. If it was the case the first length would be bigger than the second one
+```
+
+## Apllying efective doses filtering on prism.treat
+
+```{r}
+brain_cancer_treat=prism.treat[colnames(brain_cancer),] #selecting only the drugs we previously filtered out from brain_cancer
+effective_t1=brain_cancer_treat[colnames(effective_d1),]
+effective_t2=brain_cancer_treat[colnames(effective_d2),]
+effective_t3=brain_cancer_treat[colnames(effective_d3),]
+effective_t4=brain_cancer_treat[colnames(effective_d4),]
+effective_t5=brain_cancer_treat[colnames(effective_d5),]
+effective_t6=brain_cancer_treat[colnames(effective_d6),]
+effective_t7=brain_cancer_treat[colnames(effective_d7),]
+effective_t8=brain_cancer_treat[colnames(effective_d8),]
+```
+
+##Select drugs that are effective in all doses
+
+```{r}
+new_colnames<-function(x){
+  a<-gsub(pattern = "::.*", replacement = "", colnames(x))
+  return(a)
+}
+colnames(effective_d1)<-new_colnames(effective_d1)
+colnames(effective_d2)<-new_colnames(effective_d2)
+colnames(effective_d3)<-new_colnames(effective_d3)
+colnames(effective_d4)<-new_colnames(effective_d4)
+colnames(effective_d5)<-new_colnames(effective_d5)
+colnames(effective_d6)<-new_colnames(effective_d6)
+colnames(effective_d7)<-new_colnames(effective_d7)
+colnames(effective_d8)<-new_colnames(effective_d8)
+## remove everything but the drug information from colnames and make them new colnames of the dataframes
+save_new_colnames=function(y){
+  colnames(y)<-new_colnames(y)
+}
+save_new_colnames(effective_d4)
+#does not work
+  
+common_drugs<-function(x,y){
+  different<-setdiff(colnames(x), colnames(y))
+  
+  different<-unique(grep(paste(different,collapse="|"), colnames(x)))
+  
+  colnames(x[,-different])
+}
+#function returns the names of the common drugs between 2 dataframes
+d1_d2=common_drugs(effective_d1,effective_d2)
+d2_d1=common_drugs(effective_d2,effective_d1)
+#both are equal, so the function works correctly
+d1_d3=common_drugs(effective_d1,effective_d3)
+d1_d4=common_drugs(effective_d1,effective_d4)
+d1_d5=common_drugs(effective_d1,effective_d5)
+d1_d6=common_drugs(effective_d1,effective_d6)
+d1_d7=common_drugs(effective_d1,effective_d7)
+d1_d8=common_drugs(effective_d1,effective_d8)
+#which drugs are present in all 8 doses?
+present_in_all_doses<-function(a,b,c,d,e,f,g){
+ bb<-setdiff(a, b)
+ a<-a [! a %in% bb]
+ 
+ cc<-setdiff(a, c)
+ a<-a [! a %in% cc]
+ 
+ dd<-setdiff(a, d)
+ a<-a [! a %in% dd]
+ 
+ ee<-setdiff(a, e)
+ a<-a [! a %in% ee]
+ 
+ ff<-setdiff(a, f)
+ a<-a [! a %in% ff]
+ 
+ gg<-setdiff(a, g)
+ a<-a [! a %in% gg]
+ 
+ return(a)
+}
+effective_in_all_doses=present_in_all_doses(d1_d2,d1_d3,d1_d4,d1_d5,d1_d6,d1_d7,d1_d8)
+#160 drugs are effective in all doses
+
+```
+
+```{r}
+#Proofing...
+#mean(brain_cancer$`BRD-A68969091-001-12-7::0.000628134::HTS002`)
+#[1] 0.1459877
+#mean(brain_cancer$`BRD-A00077618-236-07-6::0.0024414::HTS002`)
+#[1] 0.2307986
+
+```
+
+```{r}
+# names of effective in all doses 
+for (i in effective_in_all_doses)
+{print(i)}
+
+# means of all drugs according to our threshold at doses 1
+for (i in effective_in_all_doses)
+{print(mean(effective_d1[,i]))}
+#results in vector?! vector as column in matrix --> first col is first doses --> histogram/max/min/median --> groups
+#for (i in effective_in_all_doses)
+#{q <- function(q){function_q <- q[,print(mean(effective_d2[,i]))]
+#return(function_q)}}
+#dodo1 <- vapply(effective_in_all_doses, function(i) {mean(effective_d1[,i],FUN.VALUE = c(1:51))})
+#dodo1 <- lapply(effective_in_all_doses, function(i) {mean(effective_d1[,i])})
+
+dose1 <- c(0.1459877, 0.1958964, 0.137578, -0.5081388, -0.7442165, -0.5061626, 0.1733885, -1.509186, 0.06090068, -0.4940278, -0.05631474, -0.02102045, -0.1238314, 0.1486505, -1.529, 0.127651, -0.3687355, -1.235304, 0.03261754, 0.1791687, -0.08564677, -0.1828642, 0.08949387, -0.1545583, -1.871961, 0.1246146, -1.291056, -0.9351481, -0.7912743, -0.01538246, 0.1752711, 0.04855043, 0.1689298, -0.2641809, -0.05083459, -0.2021752, -0.08926503, 0.07246877, -0.4301642, -0.3695224, -0.02845212, -2.344833, 0.06134853, -0.09171699, 0.1108932, 0.1869784, -2.401706, -2.521081, 0.09706401, 0.1803515, -0.2981757)
+
+
+for (i in effective_in_all_doses)
+{print(mean(effective_d2[,i]))}
+dose2 <- c(-0.5173928, -0.5152673, 0.01806118, -1.762984, -0.7400298, 0.09629943, 0.07768202, -1.72192, 0.1658859, 0.05908079, -0.1646352, 0.03287069, 0.0891166, 0.1297854, -1.373723, -2.423839, 0.1453067, -2.608587, 0.1304925, 0.1561928, 0.1556246, 0.1811855, -0.5886403, 0.1240279, -1.814144, -0.2044322, -1.154315, -3.254124, -1.203456, 0.0001034681, 0.06796072, 0.01146539, 0.01709366, -0.1644847, 0.1984594, 0.1141776, -3.210255, 0.1936435, 0.1966314, -0.1695394, 0.1364899, -2.402011, -0.5901274, -2.264189, -0.561693, 0.09991115, -1.020195, -2.06064, 0.1562493, 0.03427509, -0.002782081)
+
+for (i in effective_in_all_doses)
+{print(mean(effective_d3[,i]))}
+dose3 <- c(-2.708495, -2.049741, -0.02919381, -3.446289, -0.8973927, -0.244088, -0.2357301, -1.325923, 0.1891368, -0.1544101, -0.006630246, 0.06743624, -0.6832615, -0.04418176, -3.00464, -1.334758, -0.2531016, -2.540034, 0.05603871, -0.4334256, -0.5930747, 0.1552059, 0.03246395, -0.175503, -1.295104, -0.2367032, -1.431366, -1.841849, -0.6096844, -0.1767852, 0.1224077, -0.1360099, 0.02213548, -0.4792238, -0.164849, -0.2165848, -0.2216482, 0.05781284, -0.1965673, -0.1648036, 0.1270939, -2.375226, -1.291844, -3.213951, 0.08690124, 0.07567311, -2.637164, -2.581987, -0.3090536, -0.01836819, -0.6487705)
+
+for (i in effective_in_all_doses)
+{print(mean(effective_d4[,i]))}
+dose4 <- c(-4.186449, -2.855579, 0.1569564, -3.508037, -1.007481, -0.1140364, -2.217823, -1.565614, -0.2311647, -1.072786, 0.1199817, -0.2454997, -0.3822782, 0.08156749, -3.305795, -4.262625, 0.0351912, -3.199922, 0.1429403, -1.847836, -0.934641, -0.001558163, -1.226628, 0.1850865, -2.20525, -0.7440218, -1.61392, -3.362454, -1.08414, -0.8960942, -0.144593, -0.1455453, -0.0970192, -0.8749576, -0.1734072, -0.819089, -3.325401, -0.6300824, 0.1491909, 0.0101422, -0.2380782, -2.800403, -2.720659, -3.409062, -0.5779078, 0.0726243, -2.332268, -2.842337, -0.5347934, -0.05624672, -0.2839715)
+
+for (i in effective_in_all_doses)
+{print(mean(effective_d5[,i]))}
+dose5 <- c(-4.119948, -2.964207, -0.001795961, -3.891167, -1.372087, -3.01205, -2.355853, -1.36995, 0.07134102, -1.68751, 0.02318356, -0.2774928, -0.5250513, 0.1967492, -3.322553, -5.451744, 0.09868776, -2.960842, 0.09813219, -2.311198, -0.9419292, 0.1892902, 0.08647978, 0.03940835, -2.212698, -0.6432368, -2.170595, -5.163701, -1.039365, -2.108193, 0.05064235, -0.3429611, 0.1998875, -2.968861, -2.150134, -2.047914, -0.1520369, -1.374044, 0.1341879, 0.1648546, -0.8876632, -2.806684, -4.28425, -3.765434, 0.1944021, -0.362234, -3.150805, -2.826344, -0.8104967, -0.5109168, -0.8099593)
+
+for (i in effective_in_all_doses)
+{print(mean(effective_d6[,i]))}
+dose6 <- c(-4.142854, -4.291428, 0.1403506, -4.038727, -1.286117, -4.798532, -2.257259, -1.405413, -0.3149413, -2.191915, -0.1195853, -1.731317, -0.71102, -0.6527706, -3.864463, -5.323664, -1.421282, -3.057424, -0.2031732, -3.366937, -1.190164, -0.02336042, 0.07606504, -1.129097, -2.340766, -1.18591, -2.128833, -6.02629, -1.498919, -3.413455, 0.03845145, -1.118945, 0.1129766, -5.340934, -2.603907, -3.313642, -2.338816, -1.509803, -0.06285578, 0.05378386, -1.492434, -2.950681, -4.417438, -3.360113, 0.1601168, -4.556522, -3.182474, -3.563587, -1.490232, -2.374756, -1.317325)
+
+for (i in effective_in_all_doses)
+{print(mean(effective_d7[,i]))}
+dose7 <- c(-5.180453, -5.814925, -0.09246235, -6.501801, -4.063729, -6.177332, -2.513401, -1.590032, -2.741035, -4.750427, -5.085088, -3.472148, -1.186063, -2.013537, -4.608722, -7.612125, -4.168754, -5.190311, -4.023993, -4.945937, -2.346411, -1.916267, -3.024792, -4.366582, -2.417021, -1.654303, -4.086059, -6.631432, -2.125299, -6.108442, -3.866422, -3.598665, -3.920991, -6.552129, -3.183994, -5.488469, -5.014556, -4.281164, -0.3144299, -3.73881, -2.005616, -7.343663, -6.256566, -5.767014, -0.1179105, -5.636085, -5.745903, -6.305333, -2.419148, -3.428905, -3.355132)
+
+for (i in effective_in_all_doses)
+{print(mean(effective_d8[,i]))}
+dose8 <- c(-4.560065, -5.631416, 0.1010454, -4.192594, -1.192206, -5.283666, -2.464887, -1.005309, -0.9939657, -3.607274, -2.538579, -3.323936, -0.8599906, -1.240657, -3.751598, -6.553732, -3.536867, -3.029711, -1.576009, -4.395746, -1.551529, -0.3298719, -1.039671, -4.013894, -2.38797, -1.429031, -3.120706, -6.365889, -1.283414, -4.757454, -1.115332, -2.906343, -1.319294, -6.115287, -2.865918, -3.998373, -2.007839, -2.598346, -0.04709331, -2.16787, -1.36705, -3.475695, -5.483336, -4.0004, 0.07908581, -5.116111, -4.668081, -5.067978, -1.807054, -3.697879, -2.468686)
+
+# set matrix with columns as doses and rows as threshold drugs
+mean_eiad_matrix <- cbind(dose1, dose2, dose3, dose4, dose5, dose6, dose7, dose8)
+rownames(mean_eiad_matrix) <- effective_in_all_doses
+
+# histograms of each drug per doses (columns of mean_eiad)
+hist(mean_eiad_matrix[,1], main = "Dose 1 of effective drugs", xlab = "effectivity")#, breaks = 100/160? übersichtlicher
+q1 <- quantile(dose1, probs = c(0.05, 0.5, 0.95))
+abline(v = q1, col = "red", lty = 2, lwd = 2)
+
+hist(mean_eiad_matrix[,2])
+q2 <- quantile(dose2, probs = c(0.05, 0.5, 0.95))
+abline(v = q2, col = "red", lty = 2, lwd = 2)
+
+hist(mean_eiad_matrix[,3])
+q3 <- quantile(dose3, probs = c(0.05, 0.5, 0.95))
+abline(v = q3, col = "red", lty = 2, lwd = 2)
+
+hist(mean_eiad_matrix[,4])
+q4 <- quantile(dose4, probs = c(0.05, 0.5, 0.95))
+abline(v = q4, col = "red", lty = 2, lwd = 2)
+
+hist(mean_eiad_matrix[,5])
+q5 <- quantile(dose5, probs = c(0.05, 0.5, 0.95))
+abline(v = q5, col = "red", lty = 2, lwd = 2)
+
+hist(mean_eiad_matrix[,6])
+q6 <- quantile(dose6, probs = c(0.05, 0.5, 0.95))
+abline(v = q6, col = "red", lty = 2, lwd = 2)
+
+hist(mean_eiad_matrix[,7])
+q7 <- quantile(dose7, probs = c(0.05, 0.5, 0.95))
+abline(v = q7, col = "red", lty = 2, lwd = 2)
+
+hist(mean_eiad_matrix[,8])
+q8 <- quantile(dose8, probs = c(0.05, 0.5, 0.95))
+abline(v = q8, col = "red", lty = 2, lwd = 2)
+
+q_matrix <- rbind(q1,q2,q3,q4,q5,q6,q7,q8)
+
+#heatmap
+heatmap(as.matrix(mean_eiad_matrix))#--> cluster
+
+#heatmap.2
+#install.packages("gplots")
+#library(gplots)
+#heatmap.2(as.matrix(mean_eiad_matrix))
+
+#histogram of each doses per drug (rows of mean_eiad)
+plot(mean_eiad_matrix[1,], type = "b", col = "red", ylim = c(-8,1))#0, fällt/rollt, 4
+points(mean_eiad_matrix[2,], type = "b", col = "chocolate")#0,fällt pik6
+points(mean_eiad_matrix[3,], type = "b", col = "lightskyblue1")#0schwankt
+points(mean_eiad_matrix[4,], type = "b", col = "green")#1, fällt, 6
+points(mean_eiad_matrix[5,], type = "b", col = "darkgreen")#1, rollt, 4
+points(mean_eiad_matrix[6,], type = "b", col = "magenta")#0,fällt bei 4d, 6
+points(mean_eiad_matrix[7,], type = "b", col = "darkmagenta")#0, fällt bei 3d, 6
+points(mean_eiad_matrix[8,], type = "b", col = "yellow")#2,schwankt um ca 2
+points(mean_eiad_matrix[9,], type = "b", col = "black")#nah 0, rollt pik 2
+points(mean_eiad_matrix[10,], type = "b", col = "grey")#0, rollt/fällt, 4
+
+plot(mean_eiad_matrix[11,], type = "b", col = "red", ylim = c(-8,1))#0,fällt bei 6d,5
+points(mean_eiad_matrix[12,], type = "b", col = "chocolate")#0, fällt bei 5d, 4
+points(mean_eiad_matrix[13,], type = "b", col = "lightskyblue1")#0,schwankt
+points(mean_eiad_matrix[14,], type = "b", col = "green")#0, fällt bei 5d, 2
+points(mean_eiad_matrix[15,], type = "b", col = "darkgreen")#2, zz, fällt,4 
+points(mean_eiad_matrix[16,], type = "b", col = "magenta")#0,, fällt bei 4d, 6
+points(mean_eiad_matrix[17,], type = "b", col = "darkmagenta")#0, fällt bei 3d, konst
+points(mean_eiad_matrix[18,], type = "b", col = "yellow")#2,schwankt light zz
+points(mean_eiad_matrix[19,], type = "b", col = "black")#0, fällt bei 6d, 3
+points(mean_eiad_matrix[20,], type = "b", col = "grey")#0, fällt bei 2d, 4
+
+plot(mean_eiad_matrix[21,], type = "b", col = "red", ylim = c(-8,1))#0, fb 2d, 2
+points(mean_eiad_matrix[22,], type = "b", col = "chocolate")#0, fb 6d, 2
+points(mean_eiad_matrix[23,], type = "b", col = "lightskyblue1")#0, zz, 3
+points(mean_eiad_matrix[24,], type = "b", col = "green")#0, light zz, fb 5d, 4
+points(mean_eiad_matrix[25,], type = "b", col = "darkgreen")#2, light zz, ab 4d const.
+points(mean_eiad_matrix[26,], type = "b", col = "magenta")#0, fällt leicht, 1,5
+points(mean_eiad_matrix[27,], type = "b", col = "darkmagenta")#1,5, fällt, 4
+points(mean_eiad_matrix[28,], type = "b", col = "yellow")# 1, zz, 6
+points(mean_eiad_matrix[29,], type = "b", col = "black")#1,  light zz, 2
+points(mean_eiad_matrix[30,], type = "b", col = "grey")#0, fällt bei 2d, 6
+
+plot(mean_eiad_matrix[31,], type = "b", col = "red", ylim = c(-8,1))#0,light zz, fb 6d, 4
+points(mean_eiad_matrix[32,], type = "b", col = "chocolate")#0, fb 5d, 4
+points(mean_eiad_matrix[33,], type = "b", col = "lightskyblue1")#0,6d, 4
+points(mean_eiad_matrix[34,], type = "b", col = "green")#0, fb 4d, 6
+points(mean_eiad_matrix[35,], type = "b", col = "darkgreen")#0,fb 4d, 3
+points(mean_eiad_matrix[36,], type = "b", col = "magenta")#0,fb 3d,6
+points(mean_eiad_matrix[37,], type = "b", col = "darkmagenta")#0, heavy zz,5
+points(mean_eiad_matrix[38,], type = "b", col = "yellow")#0, fb 3d, 5
+points(mean_eiad_matrix[39,], type = "b", col = "black")#0,schwankt, 0
+points(mean_eiad_matrix[40,], type = "b", col = "grey")#0,6d, 4
+
+plot(mean_eiad_matrix[41,], type = "b", col = "red", ylim = c(-8,1))#0, fb 3d, 2
+points(mean_eiad_matrix[42,], type = "b", col = "chocolate")#2, fb 6d, ca 8
+points(mean_eiad_matrix[43,], type = "b", col = "lightskyblue1")#0, fällt, 6
+points(mean_eiad_matrix[44,], type = "b", col = "green")#0, fällt,5
+points(mean_eiad_matrix[45,], type = "b", col = "darkgreen")#0, zz, schwankt,0
+points(mean_eiad_matrix[46,], type = "b", col = "magenta")#0, fb 5d, 6
+points(mean_eiad_matrix[47,], type = "b", col = "darkmagenta")#2, zz, 6
+points(mean_eiad_matrix[48,], type = "b", col = "yellow")#2, fb 5d, 6
+points(mean_eiad_matrix[49,], type = "b", col = "black")#0, fällt, 2
+points(mean_eiad_matrix[50,], type = "b", col = "grey")#0, fb 5d, pik 8d 4!!!
+points(mean_eiad_matrix[51,], type = "b", col = "blue")#0, fällt, 3
+
+
+###
+# mean of the means?
+#for (i in effective_in_all_doses)
+#{mean1_160 <- mean(effective_d1[,i])}
+
+
+# variation of sorting
+#0, fallen, ca 4
+plot(mean_eiad_matrix[10,], type = "b", col = "red", ylim = c(-8,1))#0, rollt/fällt, 4
+points(mean_eiad_matrix[12,], type = "b", col = "chocolate")#0, fällt bei 5d, 4
+points(mean_eiad_matrix[31,], type = "b", col = "black")#0,light zz, fb 6d, 4
+points(mean_eiad_matrix[32,], type = "b", col = "chocolate")#0, fb 5d, 4
+points(mean_eiad_matrix[33,], type = "b", col = "lightskyblue1")#0,6d, 4
+points(mean_eiad_matrix[40,], type = "b", col = "yellow")#0,6d, 4
+points(mean_eiad_matrix[17,], type = "b", col = "darkmagenta")#0, fällt bei 3d, konst
+
+#0, fallen, 7
+plot(mean_eiad_matrix[2,], type = "b", col = "red", ylim = c(-8,1))#0,fällt pik6
+points(mean_eiad_matrix[6,], type = "b", col = "magenta")#0,fällt bei 4d, 6
+points(mean_eiad_matrix[30,], type = "b", col = "grey")#0, fällt bei 2d, 6
+points(mean_eiad_matrix[34,], type = "b", col = "green")#0, fb 4d, 6
+points(mean_eiad_matrix[36,], type = "b", col = "yellow")#0,fb 3d,6
+points(mean_eiad_matrix[43,], type = "b", col = "lightskyblue1")#0, fällt, 6
+points(mean_eiad_matrix[46,], type = "b", col = "blue")#0, fb 5d, 6
+
+#Schwanken um Null
+plot(mean_eiad_matrix[3,], type = "b", col = "red", ylim = c(-8,1))#0schwankt
+points(mean_eiad_matrix[13,], type = "b", col = "lightskyblue1")#0,schwankt
+points(mean_eiad_matrix[39,], type = "b", col = "black")#0,schwankt, 0
+
+#0, fallen, 2
+plot(mean_eiad_matrix[21,], type = "b", col = "red", ylim = c(-8,1))#0, fb 2d, 2
+points(mean_eiad_matrix[9,], type = "b", col = "black")#nah 0, rollt pik 2
+points(mean_eiad_matrix[14,], type = "b", col = "green")#0, fällt bei 5d, 2
+points(mean_eiad_matrix[22,], type = "b", col = "chocolate")#0, fb 6d, 2
+points(mean_eiad_matrix[26,], type = "b", col = "magenta")#0, fällt leicht, 1,5
+points(mean_eiad_matrix[41,], type = "b", col = "lightskyblue1")#0, fb 3d, 2
+points(mean_eiad_matrix[49,], type = "b", col = "grey")#0, fällt, 2
+points(mean_eiad_matrix[7,], type = "b", col = "darkmagenta")#0, fällt bei 3d, 2
+
+# Peak bei dose8
+plot(mean_eiad_matrix[50,], type = "b", col = "red", ylim = c(-8,1))#0, fb 5d, pik 8d 4!!!
+
+
+#0, fallen, 4
+plot(mean_eiad_matrix[11,], type = "b", col = "red", ylim = c(-8,1))
+points(mean_eiad_matrix[38,], type = "b", col = "yellow")
+points(mean_eiad_matrix[1,], type = "b", col = "lightskyblue1")
+points(mean_eiad_matrix[20,], type = "b", col = "blue")
+
+#ZickZack
+plot(mean_eiad_matrix[15,], type = "b", col = "red", ylim = c(-8,1))#2, zz, fällt,4 
+points(mean_eiad_matrix[18,], type = "b", col = "yellow")#2,schwankt light zz
+points(mean_eiad_matrix[24,], type = "b", col = "green")#0, light zz, fb 5d, 4
+points(mean_eiad_matrix[37,], type = "b", col = "darkmagenta")#0, heavy zz,5
+points(mean_eiad_matrix[16,], type = "b", col = "darkgreen")#0,, fällt bei 4d, 6
+points(mean_eiad_matrix[45,], type = "b", col = "blue")#
+points(mean_eiad_matrix[44,], type = "b", col = "grey")
+
+#0, fallen, ca 3
+plot(mean_eiad_matrix[19,], type = "b", col = "red", ylim = c(-8,1))#0, fällt bei 6d, 3
+points(mean_eiad_matrix[23,], type = "b", col = "lightskyblue1")#0, zz, 3
+points(mean_eiad_matrix[35,], type = "b", col = "darkgreen")#0,fb 4d, 3
+points(mean_eiad_matrix[51,], type = "b", col = "blue")#0, fällt, 3
+
+
+#1
+plot(mean_eiad_matrix[4,], type = "b", col = "red", ylim = c(-8,1))#1, fällt, 6
+points(mean_eiad_matrix[5,], type = "b", col = "darkgreen")#1, rollt, 4
+points(mean_eiad_matrix[27,], type = "b", col = "darkmagenta")#1,5, fällt, 4
+points(mean_eiad_matrix[28,], type = "b", col = "yellow")# 1, zz, 6
+points(mean_eiad_matrix[29,], type = "b", col = "black")#1,  light zz, 2
+
+
+#2
+plot(mean_eiad_matrix[8,], type = "b", col = "red", ylim = c(-8,1))#2,schwankt um ca 2
+points(mean_eiad_matrix[25,], type = "b", col = "darkgreen")#2, light zz, ab 4d const.
+points(mean_eiad_matrix[47,], type = "b", col = "darkmagenta")#2, zz, 6
+points(mean_eiad_matrix[48,], type = "b", col = "yellow")#2, fb 5d, 6
+points(mean_eiad_matrix[42,], type = "b", col = "chocolate")#2, fb 6d, ca 8
+
+
+
+
+
+
+
+
+
+
+```
+
+
