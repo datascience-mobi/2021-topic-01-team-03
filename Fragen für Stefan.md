@@ -1,11 +1,18 @@
 # 2021-topic-01-team-03
 
+**23.06.21**
+- Übersicht mit Stefan machen: was brauchen wir? was erwarten wir? was wollen wir?
+
 **16.06.21**
 - Wie relativieren wir die Größe der unterschiedlichen Subtypes? Können wir sagen, dass Medulloblastoma so viel effektiver behandelt werden können, weil mit Abstand die kleinste Stichprobe ist (Vorschlag von Lennard: Gene dahinter betrachten und versuchen die Effektivität auf genetische Ursachen zurückzuführen) (bezogen auf Cedriks Clustering)
+- **Geparte test für subtypes? Analysis of variance? Wilcoxon nicht paired (signifikante abweichung der Mittelwert)? Ziemlich unnötig**
 - is it cheating to use the relevant_genes_exp dataframe with high variance to perform a shapiro test?
 - Filtering for variance. Does our approach make sense?
+- **Größe variance filtern und danach kmeans. Hier es ist sinnvoll**
 - How to define a threshold for the variance?
+- **Stefan does not know, let's take top 10% for now**
 - Wilcoxon: can we perform a paired test eg by comparing each cell line with all the others 
+- **Für Wilcoxon test alle gene behalten. Nicht braincancer cell lines als referenz nemhem, median oder mean. Oder das in subtypen machen. Grundsätzlich Gene in Grupen vergleichen. May be first identify the genes that are fisst specific for brain cance. Then look if these genes are different in groups of brain cancer.**
 
 **09.06.21** 
 - Visualisierung von effective_drugs. 1 oder 2 Koordinaten?
