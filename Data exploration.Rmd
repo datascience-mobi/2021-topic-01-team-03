@@ -213,6 +213,11 @@ length(brain_cancer_cnv.big)
 (length(brain_cancer_cnv.big)/dim(brain_cancer_cnv)[2])*100
 summary(brain_cancer_cnv.big)
 #View(brain_cancer_cnv.big)
+
+# select high var
+brain_cancer_cnv.high_var <- brain_cancer_cnv[,which(brain_cancer_cnv.var > 0.05)] # Threshold?
+brain_cancer_cnv.genes <- colnames(brain_cancer_cnv.high_var) # interesting genes to differentiate subtyps clustering?
+
 ```
 
 ```{r}
@@ -228,7 +233,7 @@ bcav.sum
 hist(brain_cancer_achilles.var, xlim = c(0,0.2), breaks = 300)
 # tests
 #shapiro.test(brain_cancer_cnv.var) #set too big
-qqnorm(brain_cancer_cnv.var)
+qqnorm(brain_cancer_achilles.var)
 #small
 bcast <- bcam.sum[4]-((bcam.sum[4]-bcam.sum[1])/2)
 brain_cancer_achilles.small <- brain_cancer_achilles.mean[which(brain_cancer_achilles.mean<bcast)]
@@ -243,36 +248,40 @@ length(brain_cancer_achilles.big)
 (length(brain_cancer_achilles.big)/dim(brain_cancer_achilles)[2])*100
 summary(brain_cancer_achilles.big)
 #View(brain_cancer_achilles.big)
+
+#select low proliferation
+brain_cancer_achilles.low_prol <- brain_cancer_achilles[,which(brain_cancer_achilles.mean < c(-0.5))] # Threshold?
+brain_cancer_achilles.genes <- colnames(brain_cancer_achilles.low_prol) # interesting genes as targets
 ```
 
 ```{r}
 #exp
 ## muss angepasst werden
-brain_cancer_achilles.mean <- apply(brain_cancer_achilles,2,mean)
-hist(brain_cancer_achilles.mean, breaks = 200)
-qqnorm(brain_cancer_achilles.mean)
-bcam.sum <- summary(brain_cancer_achilles.mean)
-bcam.sum
-brain_cancer_achilles.var <- apply(brain_cancer_achilles,2,var)#variance
-bcav.sum <- summary(brain_cancer_achilles.var) #summary var
-bcav.sum
-hist(brain_cancer_achilles.var, xlim = c(0,0.2), breaks = 300)
+brain_cancer_exp.mean <- apply(brain_cancer_exp,2,mean)
+hist(brain_cancer_exp.mean, breaks = 200)
+qqnorm(brain_cancer_exp.mean)
+bcem.sum <- summary(brain_cancer_exp.mean)
+bcem.sum
+brain_cancer_exp.var <- apply(brain_cancer_exp,2,var)#variance
+bcev.sum <- summary(brain_cancer_exp.var) #summary var
+bcev.sum
+hist(brain_cancer_exp.var, xlim = c(0,5), breaks = 300) #
 # tests
 #shapiro.test(brain_cancer_cnv.var) #set too big
-qqnorm(brain_cancer_cnv.var)
+qqnorm(brain_cancer_exp.var)
 #small
-bcast <- bcam.sum[4]-((bcam.sum[4]-bcam.sum[1])/2)
-brain_cancer_achilles.small <- brain_cancer_achilles.mean[which(brain_cancer_achilles.mean<bcast)]
-length(brain_cancer_achilles.small)
-(length(brain_cancer_achilles.small)/dim(brain_cancer_achilles)[2])*100
-summary(brain_cancer_achilles.small)
+bcest <- bcem.sum[4]-((bcem.sum[4]-bcem.sum[1])/2)
+brain_cancer_exp.small <- brain_cancer_exp.mean[which(brain_cancer_exp.mean<bcest)]
+length(brain_cancer_exp.small)
+(length(brain_cancer_exp.small)/dim(brain_cancer_exp)[2])*100
+summary(brain_cancer_exp.small)
 #View(brain_cancer_achilles.small)
 #big
-bcabt <- bcam.sum[4]+((bcam.sum[6]-bcam.sum[4])/2)
-brain_cancer_achilles.big <- brain_cancer_achilles.mean[which(brain_cancer_achilles.mean>bcabt)]
-length(brain_cancer_achilles.big)
-(length(brain_cancer_achilles.big)/dim(brain_cancer_achilles)[2])*100
-summary(brain_cancer_achilles.big)
+bcebt <- bcem.sum[4]+((bcem.sum[6]-bcem.sum[4])/2)
+brain_cancer_exp.big <- brain_cancer_exp.mean[which(brain_cancer_exp.mean>bcebt)]
+length(brain_cancer_exp.big)
+(length(brain_cancer_exp.big)/dim(brain_cancer_exp)[2])*100
+summary(brain_cancer_exp.big)
 #View(brain_cancer_achilles.big)
 ```
 
