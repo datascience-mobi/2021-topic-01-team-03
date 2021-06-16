@@ -35,7 +35,7 @@ Till 21.06
 - [ ] Trying to find a way to perform Wilcoxon. How can we apply it on our datasets? **Xenia + Ilya**
 - [ ] CLUSTERING: determine specific drugs for each brain cancer subtype or is there any trend between cell lines and drugs. Basically: are there any drugs that are more effective for certain cells? **Cedrik**
 
-
+Whenever there is time (not a priority):
 - [ ] Start with report: General look and Q1 **Xenia + Cedrik**
 
 
