@@ -1,0 +1,29 @@
+---
+title: "Topic 1 Group 3: Drug viability screens for oncological and non-oncological treatments"
+author: "Cedrik Neber, Lea Ahrens, Lennard Kleemann, Ilya Schneider, Xenia Quaas"
+date: "19 7 2021"
+output: html_document
+---
+
+General structure:
+Main question: Is it possible to predict the effectiveness of a drug?
+Further breakdown:
+1) How can we distinguish the most effective drugs?
+- Create separate data frames for each dose
+- Define the threshold to select effective drugs
+- Find drugs that are effective in mutiple doses
+
+
+2) What are the targets of the effective drugs?
+3) Are there any genetic markers that are specific for brain cancer subtypes?
+- Examine gene targets of the effective drugs
+- Find a relationship between gene targets and brain cancer subtypes
+- Wilcoxon Signed Rank Test
+
+
+4) What other factors contribute to drug and effectiveness prediction? 
+- Estimate the relevant variables
+- Look for correlations between variables and leave only variables with high variance
+- Reduce the amount of dimesions by conducting a PCA
+- Regression model with PCA
+- Compare the real effectiveness with the estimated one 
