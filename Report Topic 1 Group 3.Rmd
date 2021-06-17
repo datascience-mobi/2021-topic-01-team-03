@@ -27,3 +27,14 @@ Further breakdown:
 - Reduce the amount of dimesions by conducting a PCA
 - Regression model with PCA
 - Compare the real effectiveness with the estimated one 
+
+
+Rough version with possible visualizations:
+
+Q1:
+- Visualization of efficiencies for every doses via eight *histograms* with median
+- Visualization of effective drugs after filtering for drugs effective in every cell type via Cedrik's *clustering* 
+- Showing differences of efficiencies between subtypes by *boxplots*?
+
+Q3:
+- Visualization of most relevant genes in cell lines via a *heatmap* with shows the degree of expression
