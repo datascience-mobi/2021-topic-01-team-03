@@ -417,21 +417,21 @@ relevant_genes_exp_subtypes=list(relevant_genes_exp[glioma,],relevant_genes_exp[
 
 General consideration: Characteristic genes are genes that have a huge variance and are present in a specific cell line/ subtype. 
 
+##Performance of Shapiro Test to investigate whether gene expressions are normally distributed. 
 ```{r}
-
 # Transposing dataframe
 
 brain_cancer_exp_t = as.data.frame(t(as.matrix(brain_cancer_exp)))
 
-# Filtering rows using the dplyr::filter function as Stefan suggested
+# Filtering *rows* using the dplyr::filter function as Stefan suggested
+#brain_cancer_exp_t %>%
+#filter(x==min(x))
+#bc_exp_removed = apply(brain_cancer_exp, 2, function(x) min(x) == max(x))
 
-bc_exp_removed = apply(brain_cancer_exp, 2, function(x) min(x) == max(x))
-
-brain_cancer_exp_t[,-bc_exp_removed]
 
 # Transposing dataframe again
 
-brain_cancer_exp_t = as.data.frame(t(as.matrix(brain_cancer_exp_t)))
+#brain_cancer_exp_t = as.data.frame(t(as.matrix(brain_cancer_exp_t)))
 
 # checking data for normality by applying a shapiro test on each column 
 
@@ -439,6 +439,10 @@ bc_exp_shap = apply(brain_cancer_exp_t,2,shapiro.test)
 bc_exp_shap_res = sapply(brain_cancer_exp_t,`[`,  c("p.value")) # genes which do have a normal distributed expression; which threshold?
 bc_exp_norm = which(bc_cnv_shap_res > 0.95)
 
+``` 
+
+##Performance of Wilcoxon test to extract genes which are differentially expressed.
+```{r}
 # Removal of these columns
 
 # Creating dataframe with all non brain cancer cell lines
@@ -455,8 +459,7 @@ non_bc_exp_mean=as.data.frame(t(non_bc_exp_mean_t))
 
 
 # Wilcoxon test
-``` 
-
+```
 
 # Question 4: What other factors contribute to drug effectiveness prediction?
 
