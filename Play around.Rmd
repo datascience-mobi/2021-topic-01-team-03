@@ -460,6 +460,18 @@ bc_exp_norm = which(bc_cnv_shap_res > 0.95)
 
 # Removal of these columns
 
+# Creating dataframe with all non brain cancer cell lines
+non_bc_cl = prism.cl[!prism.cl$disease == "Brain Cancer",]
+non_bc_names=non_bc_cl[,1] 
+non_bc_exp=prism.exp[non_bc_names,]
+
+# Removal of lines with NA from new dataframe
+non_bc_exp=non_bc_exp[rowSums(is.na(non_bc_exp)) == 0,]
+
+# Taking the mean/ median of all non brain cancer cell lines as reference 
+non_bc_exp_mean_t=colMeans(non_bc_exp)
+non_bc_exp_mean=as.data.frame(t(non_bc_exp_mean_t))
+
 
 # Wilcoxon test
 ``` 
