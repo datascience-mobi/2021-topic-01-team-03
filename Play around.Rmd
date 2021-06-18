@@ -430,14 +430,32 @@ brain_cancer_exp_t = as.data.frame(t(as.matrix(brain_cancer_exp)))
 
 
 # Transposing dataframe again
+View(brain_cancer_exp)
+q<-apply(brain_cancer_exp,2,var)
+w<-which(q==0)
+View(brain_cancer_exp[,-w])
+s<-brain_cancer_exp[,-w]
+s<-apply(s,2,as.numeric)
+
+exp_list <- vector(mode = "list", length = ncol(s))
+for(i in 1:ncol(s)) {         
+  exp_list[[i]] <- s[ , i]
+}
 
 #brain_cancer_exp_t = as.data.frame(t(as.matrix(brain_cancer_exp_t)))
 
 # checking data for normality by applying a shapiro test on each column 
 
-bc_exp_shap = apply(brain_cancer_exp_t,2,shapiro.test)
-bc_exp_shap_res = sapply(brain_cancer_exp_t,`[`,  c("p.value")) # genes which do have a normal distributed expression; which threshold?
-bc_exp_norm = which(bc_cnv_shap_res > 0.95)
+bc_exp_shap = lapply(exp_list,shapiro.test)
+
+exp_pvalue <- vector(length = ncol(s))
+for(i in 1:ncol(s)) {         
+  exp_pvalue[i] <- bc_exp_shap[[i]]$p.value
+} # genes which do have a normal distributed expression; which threshold?
+View(bc_exp_shap)
+bc_exp_norm = which(exp_pvalue > 0.95)
+bc_exp_not_norm=brain_cancer_exp[,-bc_exp_norm]
+
 
 ``` 
 
@@ -452,18 +470,52 @@ non_bc_exp=prism.exp[non_bc_names,]
 
 # Removal of lines with NA from new dataframe
 non_bc_exp=non_bc_exp[rowSums(is.na(non_bc_exp)) == 0,]
-
+non_bc_exp=non_bc_exp[,-c(bc_exp_norm)]
 # Taking the mean/ median of all non brain cancer cell lines as reference 
 non_bc_exp_mean_t=colMeans(non_bc_exp)
 non_bc_exp_mean=as.data.frame(t(non_bc_exp_mean_t))
-
+View(non_bc_exp_mean)
 
 # Wilcoxon test
+wilcox_cells <- vector(mode = "list",length = 34)
+for(i in 1:34) {         
+  wilcox_cells[[i]] <- wilcox.test(as.numeric(non_bc_exp_mean[1,]),as.numeric(bc_exp_not_norm[i,]))
+}
+
+wilcox_pvalue <- vector(length = 34)
+for(i in 1:34) {         
+  wilcox_pvalue[i] <- wilcox_cells[[i]]$p.value
+}
+
+length(which(wilcox_pvalue<=0.05))
+#24 brain cancer cell lines are different in gene expression comparing to other tumor types
+names[-which(wilcox_pvalue<=0.05)] #names of cell lines which are similar in expression to the rest of tumor
+
+brain_cancer_cl[-which(wilcox_pvalue<=0.05),"disease_subtype"]
+#here we can see which types of cells are similar in expression to other tumors
 ```
+
+##Wilcoxon test: compare all gene from 34 brain cancer cell lines with the same gene from all other tumors
+```{r}
+wilcox.test(as.numeric(non_bc_exp[,1]),as.numeric(bc_exp_not_norm[,1]),paired = F)
+
+wilcox_genes <- vector(mode = "list",length = 18699)
+for(i in 1:18699) {         
+  wilcox_genes[[i]] <- wilcox.test(as.numeric(non_bc_exp[,i]),as.numeric(bc_exp_not_norm[,i]),paired = F)
+}
+
+wilcox_pvalue_genes <- vector(length = 18699)
+for(i in 1:18699) {         
+  wilcox_pvalue_genes[i] <- wilcox_genes[[i]]$p.value
+}
+
+length(which(wilcox_pvalue_genes<=0.05))#the amount of genes that are significantly different in expression comparing to other tumors
+```
+
 
 # Question 4: What other factors contribute to drug effectiveness prediction?
 
-# Random: place to try out things
+##Random: place to try out things
 
 ```{r random}
 # just trying something out
