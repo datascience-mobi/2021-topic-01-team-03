@@ -174,14 +174,18 @@ d7_extra=which(to_which_dose==7)
 d8_extra=which(to_which_dose==8)
 
 
-to_which_dose_=list(apply(extra_drugs, 2, which.min))
-extra_drugs_<-(rep(to_which_dose_, 8))
-a<-function(x){
-  for(i in 1:8)
-  which(x==i)
+
+doses_for_list_2<-list(1,2,3,4,5,6,7,8)
+select_doses_2=function(x){
+  brain_cancer[,grep(x, to_which_dose)]
 }
-k<-lapply(to_which_dose_, a)
-#find another way
+doses_subsets_2<-lapply(doses_for_list_2,select_doses_2)
+
+add_extra_doses_list=function(x){
+  cbind(doses_subsets_2[[x]], doses_subsets_[[x]])
+}
+doses_subsets_<-lapply(doses_for_list_2,add_extra_doses_list)
+
 
 
 #just a quick check how many doses there are in total
@@ -229,8 +233,12 @@ effective_d6=effective_drugs(d6)
 effective_d7=effective_drugs(d7)
 effective_d8=effective_drugs(d8)
 
+
+setdiff(colnames(d1), colnames(doses_subsets_[[1]])) #something is wrong
 doses_subsets <- list(d1 = d1, d2 = d2, d3 = d3, d4 = d4, d5 = d5, d6 = d6, d7 = d7, d8 = d8)
 all_effective_drugs<- lapply(doses_subsets, effective_drugs)
+
+
 
 ncol(all_effective_drugs[[1]])+ncol(all_effective_drugs[[2]])+ncol(all_effective_drugs[[3]])+ncol(all_effective_drugs[[4]])+ncol(all_effective_drugs[[5]])+ncol(all_effective_drugs[[6]])+ncol(all_effective_drugs[[7]])+ncol(all_effective_drugs[[8]])
 
@@ -256,8 +264,12 @@ effective_d6<-save_new_colnames(effective_d6)
 effective_d7<-save_new_colnames(effective_d7)
 effective_d8<-save_new_colnames(effective_d8)
 
+
+
 all_effective_drugs<-lapply(all_effective_drugs, save_new_colnames)
 ## remove everything but the drug information from colnames and make them new colnames of the dataframes
+
+
   
 common_drugs<-function(x,y){
   different<-setdiff(colnames(x), colnames(y))
@@ -304,38 +316,7 @@ present_in_all_doses<-function(a,b,c,d,e,f,g){
 }
 
 effective_in_all_doses=present_in_all_doses(d1_d2,d1_d3,d1_d4,d1_d5,d1_d6,d1_d7,d1_d8)
-#160 drugs are effective in all doses
-
-present_in_6_doses<-function(a,b,c,d,e){
- bb<-setdiff(a, b)
- a<-a [! a %in% bb]
- 
- cc<-setdiff(a, c)
- a<-a [! a %in% cc]
- 
- dd<-setdiff(a, d)
- a<-a [! a %in% dd]
- 
- ee<-setdiff(a, e)
- a<-a [! a %in% ee]
- 
- return(a)
-}
-
-effective_in_6_doses=present_in_6_doses(d1_d2,d1_d3,d1_d4,d1_d5,d1_d6)
-#164 drugs are effective in 6 smallest doses
-
-present_in_4_doses<-function(a,b,c){
- bb<-setdiff(a, b)
- a<-a [! a %in% bb]
- 
- cc<-setdiff(a, c)
- a<-a [! a %in% cc]
- 
- return(a)
-}
-effective_in_4_doses=present_in_4_doses(d1_d2,d1_d3,d1_d4)
-#247 drugs are effective in 4 smallest doses
+#51 drugs are effective in all doses
 ```
 
 # Question 2: What are the targets of the effective drugs?
