@@ -419,40 +419,37 @@ General consideration: Characteristic genes are genes that have a huge variance 
 
 ##Performance of Shapiro Test to investigate whether gene expressions are normally distributed. 
 ```{r}
-# Transposing dataframe
-
-brain_cancer_exp_t = as.data.frame(t(as.matrix(brain_cancer_exp)))
-
-# Filtering *rows* using the dplyr::filter function as Stefan suggested
-#brain_cancer_exp_t %>%
-#filter(x==min(x))
-#bc_exp_removed = apply(brain_cancer_exp, 2, function(x) min(x) == max(x))
 
 
-# Transposing dataframe again
-View(brain_cancer_exp)
-q<-apply(brain_cancer_exp,2,var)
-w<-which(q==0)
-View(brain_cancer_exp[,-w])
-s<-brain_cancer_exp[,-w]
-s<-apply(s,2,as.numeric)
 
+#q<-apply(brain_cancer_exp,2,var)
+#w<-which(q==0)
+#View(brain_cancer_exp[,-w])
+#s<-brain_cancer_exp[,-w]
+#s<-apply(s,2,as.numeric)
+
+# Filtering genes that have no variance
+bc_exp_var <- apply(brain_cancer_exp,2,var)
+bc_exp_no_var <- which(bc_exp_var==0)
+bc_exp_high_var <- brain_cancer_exp[,-bc_exp_no_var]
+bc_exp_high_var <- apply(bc_exp_high_var,2,as.numeric)
+
+#Listing all gene variances
 exp_list <- vector(mode = "list", length = ncol(s))
-for(i in 1:ncol(s)) {         
-  exp_list[[i]] <- s[ , i]
+for(i in 1:ncol(bc_exp_high_var)) {         
+  exp_list[[i]] <- bc_exp_high_var[ , i]
 }
 
-#brain_cancer_exp_t = as.data.frame(t(as.matrix(brain_cancer_exp_t)))
-
-# checking data for normality by applying a shapiro test on each column 
-
+# checking data for normality by applying a shapiro test on list element
 bc_exp_shap = lapply(exp_list,shapiro.test)
 
-exp_pvalue <- vector(length = ncol(s))
-for(i in 1:ncol(s)) {         
+# Keeping p values in another list
+exp_pvalue <- vector(length = ncol(bc_exp_high_var))
+for(i in 1:ncol(bc_exp_high_var)) {         
   exp_pvalue[i] <- bc_exp_shap[[i]]$p.value
-} # genes which do have a normal distributed expression; which threshold?
-View(bc_exp_shap)
+} 
+
+# Selecting genes with a p value smaller than 0.5%
 bc_exp_norm = which(exp_pvalue > 0.95)
 bc_exp_not_norm=brain_cancer_exp[,-bc_exp_norm]
 
@@ -509,7 +506,7 @@ for(i in 1:18699) {
   wilcox_pvalue_genes[i] <- wilcox_genes[[i]]$p.value
 }
 
-length(which(wilcox_pvalue_genes<=0.05))#the amount of genes that are significantly different in expression comparing to other tumors
+length(which(wilcox_pvalue_genes<=0.01))#the amount of genes that are significantly different in expression comparing to other tumors
 ```
 
 
