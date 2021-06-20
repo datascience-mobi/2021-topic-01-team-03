@@ -452,6 +452,9 @@ bc_exp_norm = which(exp_pvalue > 0.95)
 bc_exp_not_norm=brain_cancer_exp[,-bc_exp_norm]
 
 
+#Conclusion: I think this was not totally useless. Although we maybe do not need to remove the genes that are normally distributed before performing the Wilcoxon test, it is a good justification for performing it, because the t-test and ANOVA are not possible because just a few genes are not normally distributed. The Wilcoxon test can be used when the samples have similarly sizes (in our case 447 and 41) and i.i.d. can be assumed. 
+# After some research I came to the conclusion that we can use these unequal sample sizes but we have to take into account that the power of our test is minimized. 
+# Power of a test: Probability for a type two error not to occur
 ``` 
 
 ##Performance of Wilcoxon test to extract genes which are differentially expressed.
@@ -503,16 +506,16 @@ non_bc_exp=non_bc_exp[rowSums(is.na(non_bc_exp)) == 0,]
 
 # Performance of Wilcoxon
 #wilcox.test(as.numeric(non_bc_exp[,1]),as.numeric(bc_exp_not_norm[,1]),paired = F) #same procedure
-wilcox.test(as.numeric(non_bc_exp[,1]),as.numeric(brain_cancer_exp[,1]),paired = F)
+wilcox.test(as.numeric(non_bc_exp[,1]),as.numeric(brain_cancer_exp[,1]),alternative = "two.sided", paired = F)
 
 #wilcox_genes <- vector(mode = "list",length = 18699)
 #for(i in 1:18699) {         
 #  wilcox_genes[[i]] <- wilcox.test(as.numeric(non_bc_exp[,i]),as.numeric(bc_exp_not_norm[,i]),paired = F)
 #}
 
-wilcox_genes <- vector(mode = "list",length = 19177)
-for(i in 1:19177) {         
-  wilcox_genes[[i]] <- wilcox.test(as.numeric(non_bc_exp[,i]),as.numeric(brain_cancer_exp[,i]),paired = F)
+wilcox_genes <- vector(mode = "list",length = ncol(brain_cancer_exp))
+for(i in 1:ncol(brain_cancer_exp)) {         
+  wilcox_genes[[i]] <- wilcox.test(as.numeric(non_bc_exp[,i]),as.numeric(brain_cancer_exp[,i]), alternative = "two.sided", paired = F)
 }
 
 #wilcox_pvalue_genes <- vector(length = 18699)
@@ -520,13 +523,17 @@ for(i in 1:19177) {
 #  wilcox_pvalue_genes[i] <- wilcox_genes[[i]]$p.value
 #}
 
-wilcox_pvalue_genes <- vector(length = 19177)
-for(i in 1:19177) {
+wilcox_pvalue_genes <- vector(length = ncol(brain_cancer_exp))
+for(i in 1:ncol(brain_cancer_exp)) {
   wilcox_pvalue_genes[i] <- wilcox_genes[[i]]$p.value
 }
 
 length(which(wilcox_pvalue_genes<=0.05))#the amount of genes that are significantly different in expression comparing to other tumors
 
+
+#Stefan's suggestion: Two larger samples with roughly equal size can be used to run a Mann-Whitney-U/Wilcoxon test for each gene. Assumptions: 
+#H0: expression value for the gene comes from the same distribution
+#H1: Group gene expression values vome from two distributions with different central measures
 
 ```
 
@@ -542,13 +549,12 @@ https://www.reneshbedre.com/blog/multiple-hypothesis-testing-corrections.html
 ##Adjustment of multiple testing problem 
 ```{r}
 #Bonferroni correction
-
 wilcox_pvalue_bonf = p.adjust(wilcox_pvalue_genes, method = "bonferroni", n = length(wilcox_pvalue_genes)) #I first was confused from p-value=1 but is possible when there is absolutely no evidence to reject H0
-length(which(wilcox_pvalue_bonf<=0.05))
+length(which(wilcox_pvalue_bonf<=0.01))
 
 #Benjamini-Hochberg correction
 wilcox_pvalue_BH = p.adjust(wilcox_pvalue_genes, method = "BH", n = length(wilcox_pvalue_genes))
-length(which(wilcox_pvalue_BH<=0.05))
+length(which(wilcox_pvalue_BH<=0.01))
 ```
 
 
