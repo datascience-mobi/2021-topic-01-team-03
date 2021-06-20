@@ -2,6 +2,7 @@
 
 **23.06.21**
 - Übersicht mit Stefan machen: was brauchen wir? was erwarten wir? was wollen wir?
+- Chaos Wilcoxon Test: Brauchen wir wirklich keinen Shapiro Test (siehe Carls Folien); 
 
 **16.06.21**
 - Wie relativieren wir die Größe der unterschiedlichen Subtypes? Können wir sagen, dass Medulloblastoma so viel effektiver behandelt werden können, weil mit Abstand die kleinste Stichprobe ist (Vorschlag von Lennard: Gene dahinter betrachten und versuchen die Effektivität auf genetische Ursachen zurückzuführen) (bezogen auf Cedriks Clustering)
