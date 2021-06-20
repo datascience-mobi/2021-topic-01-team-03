@@ -16,7 +16,7 @@ Till 31.05
 - [x] Which cell lines miss from achilles? **Cedrik**
 - [x] Find a way to justify the 0,3. **Lennard**
 
-Till 7.06y
+Till 7.06
 - [ ] *What to do with the drug targets? How to examine gene targets of the effective drugs and what to do with them? How do we work further? (prism.treat + prism.achilles + prism.cnv) As I understood Stefan meant that it tis not worth it and that the whole idea of repurpusing is that these drugs act differently and not like they are supposed it. So the effect is not attributed to the designed drug target*
 - [x] Select one dose to continue working on. **Ilya**
 - [x] See what is the norm is in brain_cancer_treat and brain_cancer_cnv and brain_cancer_achilles. Generate general information and visualisation of this dataframs. **Lennard**
@@ -32,14 +32,15 @@ Till 21.06
 - [ ] Extracting genes with highest variance from brain_cancer_cnv **Lennard**
 - [ ] Definition of a threshold for variance für exp bzw cnv **Ilya + Lennard**
 - [ ] Code optimieren **Ilya**
-- [ ] Trying to find a way to perform Wilcoxon. How can we apply it on our datasets? **Xenia + Ilya**
+- [x] Trying to find a way to perform Wilcoxon. How can we apply it on our datasets? **Xenia + Ilya**
 - [ ] CLUSTERING: determine specific drugs for each brain cancer subtype or is there any trend between cell lines and drugs. Basically: are there any drugs that are more effective for certain cells? **Cedrik**
 
 Whenever there is time (not a priority):
 - [ ] Start with report: General look and Q1 **Xenia + Cedrik**
 
 
-
+Till 28.06
+- [ ] Visualization of gene expression via vulcano plot
 
 
 In the pipeline:
