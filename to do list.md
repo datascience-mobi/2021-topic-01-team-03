@@ -51,3 +51,6 @@ In the pipeline:
 Idea how to continue:
 - [ ] PCA of relevant data and clustering 
 - [ ] Assign (hopefully) to subtype 
+
+Missing for report:
+- [ ] Code how we definded threshold of effectiveness and reason 
