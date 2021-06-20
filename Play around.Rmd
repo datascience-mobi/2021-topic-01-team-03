@@ -418,9 +418,7 @@ relevant_genes_exp_subtypes=list(relevant_genes_exp[glioma,],relevant_genes_exp[
 General consideration: Characteristic genes are genes that have a huge variance and are present in a specific cell line/ subtype. 
 
 ##Performance of Shapiro Test to investigate whether gene expressions are normally distributed. 
-```{r}
-
-
+```{r eval=FALSE}
 
 #q<-apply(brain_cancer_exp,2,var)
 #w<-which(q==0)
@@ -435,7 +433,7 @@ bc_exp_high_var <- brain_cancer_exp[,-bc_exp_no_var]
 bc_exp_high_var <- apply(bc_exp_high_var,2,as.numeric)
 
 #Listing all gene variances
-exp_list <- vector(mode = "list", length = ncol(s))
+exp_list <- vector(mode = "list", length = ncol(bc_exp_high_var))
 for(i in 1:ncol(bc_exp_high_var)) {         
   exp_list[[i]] <- bc_exp_high_var[ , i]
 }
@@ -457,7 +455,7 @@ bc_exp_not_norm=brain_cancer_exp[,-bc_exp_norm]
 ``` 
 
 ##Performance of Wilcoxon test to extract genes which are differentially expressed.
-```{r}
+```{r eval=FALSE}
 # Removal of these columns
 
 # Creating dataframe with all non brain cancer cell lines
@@ -494,20 +492,65 @@ brain_cancer_cl[-which(wilcox_pvalue<=0.05),"disease_subtype"]
 
 ##Wilcoxon test: compare all gene from 34 brain cancer cell lines with the same gene from all other tumors
 ```{r}
-wilcox.test(as.numeric(non_bc_exp[,1]),as.numeric(bc_exp_not_norm[,1]),paired = F)
+# Creating dataframe with all non brain cancer cell lines
+non_bc_cl = prism.cl[!prism.cl$disease == "Brain Cancer",]
+non_bc_names=non_bc_cl[,1] 
+non_bc_exp=prism.exp[non_bc_names,]
 
-wilcox_genes <- vector(mode = "list",length = 18699)
-for(i in 1:18699) {         
-  wilcox_genes[[i]] <- wilcox.test(as.numeric(non_bc_exp[,i]),as.numeric(bc_exp_not_norm[,i]),paired = F)
+# Removal of lines with NA from new dataframe
+non_bc_exp=non_bc_exp[rowSums(is.na(non_bc_exp)) == 0,]
+#non_bc_exp=non_bc_exp[,-c(bc_exp_norm)] #deactivation of this line since we don't know whether Shapiro was necessary
+
+# Performance of Wilcoxon
+#wilcox.test(as.numeric(non_bc_exp[,1]),as.numeric(bc_exp_not_norm[,1]),paired = F) #same procedure
+wilcox.test(as.numeric(non_bc_exp[,1]),as.numeric(brain_cancer_exp[,1]),paired = F)
+
+#wilcox_genes <- vector(mode = "list",length = 18699)
+#for(i in 1:18699) {         
+#  wilcox_genes[[i]] <- wilcox.test(as.numeric(non_bc_exp[,i]),as.numeric(bc_exp_not_norm[,i]),paired = F)
+#}
+
+wilcox_genes <- vector(mode = "list",length = 19177)
+for(i in 1:19177) {         
+  wilcox_genes[[i]] <- wilcox.test(as.numeric(non_bc_exp[,i]),as.numeric(brain_cancer_exp[,i]),paired = F)
 }
 
-wilcox_pvalue_genes <- vector(length = 18699)
-for(i in 1:18699) {         
+#wilcox_pvalue_genes <- vector(length = 18699)
+#for(i in 1:18699) {         
+#  wilcox_pvalue_genes[i] <- wilcox_genes[[i]]$p.value
+#}
+
+wilcox_pvalue_genes <- vector(length = 19177)
+for(i in 1:19177) {
   wilcox_pvalue_genes[i] <- wilcox_genes[[i]]$p.value
 }
 
-length(which(wilcox_pvalue_genes<=0.01))#the amount of genes that are significantly different in expression comparing to other tumors
+length(which(wilcox_pvalue_genes<=0.05))#the amount of genes that are significantly different in expression comparing to other tumors
+
+
 ```
+
+Caution: This is a case for the multiplicity problem. While testing thousands of hypotheses simultaneously, the chance of getting false positives is increased. There are two possibilities of adjustment.
+
+First: The Bonferroni correction: Correction of the FWER (family-wise error rate) so the probability of getting at least one false positive during multiple testing. In this way, the significance level alpha is adjustet to alpha/n.
+
+Second: The Benjamini and Hochberg correction. This is a method to control the FDR (false discovery rate) so the proportion of false positives among the significant results. This method is more recommended for gene expression analysis.
+
+https://www.reneshbedre.com/blog/multiple-hypothesis-testing-corrections.html
+
+
+##Adjustment of multiple testing problem 
+```{r}
+#Bonferroni correction
+
+wilcox_pvalue_bonf = p.adjust(wilcox_pvalue_genes, method = "bonferroni", n = length(wilcox_pvalue_genes)) #I first was confused from p-value=1 but is possible when there is absolutely no evidence to reject H0
+length(which(wilcox_pvalue_bonf<=0.05))
+
+#Benjamini-Hochberg correction
+wilcox_pvalue_BH = p.adjust(wilcox_pvalue_genes, method = "BH", n = length(wilcox_pvalue_genes))
+length(which(wilcox_pvalue_BH<=0.05))
+```
+
 
 
 # Question 4: What other factors contribute to drug effectiveness prediction?
