@@ -721,7 +721,7 @@ ggplot(new_means_eff, aes(x = x, y = y, color = subtype)) +
                           xlab("Drugs") + 
                           ylab("Efficiency") + 
   
-  geom_point(aes(shape=subtype, size = -y))
+  geom_point(aes(shape=subtype))
 
 ##auffallend sind die Medulloblastoma, die in 31 von 51 Fällen effektiver sind als alle anderen Drogen!!!  Drogen 24, 26, 32 und 33 
 
@@ -789,13 +789,12 @@ y <- 4 ## cut off height was choosen as 8 from previous dendogramm
 clust_km <- km_astrocytoma_ae_d7$cluster 
 
 # Create a new data frame storing these results
-km_astrocytoma_ae_d7_complete <- mutate(as.data.frame(t(astrocytoma_ae_d7)), cluster = clust_km)
+km_astrocytoma_ae_d7_complete <- as.data.frame(t(astrocytoma_ae_d7), cluster = clust_km)
 
 plot(km_astrocytoma_ae_d7_complete)
 
 # Plot the positions of the players and color them using their cluster for height = 20
-ggplot(astrocytoma_ae_d7_mean, aes(x = x), color = factor) +
-  geom_scatter()
+
 ```
 
 
