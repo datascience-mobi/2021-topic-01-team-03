@@ -767,7 +767,7 @@ km_df <- data.frame(Astrocytoma = astrocytoma_ae_d7_mean,
                         Glioma = glioma_ae_d7_mean, 
                         Glioblastoma = glioblastoma_ae_d7_mean,  
                         Medulloblastoma = medulloblastoma_ae_d7_mean)
-km <- kmeans(km_df, 4, iter.max = 10, nstart = 1)
+km <- kmeans(km_df, 3, iter.max = 20, nstart = 1)
 km
 ```
 ## Elbowplot for the clusters 
@@ -781,7 +781,7 @@ wss <- sapply(1:8, function(k){
 plot(1:8,wss,type = 'b',pch = 19, main = "Subtypes", xlab = "Number of clusters K",
      ylab = "Total within-clusters sum of squares")
 library(cluster)
-pam_4 <- pam(km_df, k = 4)
+pam_4 <- pam(km_df, k = 3)
 plot(silhouette(pam_4))
 
 

@@ -4,6 +4,11 @@
 - Übersicht mit Stefan machen: was brauchen wir? was erwarten wir? was wollen wir?
 - Chaos Wilcoxon Test: Brauchen wir wirklich keinen Shapiro Test um Zelllinien zu entfernen? (siehe Carls Folien); Inwiefern müssen Stichproben gleichgroß sein? (bei uns 447 und 34); 
 
+**21.06.21** 
+- CLustering efficiency, macht das Sinn? Vergleich und Abdeckung mit dem clustering der Expressionsswerte 
+- 
+
+
 **16.06.21**
 - Wie relativieren wir die Größe der unterschiedlichen Subtypes? Können wir sagen, dass Medulloblastoma so viel effektiver behandelt werden können, weil mit Abstand die kleinste Stichprobe ist (Vorschlag von Lennard: Gene dahinter betrachten und versuchen die Effektivität auf genetische Ursachen zurückzuführen) (bezogen auf Cedriks Clustering)
 - **Geparte test für subtypes? Analysis of variance? Wilcoxon nicht paired (signifikante abweichung der Mittelwert)? Ziemlich unnötig**
