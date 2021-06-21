@@ -36,7 +36,7 @@ Nevertheless, treatments were given whose doses did not correspond to the standa
 
 To identify the most effective drugs, we looked at the effectiveness values of the `prism` data frame. The more negative the value, the more effective the treatment. Contrary to the threshold value 0.3 of Corsello *et al.* we have set the threshold value 0.2.
 
-In order to reduce the number of drugs and to be able to make later predictions independent of the dose, we finally selected drugs that are effective at all doses. 
+In order to reduce the number of drugs and to be able to make later predictions independent of the dose, we finally selected drugs that are effective in all doses. 
 
 
 
@@ -47,10 +47,10 @@ In order to reduce the number of drugs and to be able to make later predictions 
 - Wilcoxon Signed Rank Test
 
 
-4) What other factors contribute to drug and effectiveness prediction? 
+4) What other factors contribute to predicting the effectiveness of a drug? 
 - Estimate the relevant variables
 - Look for correlations between variables and leave only variables with high variance
-- Reduce the amount of dimesions by conducting a PCA
+- Reduce the amount of dimensions by conducting a PCA
 - Regression model with PCA
 - Compare the real effectiveness with the estimated one 
 
@@ -58,9 +58,9 @@ In order to reduce the number of drugs and to be able to make later predictions 
 Rough version with possible visualizations:
 
 Q1:
-- Visualization of efficiencies for every doses via eight *histograms* with median
+- Visualization of effectiveness for every doses via eight *histograms* with median
 - Visualization of effective drugs after filtering for drugs effective in every cell type via Cedrik's *clustering* 
-- Showing differences of efficiencies between subtypes by *boxplots*?
+- Showing differences in the effectiveness between subtypes by *boxplots*?
 
 Q3:
 - Visualization of most relevant genes in cell lines via a *heatmap* with shows the degree of expression

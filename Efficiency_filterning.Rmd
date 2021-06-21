@@ -607,7 +607,6 @@ library(ggplot2)
 #ggplot(data = gb_cluster_df) +
   #geom_point(aes(x=, y=)
 
-
 ```
 
 
@@ -621,26 +620,6 @@ library(ggplot2)
 
 ```{r}
 
-## Compute k-means with k = x 
-x <- 6 
-
-km_astrocytoma_ae_d7 = kmeans(t(astrocytoma_ae_d7), centers = x) 
-
-y <- 4 ## cut off height was choosen as 8 from previous dendogramm 
-
-clust_km <- km_astrocytoma_ae_d7$cluster 
-
-# Create a new data frame storing these results
-# km_astrocytoma_ae_d7_complete <- mutate(as.data.frame(t(astrocytoma_ae_d7)), cluster = clust_km)
-
-plot(km_astrocytoma_ae_d7_complete)
-
-# Plot the positions of the players and color them using their cluster for height = 20
-# ggplot(astrocytoma_ae_d7_mean, aes(x = x), color = factor) +
- # geom_scatter()
-
-## Compute k-means with k = 6
-set.seed(123)
 ae_d7 <-data.frame(matrix(nrow = 34,ncol = length(effective_in_all_doses)),row.names = rownames(brain_cancer))
 for (i in 1:length(effective_in_all_doses)){
   ae_d7[,i]=effective_d7[,grep(effective_in_all_doses[i], colnames(effective_d7))]
@@ -655,22 +634,32 @@ colnames(ae_d7)=effective_in_all_doses
 km_astrocytoma_d7 <- kmeans(astrocytoma_ae_d7, 1, nstart = 25)
 print(km_astrocytoma_d7)
 
+## Compute k-means with k = x 
+x <- 6 
+
+km_astrocytoma_ae_d7 = kmeans(t(astrocytoma_ae_d7), centers = x) 
+
+y <- 4 ## cut off height was choosen as 8 from previous dendogramm 
+
+clust_km <- km_astrocytoma_ae_d7$cluster 
+
+# Create a new data frame storing these results
+library(dplyr)
+km_astrocytoma_ae_d7_complete <- mutate(as.data.frame(t(astrocytoma_ae_d7)), cluster = clust_km)
+
+plot(km_astrocytoma_ae_d7_complete)
+
+# Plot the positions of the players and color them using their cluster for height = 20
+# ggplot(astrocytoma_ae_d7_mean, aes(x = x), color = factor) +
+ # geom_scatter()
+
+## Compute k-means with k = 6
+
+
 ```
 
 
 ```{r}
-clusters_x <- cutree(clust_astro_ae_d7, k=x) ## 4 clusters could be ideal 
-#astro_ae_d7_complete <- mutate(astrocytoma_ae_d7, cluster = clusters_x)
-
-ggplot(astro_ae_d7_complete, aes(x = x, y = y, color = factor(cluster))) +
-  geom_point()
-```
-
-
-
-```{r}
-value <- colMeans(astrocytoma_ae_d7)
-hist(value, breaks = 500)
 
 boxplot(astrocytoma_ae_d7, xlba="Efficiency", ylab="Drug")
 boxplot(glioma_ae_d7, xlab="Efficiency", ylab="Drug")
@@ -695,6 +684,7 @@ means_eff <- data.frame(Astrocytoma = astrocytoma_ae_d7_mean,
 ## Plotting all of the individual subtyp means 
 
 ```{r}
+library("ggplot2")
 par(mfrow=c(2,2))
 ggplot(means_eff, aes(x = Drugs , y = Astrocytoma)) + 
         geom_point()
@@ -771,57 +761,41 @@ ggplot(new_means_eff, aes(x = x, y = y, color = subtype)) +
 
 ## in 38 von 51 Fällen sind die Drogen auf die Medulloblastoma wirksamer als auf die Astrocytoma  
 ```
-
-
-
-# Cedriks clustering 
-
-## d7 sets 
-
+## kmeans clustering of the meansof all subtypes  
 ```{r}
-## Compute k-means with k = x 
-x <- 6 
-
-km_astrocytoma_ae_d7 = kmeans(t(astrocytoma_ae_d7), centers = x) 
-
-y <- 4 ## cut off height was choosen as 8 from previous dendogramm 
-
-clust_km <- km_astrocytoma_ae_d7$cluster 
-
-# Create a new data frame storing these results
-km_astrocytoma_ae_d7_complete <- as.data.frame(t(astrocytoma_ae_d7), cluster = clust_km)
-
-plot(km_astrocytoma_ae_d7_complete)
-
-# Plot the positions of the players and color them using their cluster for height = 20
-
+km_df <- data.frame(Astrocytoma = astrocytoma_ae_d7_mean,
+                        Glioma = glioma_ae_d7_mean, 
+                        Glioblastoma = glioblastoma_ae_d7_mean,  
+                        Medulloblastoma = medulloblastoma_ae_d7_mean)
+km <- kmeans(km_df, 4, iter.max = 10, nstart = 1)
+km
 ```
-
+## Elbowplot for the clusters 
 
 ```{r}
-#Elbow Method for finding the optimal number of clusters
-set.seed(123)
-# Compute and plot wss for k = 2 to k = 15.
-k.max <- 15
-wss <- sapply(1:k.max, 
-              function(k){kmeans(astrocytoma_ae_d7, 2, nstart=50,iter.max = 15 )$tot.withinss})
-wss
-plot(1:k.max, wss,
-     type="b", pch = 19, frame = FALSE, 
-     xlab="Number of clusters K",
-     ylab="Total within-clusters sum of squares")
+# testing the number of clusters by elbow-plot
 
+wss <- sapply(1:8, function(k){
+  kmeans(x=km_df, centers = k)$tot.withinss
+})
+plot(1:8,wss,type = 'b',pch = 19, main = "Subtypes", xlab = "Number of clusters K",
+     ylab = "Total within-clusters sum of squares")
+library(cluster)
+pam_4 <- pam(km_df, k = 4)
+plot(silhouette(pam_4))
+
+
+library(factoextra)
+fviz_cluster(km, data = km_df)
 ```
 
 
 
-```{r}
-clusters_x <- cutree(clust_astro_ae_d7, k=x) ## 4 clusters could be ideal 
-astro_ae_d7_complete <- mutate(astrocytoma_ae_d7, cluster = clusters_x)
 
-ggplot(astro_ae_d7_complete, aes(x = x, y = y, color = factor(cluster))) +
-  geom_point()
-```
+
+
+
+
 
 
 
