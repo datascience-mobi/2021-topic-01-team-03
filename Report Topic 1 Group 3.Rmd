@@ -27,6 +27,7 @@ To explore our main question, we examined four milestones:
 
 As the datasets also contain information on other cancer types, we removed non-relevant cell lines. In addition, we classified the datasets according to brain cancer subtypes, as this information was used for later analyses. We treated NA values either by removing the cell line or by replacing it with a mean value, depending on the dataset. 
 
+++Descriptive statistics++
 
 #Identification of effective drugs
 
@@ -40,7 +41,13 @@ In order to reduce the number of drugs and to be able to make later predictions 
 
 siehe effective drugs summary Lennards Datei
 
-ungefähr 75% Quantil; median 
+ungefähr 75% Quantil; mean 
+
+++Clustering of effective drugs++
+
+Taking it as justification for not taking subtypes into account.
+
+++Subtypes in boxplots represent the efficiency++
 
 2) What are the targets of the effective drugs?
 3) Are there any genetic markers that are specific for brain cancer subtypes?
@@ -59,10 +66,6 @@ ungefähr 75% Quantil; median
 
 Rough version with possible visualizations (6 plots in total)
 
-Q1:
-- Visualization of effectiveness for every doses via eight *histograms* with median
-- Visualization of effective drugs after filtering for drugs effective in every cell type via Cedrik's *clustering* 
-- Showing differences in the effectiveness between subtypes by *boxplots*?
 
 Q3:
 - Visualization of most relevant genes in cell lines via a *heatmap* with shows the degree of expression
