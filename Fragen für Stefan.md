@@ -2,7 +2,9 @@
 
 **23.06.21**
 - Übersicht mit Stefan machen: was brauchen wir? was erwarten wir? was wollen wir?
-- Chaos Wilcoxon Test: Brauchen wir wirklich keinen Shapiro Test um Zelllinien zu entfernen? (siehe Carls Folien); Inwiefern müssen Stichproben gleichgroß sein? (bei uns 447 und 34); 
+- Chaos Wilcoxon Test: Die Hälfte der Gene sind normal verteilt, bzw. im Durchschnitt sind sie es. Sollen wir dann doch einen t-test machen oder ist der Wilcoxon besser, weil nicht alle Gene normalverteilt sind; Inwiefern müssen Stichproben beim Wilcoxon gleichgroß sein? (bei uns 447 und 34); 
+- Log fold change?
+- Wie finden wir einen Zusammenhang zwischen drugs und gene expression? Ja, irgendwas mit clustering, aber wie macht man das?
 
 **21.06.21** 
 - CLustering efficiency, macht das Sinn? Vergleich und Abdeckung mit dem clustering der Expressionsswerte 
