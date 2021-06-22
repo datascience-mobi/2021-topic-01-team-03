@@ -419,13 +419,6 @@ General consideration: Characteristic genes are genes that have a huge variance 
 
 ##Performance of Shapiro Test to investigate whether gene expressions are normally distributed. 
 ```{r eval=FALSE}
-
-#q<-apply(brain_cancer_exp,2,var)
-#w<-which(q==0)
-#View(brain_cancer_exp[,-w])
-#s<-brain_cancer_exp[,-w]
-#s<-apply(s,2,as.numeric)
-
 # Filtering genes that have no variance
 bc_exp_var <- apply(brain_cancer_exp,2,var)
 bc_exp_no_var <- which(bc_exp_var==0)
@@ -447,51 +440,16 @@ for(i in 1:ncol(bc_exp_high_var)) {
   exp_pvalue[i] <- bc_exp_shap[[i]]$p.value
 } 
 
-# Selecting genes with a p value smaller than 0.5%
-bc_exp_norm = which(exp_pvalue > 0.95)
-bc_exp_not_norm=brain_cancer_exp[,-bc_exp_norm]
+# Selecting genes with a p value smaller than 5%
+bc_exp_norm = which(exp_pvalue >= 0.05)
+exp_p_mean=mean(exp_pvalue)
+#aproximately half of the genes are normally distributed and on avarage gene expression is normally distributed too.
 
 
 #Conclusion: I think this was not totally useless. Although we maybe do not need to remove the genes that are normally distributed before performing the Wilcoxon test, it is a good justification for performing it, because the t-test and ANOVA are not possible because just a few genes are not normally distributed. The Wilcoxon test can be used when the samples have similarly sizes (in our case 447 and 41) and i.i.d. can be assumed. 
 # After some research I came to the conclusion that we can use these unequal sample sizes but we have to take into account that the power of our test is minimized. 
 # Power of a test: Probability for a type two error not to occur
 ``` 
-
-##Performance of Wilcoxon test to extract genes which are differentially expressed.
-```{r eval=FALSE}
-# Removal of these columns
-
-# Creating dataframe with all non brain cancer cell lines
-non_bc_cl = prism.cl[!prism.cl$disease == "Brain Cancer",]
-non_bc_names=non_bc_cl[,1] 
-non_bc_exp=prism.exp[non_bc_names,]
-
-# Removal of lines with NA from new dataframe
-non_bc_exp=non_bc_exp[rowSums(is.na(non_bc_exp)) == 0,]
-non_bc_exp=non_bc_exp[,-c(bc_exp_norm)]
-# Taking the mean/ median of all non brain cancer cell lines as reference 
-non_bc_exp_mean_t=colMeans(non_bc_exp)
-non_bc_exp_mean=as.data.frame(t(non_bc_exp_mean_t))
-View(non_bc_exp_mean)
-
-# Wilcoxon test
-wilcox_cells <- vector(mode = "list",length = 34)
-for(i in 1:34) {         
-  wilcox_cells[[i]] <- wilcox.test(as.numeric(non_bc_exp_mean[1,]),as.numeric(bc_exp_not_norm[i,]))
-}
-
-wilcox_pvalue <- vector(length = 34)
-for(i in 1:34) {         
-  wilcox_pvalue[i] <- wilcox_cells[[i]]$p.value
-}
-
-length(which(wilcox_pvalue<=0.05))
-#24 brain cancer cell lines are different in gene expression comparing to other tumor types
-names[-which(wilcox_pvalue<=0.05)] #names of cell lines which are similar in expression to the rest of tumor
-
-brain_cancer_cl[-which(wilcox_pvalue<=0.05),"disease_subtype"]
-#here we can see which types of cells are similar in expression to other tumors
-```
 
 ##Wilcoxon test: compare all gene from 34 brain cancer cell lines with the same gene from all other tumors
 ```{r}
@@ -502,26 +460,14 @@ non_bc_exp=prism.exp[non_bc_names,]
 
 # Removal of lines with NA from new dataframe
 non_bc_exp=non_bc_exp[rowSums(is.na(non_bc_exp)) == 0,]
-#non_bc_exp=non_bc_exp[,-c(bc_exp_norm)] #deactivation of this line since we don't know whether Shapiro was necessary
 
 # Performance of Wilcoxon
-#wilcox.test(as.numeric(non_bc_exp[,1]),as.numeric(bc_exp_not_norm[,1]),paired = F) #same procedure
 wilcox.test(as.numeric(non_bc_exp[,1]),as.numeric(brain_cancer_exp[,1]),alternative = "two.sided", paired = F)
-
-#wilcox_genes <- vector(mode = "list",length = 18699)
-#for(i in 1:18699) {         
-#  wilcox_genes[[i]] <- wilcox.test(as.numeric(non_bc_exp[,i]),as.numeric(bc_exp_not_norm[,i]),paired = F)
-#}
 
 wilcox_genes <- vector(mode = "list",length = ncol(brain_cancer_exp))
 for(i in 1:ncol(brain_cancer_exp)) {         
   wilcox_genes[[i]] <- wilcox.test(as.numeric(non_bc_exp[,i]),as.numeric(brain_cancer_exp[,i]), alternative = "two.sided", paired = F)
 }
-
-#wilcox_pvalue_genes <- vector(length = 18699)
-#for(i in 1:18699) {         
-#  wilcox_pvalue_genes[i] <- wilcox_genes[[i]]$p.value
-#}
 
 wilcox_pvalue_genes <- vector(length = ncol(brain_cancer_exp))
 for(i in 1:ncol(brain_cancer_exp)) {
@@ -532,8 +478,8 @@ length(which(wilcox_pvalue_genes<=0.05))#the amount of genes that are significan
 
 
 #Stefan's suggestion: Two larger samples with roughly equal size can be used to run a Mann-Whitney-U/Wilcoxon test for each gene. Assumptions: 
-#H0: expression value for the gene comes from the same distribution
-#H1: Group gene expression values vome from two distributions with different central measures
+#H0: expression value for the gene comes from the same distribution (=same expression)
+#H1: Group gene expression values come from two distributions with different central measures (=different expression)
 
 ```
 
@@ -551,10 +497,31 @@ https://www.reneshbedre.com/blog/multiple-hypothesis-testing-corrections.html
 #Bonferroni correction
 wilcox_pvalue_bonf = p.adjust(wilcox_pvalue_genes, method = "bonferroni", n = length(wilcox_pvalue_genes)) #I first was confused from p-value=1 but is possible when there is absolutely no evidence to reject H0
 length(which(wilcox_pvalue_bonf<=0.01))
+length(which(wilcox_pvalue_bonf<=0.05))
 
 #Benjamini-Hochberg correction
 wilcox_pvalue_BH = p.adjust(wilcox_pvalue_genes, method = "BH", n = length(wilcox_pvalue_genes))
 length(which(wilcox_pvalue_BH<=0.01))
+length(which(wilcox_pvalue_BH<=0.05))
+```
+
+##Effect size
+```{r}
+#install.packages("effsize")
+library(effsize)
+cohen_d_values <- vector(mode = "list",length = ncol(brain_cancer_exp))
+for(i in 1:ncol(brain_cancer_exp)) {         
+  cohen_d_values[[i]] <- cohen.d(non_bc_exp[,i], brain_cancer_exp[,i])
+}
+```
+
+##Fold change
+```{r}
+#install.packages("gtools")
+library(gtools)
+bc_exp_mean=apply(brain_cancer_exp,2, mean)
+non_bc_exp_mean=apply(non_bc_exp,2,mean)
+foldchange(bc_exp_mean,non_bc_exp_mean)
 ```
 
 
