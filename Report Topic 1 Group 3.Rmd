@@ -38,7 +38,9 @@ To identify the most effective drugs, we looked at the effectiveness values of t
 
 In order to reduce the number of drugs and to be able to make later predictions independent of the dose, we finally selected drugs that are effective in all doses. 
 
+siehe effective drugs summary Lennards Datei
 
+ungefähr 75% Quantil; median 
 
 2) What are the targets of the effective drugs?
 3) Are there any genetic markers that are specific for brain cancer subtypes?
@@ -55,7 +57,7 @@ In order to reduce the number of drugs and to be able to make later predictions 
 - Compare the real effectiveness with the estimated one 
 
 
-Rough version with possible visualizations:
+Rough version with possible visualizations (6 plots in total)
 
 Q1:
 - Visualization of effectiveness for every doses via eight *histograms* with median
