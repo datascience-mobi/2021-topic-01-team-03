@@ -522,6 +522,7 @@ library(gtools)
 bc_exp_mean=apply(brain_cancer_exp,2, mean)
 non_bc_exp_mean=apply(non_bc_exp,2,mean)
 foldchange(bc_exp_mean,non_bc_exp_mean)
+cohen.d(bc_exp_mean,non_bc_exp_mean)
 ```
 
 
