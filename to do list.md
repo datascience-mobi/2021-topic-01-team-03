@@ -40,7 +40,7 @@ Whenever there is time (not a priority):
 
 
 Till 28.06
-- [ ] Visualization of gene expression via vulcano plot
+- [ ] **Xenia+Ilya** Wilcoxon significance level lower (justification), Vulcano plot to define threshold for log-fold-change, Ranking of p values, Visualization of distribution (histograms) from lowest p value
 
 
 In the pipeline:
@@ -49,8 +49,9 @@ In the pipeline:
 
 
 Idea how to continue:
-- [ ] PCA of relevant data and clustering 
-- [ ] Assign (hopefully) to subtype 
+- [ ] Before using model: normalization of genes (?) and testing of quality (or afterwards?)
+- [ ] Regression model: Prediction of efficiency of a drug by putting genes into the model; removing of genes that do not improve the model
+- [ ] Null-Modell: Defining criteria from prism-dataset (eg stage)
 
 Missing for report:
 - [ ] Code how we definded threshold of effectiveness and reason 
