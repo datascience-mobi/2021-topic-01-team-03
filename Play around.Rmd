@@ -496,33 +496,24 @@ https://www.reneshbedre.com/blog/multiple-hypothesis-testing-corrections.html
 ```{r}
 #Bonferroni correction
 wilcox_pvalue_bonf = p.adjust(wilcox_pvalue_genes, method = "bonferroni", n = length(wilcox_pvalue_genes)) #I first was confused from p-value=1 but is possible when there is absolutely no evidence to reject H0
-length(which(wilcox_pvalue_bonf<=0.01))
+b_correction=which(wilcox_pvalue_bonf<=0.01)
 length(which(wilcox_pvalue_bonf<=0.05))
 
 #Benjamini-Hochberg correction
 wilcox_pvalue_BH = p.adjust(wilcox_pvalue_genes, method = "BH", n = length(wilcox_pvalue_genes))
-length(which(wilcox_pvalue_BH<=0.01))
+bh_correction=which(wilcox_pvalue_BH<=0.01)
 length(which(wilcox_pvalue_BH<=0.05))
 ```
 
-##Effect size
-```{r}
-#install.packages("effsize")
-library(effsize)
-cohen_d_values <- vector(mode = "list",length = ncol(brain_cancer_exp))
-for(i in 1:ncol(brain_cancer_exp)) {         
-  cohen_d_values[[i]] <- cohen.d(non_bc_exp[,i], brain_cancer_exp[,i])
-}
-```
-
-##Fold change
+##Fold change and volcano plot
 ```{r}
 #install.packages("gtools")
 library(gtools)
-bc_exp_mean=apply(brain_cancer_exp,2, mean)
-non_bc_exp_mean=apply(non_bc_exp,2,mean)
+bc_exp_mean=apply(brain_cancer_exp[,b_correction],2, mean)
+non_bc_exp_mean=apply(non_bc_exp[,b_correction],2,mean)
 foldchange(bc_exp_mean,non_bc_exp_mean)
-cohen.d(bc_exp_mean,non_bc_exp_mean)
+
+bc_exp_mean/non_bc_exp_mean
 ```
 
 
