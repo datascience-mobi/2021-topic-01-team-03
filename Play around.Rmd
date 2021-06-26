@@ -531,19 +531,17 @@ the_genes=brain_cancer_exp[names,names(volcano_filtered_genes)]
 View(ae_d7)
 View(the_genes)
 
-
-ll<-letters[seq(1,19)]
-d_g<-data.frame(matrix(nrow = 20,ncol = 51))
-rownames(d_g)=c("Drugs",ll)
+d_g<-data.frame(matrix(nrow = 35,ncol = 51))
+rownames(d_g)=c("Drugs",names)
 d_g[1,]<-apply(ae_d7,2,mean)
 
 set.seed(333)
-for(i in 1:19){
+for(i in 1:34){
   d_g[i+1,]<-sample(the_genes[i,],51)
 }
  d_g<-as.data.frame(t(d_g))
 
-summary(lm(Drugs~a+b+c,d_g))
+#summary(lm(Drugs~a+b+c,d_g))
 
 
 #loop intent
