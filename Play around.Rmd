@@ -461,11 +461,17 @@ non_bc_exp=prism.exp[non_bc_names,]
 # Removal of lines with NA from new dataframe
 non_bc_exp=non_bc_exp[rowSums(is.na(non_bc_exp)) == 0,]
 
-# Performance of Wilcoxon
-wilcox.test(as.numeric(non_bc_exp[,1]),as.numeric(brain_cancer_exp[,1]),alternative = "two.sided", paired = F)
+#Z-transformation
 
-wilcox_genes <- vector(mode = "list",length = ncol(brain_cancer_exp))
-for(i in 1:ncol(brain_cancer_exp)) {         
+non_bc_exp=as.data.frame(scale(as.matrix(non_bc_exp)))
+brain_cancer_exp_w=as.data.frame(scale(as.matrix(brain_cancer_exp)))
+
+
+# Performance of Wilcoxon
+wilcox.test(as.numeric(non_bc_exp[,234]),as.numeric(brain_cancer_exp[,234]),alternative = "two.sided", paired = F)
+
+wilcox_genes <- vector(mode = "list",length = 100)
+for(i in 1:100) {         
   wilcox_genes[[i]] <- wilcox.test(as.numeric(non_bc_exp[,i]),as.numeric(brain_cancer_exp[,i]), alternative = "two.sided", paired = F)
 }
 
@@ -524,8 +530,41 @@ View(volcano_filtered_genes)
 the_genes=brain_cancer_exp[names,names(volcano_filtered_genes)]
 View(ae_d7)
 View(the_genes)
-a<-data.frame()
-lm()
+
+d_g<-data.frame(matrix(nrow = 35,ncol = 51))
+rownames(d_g)=c("Drugs",names)
+d_g[1,]<-apply(ae_d7,2,mean)
+
+set.seed(333)
+for(i in 1:34){
+  d_g[i+1,]<-sample(the_genes[i,],51)
+}
+ d_g<-as.data.frame(t(d_g))
+
+summary(lm(Drugs~colnames()),data=d_g)
+
+#try onj a single cell line
+d_g<-data.frame(matrix(nrow = 2,ncol = 51))
+rownames(d_g)=c("Drugs","Genes")
+d_g[1,]<-apply(ae_d7,2,mean)
+d_g[2,]<-sample(the_genes[1,],51)
+ d_g<-as.data.frame(t(d_g))
+summary(lm(Drugs~Genes,data = d_g))
+
+#loop intent
+aa<-lm(Drugs~Genes,data = a)
+
+r_squared<- vector(length = 50000)
+
+d_g<-data.frame(matrix(nrow = 51,ncol = 2))
+colnames(d_g)=c("Drugs","Genes")
+d_g[,1]<-apply(ae_d7,2,mean)
+d_g[,2]<-sample(the_genes[1,],51)
+
+for(i in 1:50000) {
+  r_squared[i] <- summary(lm())
+}
+
 ```
 
 
