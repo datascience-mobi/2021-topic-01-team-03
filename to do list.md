@@ -44,6 +44,7 @@ Till 28.06
 
 Till 05.07.
 - [ ] Finding correlation / Filtering for more genes by using achilles dataset 
+- [ ] Comparison cnv und exp between subtypes to find out if it makes sense to compare these values. Comparing subtypes genewise. 
 
 
 In the pipeline:
