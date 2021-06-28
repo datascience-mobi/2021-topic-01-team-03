@@ -40,7 +40,10 @@ Whenever there is time (not a priority):
 
 
 Till 28.06
-- [ ] **Xenia+Ilya** Wilcoxon significance level lower (justification), Vulcano plot to define threshold for log-fold-change, Ranking of p values, Visualization of distribution (histograms) from lowest p value
+- [ ] **Xenia+Ilya** Wilcoxon significance level lower (justification), Volcano plot to define threshold for log-fold-change, Ranking of p values, Visualization of distribution (histograms) from lowest p value
+
+Till 05.07.
+- [ ] Finding correlation / Filtering for more genes by using achilles dataset 
 
 
 In the pipeline:
