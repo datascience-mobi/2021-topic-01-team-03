@@ -40,7 +40,11 @@ Whenever there is time (not a priority):
 
 
 Till 28.06
-- [ ] **Xenia+Ilya** Wilcoxon significance level lower (justification), Vulcano plot to define threshold for log-fold-change, Ranking of p values, Visualization of distribution (histograms) from lowest p value
+- [ ] **Xenia+Ilya** Wilcoxon significance level lower (justification), Volcano plot to define threshold for log-fold-change, Ranking of p values, Visualization of distribution (histograms) from lowest p value
+
+Till 05.07.
+- [ ] Finding correlation / Filtering for more genes by using achilles dataset 
+- [ ] Comparison cnv und exp between subtypes to find out if it makes sense to compare these values. Comparing subtypes genewise. 
 
 
 In the pipeline:
@@ -52,6 +56,7 @@ Idea how to continue:
 - [ ] Before using model: normalization of genes (?) and testing of quality (or afterwards?)
 - [ ] Regression model: Prediction of efficiency of a drug by putting genes into the model; removing of genes that do not improve the model
 - [ ] Null-Modell: Defining criteria from prism-dataset (eg stage)
+- [ ] Differences in exp/cnv values between cellsubtypes
 
 Missing for report:
 - [ ] Code how we definded threshold of effectiveness and reason 
