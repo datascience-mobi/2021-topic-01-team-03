@@ -1,0 +1,384 @@
+---
+title: "comparison of drug and achilles targets"
+author: "Lennard"
+date: "24/6/2021"
+output: html_document
+---
+
+
+```{r}
+load("../2021-topic-01-team-03/dataset/prism_datasets.rda")
+load("../2021-topic-01-team-03/dataset/cellline_datasets.rda")
+```
+
+# Guidelines
+
+prism: effect of the treatment (columns) on cell growth of cell lines (rows).For example, BRD-A00077618-236-07-6::0.0024414::HTS002 indicates treatment with the drug BRD-A00077618-236-07-6, with a dose of 2.4 nM, in assay HTS002. Values represent log fold changes with respect to a control DMSO experiment.
+
+prism.treat:information about the treatment (row) and the drug used
+
+prism.cl: cell lines' info
+
+prism.exp: gene TPM (transcripts per million) values. Indicate over/underexpression. Rows = cell lines, columns = genes
+
+prism.cnv: gene copy number (CN) values. In absolute terms, CN = 2, since there are two alleles per genes. In cancer, genes might be amplified CN > 2 or deleted CN < 2
+
+prism.snv: observed mutations in a sample. The isDeleterious flag specifies if mutation has a functional effect or not. First column is genes. There is a column
+(DepMap_ID) with corresponding cell lines
+
+prism.achilles: gene KO scores, a measure of how essential/important is a particular gene for the cell survival
+
+IDEA: use same indications as in PRISM paper to start filtering for relevant genes, cell lines? 
+
+
+# Cleaning
+
+## Selecting brain cancer specific cell lines in all data sets
+
+```{r Selection of cell lines}
+brain_cancer_cl=subset.data.frame(prism.cl, disease == 	"Brain Cancer") #identify the brain cancer cell lines' names
+
+names=brain_cancer_cl[,1] #saving the names as names
+
+#select wanted cell lines from all datasets
+brain_cancer=prism[names,]
+brain_cancer_achilles=prism.achilles[names,]
+brain_cancer_cnv=prism.cnv[names,]
+brain_cancer_exp=prism.exp[names,]
+```
+
+## Working on NAs
+
+```{r Working on NAs}
+# replacing NAs 
+lines=row.names(brain_cancer)
+row.names(brain_cancer_achilles) = lines
+
+# NA removal 
+brain_cancer_achilles_no_NA=na.omit(brain_cancer_achilles) #remove the entire cell lines from everywhere without KO scores
+
+# NA substitution for mean in brain_cancer
+for(i in 1:ncol(brain_cancer)){
+  brain_cancer[is.na(brain_cancer[,i]), i] <- mean(brain_cancer[,i], na.rm = TRUE)
+}
+brain_cancer=brain_cancer[ , colSums(is.na(brain_cancer)) == 0]
+```
+
+## Removal of useless columns 
+
+```{r}
+brain_cancer_cl=brain_cancer_cl[,-c(4,6,7,8,9,11,12,15,17,19,23,24,26,28,29,30,31,32,33)]
+```
+
+## Dividing cell lines into subtypes
+
+```{r}
+medulloblastoma=brain_cancer_cl$DepMap_ID[grep("Medulloblastoma", brain_cancer_cl$disease_subtype)]#we obtain the names of the cell lines that are classified as medulloblastoma
+
+glioblastoma=brain_cancer_cl$DepMap_ID[grep("Glioblastoma", brain_cancer_cl$disease_subtype)]
+
+glioma=brain_cancer_cl$DepMap_ID[grep("Glioma", brain_cancer_cl$disease_subtype)]
+
+astrocytoma=brain_cancer_cl$DepMap_ID[grep("Astrocytoma", brain_cancer_cl$disease_subtype)]
+
+#making sure we didnt forget anything 
+
+disease_subtypes=c(medulloblastoma,glioblastoma,glioma,astrocytoma)
+length(disease_subtypes)
+
+# Converting them into dataframes [IS THIS RELEVANT?]
+glioblastoma_bc <- brain_cancer[glioblastoma,]
+medulloblastoma_bc <- brain_cancer[medulloblastoma,]
+glioma_bc <- brain_cancer[glioma,]
+astrocytoma_bc <- brain_cancer[astrocytoma,]
+```
+
+
+# Question 1: How can we distinguish the most effective drugs?
+
+## Dividing drugs in doses groups
+
+```{r}
+dd1=grep("::0.00061034::", colnames(brain_cancer))
+dd2=grep("::0.0024414::", colnames(brain_cancer))
+dd3=grep("::0.00976562::", colnames(brain_cancer))
+dd4=grep("::0.0390625::", colnames(brain_cancer))
+dd5=grep("::0.15625::", colnames(brain_cancer))
+dd6=grep("::0.625::", colnames(brain_cancer))
+dd7=grep("::10::", colnames(brain_cancer))
+dd8=grep("::2.5::", colnames(brain_cancer))
+#positions of the respective doses in the dataframe 
+doses=c(dd1,dd2,dd3,dd4,dd5,dd6,dd7,dd8)
+
+
+
+doses_for_list=list("::0.00061034::","::0.0024414::","::0.00976562::","::0.0390625::","::0.15625::","::0.625::","::10::","::2.5::")
+select_doses=function(x){
+  brain_cancer[,grep(x, colnames(brain_cancer))]
+}
+doses_subsets_<-lapply(doses_for_list,select_doses)
+
+
+
+d1=brain_cancer[,dd1]
+d2=brain_cancer[,dd2]
+d3=brain_cancer[,dd3]
+d4=brain_cancer[,dd4]
+d5=brain_cancer[,dd5]
+d6=brain_cancer[,dd6]
+d7=brain_cancer[,dd7]
+d8=brain_cancer[,dd8]
+
+#these are the standard doses summed up into seperate dataframes
+sum(length(dd1), length(dd2), length(dd3), length(dd4),length(dd5), length(dd6),length(dd7),length(dd8)) #ups something missing
+
+deviation=brain_cancer[,-doses] #lets see what we missed-> these are the doses that are not exact and have some kind of a deviation
+
+questionable_drugs=prism.treat[colnames(deviation),]#we dont know if we can use these drugs, may be their doses deviate too far from the standard
+```
+
+## Working on drugs that do not fit the standard doses
+
+```{r}
+#Stefan's suggestion: assigning the outliers to closest standard doses
+
+#Calculation of all differences between questionable drugs and standard doses
+std_doses <- c(0.00061034,0.0024414,0.00976562,0.0390625,0.15625,0.625,10,2.5) #vector with standard dosages
+
+#Picking dosages from dosages that have to be assigned to standard dosages
+doses_to_assign=as.numeric(questionable_drugs$dose)
+
+#Creating data frame for the differences between standard dosages and questionable drugs
+extra_drugs <-data.frame(matrix(nrow = 8,ncol = length(doses_to_assign)),row.names = std_doses)
+colnames(extra_drugs)=rownames(questionable_drugs)
+
+for (i in 1:length(doses_to_assign)){
+    extra_drugs[,i]=abs(std_doses - doses_to_assign[i])
+}
+
+#Assigning the drugs to the closest standard dosage 
+to_which_dose=apply(extra_drugs, 2, which.min) #function of which.min: gives row number of min value of column. In comparison just apply: gives min difference
+
+d1_extra=which(to_which_dose==1)
+d2_extra=which(to_which_dose==2)
+d3_extra=which(to_which_dose==3)
+d4_extra=which(to_which_dose==4)
+d5_extra=which(to_which_dose==5)
+d6_extra=which(to_which_dose==6)
+d7_extra=which(to_which_dose==7)
+d8_extra=which(to_which_dose==8)
+
+
+
+doses_for_list_2<-list(1,2,3,4,5,6,7,8)
+select_doses_2=function(x){
+  brain_cancer[,grep(x, to_which_dose)]
+}
+doses_subsets_2<-lapply(doses_for_list_2,select_doses_2)
+
+add_extra_doses_list=function(x){
+  cbind(doses_subsets_2[[x]], doses_subsets_[[x]])
+}
+doses_subsets_<-lapply(doses_for_list_2,add_extra_doses_list)
+
+
+
+#just a quick check how many doses there are in total
+not_standard_doses=c(d1_extra,d2_extra,d3_extra,d4_extra,d5_extra,d6_extra,d7_extra,d8_extra)
+length(not_standard_doses)#in comparison with dimension from questionable_drugs right!
+
+#Adding new assigned dosages to small data frames of standard dosages 
+add_extra_doses=function(x,y){
+  cbind(brain_cancer[,unique(grep(paste(colnames(extra_drugs[,x]),collapse="|"), colnames(brain_cancer)))], y)
+  }
+
+d1=add_extra_doses(d1_extra,d1)
+d2=add_extra_doses(d2_extra,d2)
+d3=add_extra_doses(d3_extra,d3)
+d4=add_extra_doses(d4_extra,d4)
+d5=add_extra_doses(d5_extra,d5)
+d6=add_extra_doses(d6_extra,d6)
+d7=add_extra_doses(d7_extra,d7)
+d8=add_extra_doses(d8_extra,d8)
+
+
+
+#Resumé: new data sets for each dosage with assigned outliers to closest deviation
+
+ncol(d2)+ncol(d1)+ncol(d3)+ncol(d4)+ncol(d5)+ncol(d6)+ncol(d7)+ncol(d8)
+ncol(brain_cancer)
+```
+
+
+## Filter effective drugs in each dose group
+
+```{r}
+#Lets say for now that our threshold is 0,3 so we can see how many drugs meet this criteria in each dose group
+effective_drugs<-function(x){
+  effective_x<-x[,which(apply(x,2,mean)<=0.2)]
+  return(effective_x)
+}
+
+effective_d1=effective_drugs(d1)
+effective_d2=effective_drugs(d2)
+effective_d3=effective_drugs(d3)
+effective_d4=effective_drugs(d4)
+effective_d5=effective_drugs(d5)
+effective_d6=effective_drugs(d6)
+effective_d7=effective_drugs(d7)
+effective_d8=effective_drugs(d8)
+
+
+setdiff(colnames(d1), colnames(doses_subsets_[[1]])) #something is wrong
+doses_subsets <- list(d1 = d1, d2 = d2, d3 = d3, d4 = d4, d5 = d5, d6 = d6, d7 = d7, d8 = d8)
+all_effective_drugs<- lapply(doses_subsets, effective_drugs)
+
+
+
+ncol(all_effective_drugs[[1]])+ncol(all_effective_drugs[[2]])+ncol(all_effective_drugs[[3]])+ncol(all_effective_drugs[[4]])+ncol(all_effective_drugs[[5]])+ncol(all_effective_drugs[[6]])+ncol(all_effective_drugs[[7]])+ncol(all_effective_drugs[[8]])
+
+length(all_effective_drugs)
+length(which(apply(brain_cancer,2,mean)<=0.2)) #this is the amount of drugs that we keep in total. We compare these 2 length to make sure that that we do not select the same drug twice. If it was the case the first length would be bigger than the second one
+```
+
+##Select drugs that are effective in all doses
+
+```{r}
+save_new_colnames<-function(x){
+  a<-gsub(pattern = "::.*", replacement = "", colnames(x))
+  colnames(x)<-a
+  return(x)
+}
+
+effective_d1<-save_new_colnames(effective_d1)
+effective_d2<-save_new_colnames(effective_d2)
+effective_d3<-save_new_colnames(effective_d3)
+effective_d4<-save_new_colnames(effective_d4)
+effective_d5<-save_new_colnames(effective_d5)
+effective_d6<-save_new_colnames(effective_d6)
+effective_d7<-save_new_colnames(effective_d7)
+effective_d8<-save_new_colnames(effective_d8)
+
+
+
+all_effective_drugs<-lapply(all_effective_drugs, save_new_colnames)
+## remove everything but the drug information from colnames and make them new colnames of the dataframes
+
+
+  
+common_drugs<-function(x,y){
+  different<-setdiff(colnames(x), colnames(y))
+  
+  different<-unique(grep(paste(different,collapse="|"), colnames(x)))
+  
+  colnames(x[,-different])
+}
+#function returns the names of the common drugs between 2 dataframes
+
+d1_d2=common_drugs(effective_d1,effective_d2)
+d2_d1=common_drugs(effective_d2,effective_d1)
+#both are equal, so the function works correctly
+
+d1_d3=common_drugs(effective_d1,effective_d3)
+d1_d4=common_drugs(effective_d1,effective_d4)
+d1_d5=common_drugs(effective_d1,effective_d5)
+d1_d6=common_drugs(effective_d1,effective_d6)
+d1_d7=common_drugs(effective_d1,effective_d7)
+d1_d8=common_drugs(effective_d1,effective_d8)
+
+#which drugs are present in all 8 doses?
+
+present_in_all_doses<-function(a,b,c,d,e,f,g){
+ bb<-setdiff(a, b)
+ a<-a [! a %in% bb]
+ 
+ cc<-setdiff(a, c)
+ a<-a [! a %in% cc]
+ 
+ dd<-setdiff(a, d)
+ a<-a [! a %in% dd]
+ 
+ ee<-setdiff(a, e)
+ a<-a [! a %in% ee]
+ 
+ ff<-setdiff(a, f)
+ a<-a [! a %in% ff]
+ 
+ gg<-setdiff(a, g)
+ a<-a [! a %in% gg]
+ 
+ return(a)
+}
+
+effective_in_all_doses=present_in_all_doses(d1_d2,d1_d3,d1_d4,d1_d5,d1_d6,d1_d7,d1_d8)
+#51 drugs are effective in all doses
+```
+
+# Question 2: What are the targets of the effective drugs?
+
+##What are the targets of the effective drugs?
+
+```{r}
+brain_cancer_treat=prism.treat[colnames(brain_cancer),] #selecting only the drugs we previously filtered out from brain_cancer
+brain_cancer_treat=brain_cancer_treat[!duplicated(brain_cancer_treat$broad_id),]
+rownames(brain_cancer_treat)<-brain_cancer_treat[,1]
+effective_bc_treat=brain_cancer_treat[effective_in_all_doses,-c(1,2,3,4,10)]
+#summary(effective_bc_treat$target)
+#summary(effective_bc_treat$moa)
+#expression of these genes would be interesting to look into our cell lines
+```
+
+#Target of effective drugs
+```{r}
+brain_cancer.effective_targets <- effective_bc_treat$target
+```
+
+
+##Selecting brain cancer specific cell lines in all data sets
+```{r}
+brain_cancer_cl=subset.data.frame(prism.cl, disease == 	"Brain Cancer") #identify the brain cancer cell lines' names
+
+names=brain_cancer_cl[,1] #saving the names as names
+
+#select wanted cell lines from all datasets
+brain_cancer=prism[names,]
+brain_cancer_achilles=prism.achilles[names,]
+brain_cancer_cnv=prism.cnv[names,]
+brain_cancer_exp=prism.exp[names,]
+#brain_cancer_snv=prism.snv[names,] #does not make sense no cell line info, other type of filtering required
+#brain_cancer_treat=prism.treat[names,] #does not make sense no cell line info, other type of filtering required
+```
+
+# Selecting achilles targets
+```{r}
+brain_cancer_achilles.mean <- apply(brain_cancer_achilles,2,mean)
+hist(brain_cancer_achilles.mean, breaks = 200)
+brain_cancer_achilles.var <- apply(brain_cancer_achilles,2,var)#variance
+hist(brain_cancer_achilles.var, breaks = 200, xlim = c(0,0.4))
+brain_cancer_achilles.relevant <- colnames(brain_cancer_achilles)[brain_cancer_achilles.mean < -0.2]
+```
+
+# Compare drug and achilles targets
+```{r}
+brain_cancer.effective_targets <- as.character(brain_cancer.effective_targets)
+
+for(i in brain_cancer.effective_targets){
+  
+ strsplit 
+
+x <- 0
+y <- 0
+for(i in brain_cancer.effective_targets){
+  for(j in brain_cancer_achilles.relevant){
+    
+    if(brain_cancer.effective_targets[i] == brain_cancer_achilles.relevant[j]){x = x+1}
+    
+    else if(brain_cancer.effective_targets[i] != brain_cancer_achilles.relevant[j]){y = y+1}
+  }
+}
+length(brain_cancer.effective_targets)*length(brain_cancer_achilles.relevant)
+x
+y
+
+```
+
