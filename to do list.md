@@ -56,6 +56,7 @@ Idea how to continue:
 - [ ] Before using model: normalization of genes (?) and testing of quality (or afterwards?)
 - [ ] Regression model: Prediction of efficiency of a drug by putting genes into the model; removing of genes that do not improve the model
 - [ ] Null-Modell: Defining criteria from prism-dataset (eg stage)
+- [ ] Differences in exp/cnv values between cellsubtypes
 
 Missing for report:
 - [ ] Code how we definded threshold of effectiveness and reason 
