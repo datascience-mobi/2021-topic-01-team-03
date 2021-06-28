@@ -258,7 +258,7 @@ present_in_all_doses<-function(a,b,c,d,e,f,g){
  return(a)
 }
 effective_in_all_doses=present_in_all_doses(d1_d2,d1_d3,d1_d4,d1_d5,d1_d6,d1_d7,d1_d8)
-#160 drugs are effective in all doses
+#51 drugs are effective in all doses
 
 ```
 
@@ -503,15 +503,221 @@ points(mean_eiad_matrix[47,], type = "b", col = "darkmagenta")#2, zz, 6
 points(mean_eiad_matrix[48,], type = "b", col = "yellow")#2, fb 5d, 6
 points(mean_eiad_matrix[42,], type = "b", col = "chocolate")#2, fb 6d, ca 8
 
+```
+
+# Question 2: What are the targets of the effective drugs?
+
+##What are the targets of the effective drugs?
+
+```{r}
+brain_cancer_treat=prism.treat[colnames(brain_cancer),] #selecting only the drugs we previously filtered out from brain_cancer
+brain_cancer_treat=brain_cancer_treat[!duplicated(brain_cancer_treat$broad_id),]
+rownames(brain_cancer_treat)<-brain_cancer_treat[,1]
+effective_bc_treat=brain_cancer_treat[effective_in_all_doses,-c(1,2,3,4,10)]
+#summary(effective_bc_treat$target)
+#summary(effective_bc_treat$moa)
+#expression of these genes would be interesting to look into our cell lines
+```
 
 
+Targets
 
-
-
-
-
+```{r}
+#top <- which(effective_bc_treat$moa == "topoisomerase inhibitor")
+# <- which(effective_bc_treat$moa == "mTOR inhibitor")
+#aurk <- which(effective_bc_treat$moa == "Aurora kinase inhibitor")
+#jak <- which(effective_bc_treat$moa == "JAK inhibitor")
+#mek <- which(effective_bc_treat$moa == "MEK inhibitor")
 
 
 ```
+
+
+
+
+## Drugs and subtypes relationship
+
+```{r}
+ae_d7 <-data.frame(matrix(nrow = 34,ncol = length(effective_in_all_doses)),row.names = rownames(brain_cancer))
+colnames(ae_d7)=effective_in_all_doses
+
+for (i in 1:length(effective_in_all_doses)){
+  ae_d7[,i]=effective_d7[,grep(effective_in_all_doses[i], colnames(effective_d7))]
+}
+
+glioma_ae_d7=ae_d7[glioma,]
+
+glioblastoma_ae_d7=ae_d7[glioblastoma,]
+
+astrocytoma_ae_d7=ae_d7[astrocytoma,]
+
+medulloblastoma_ae_d7=ae_d7[medulloblastoma,]
+
+compare_subtypes<-data.frame(matrix(nrow = 4,ncol = length(effective_in_all_doses)),row.names = c("glioma", "glioblastoma", "astrocytoma", "medulloblastoma"))
+colnames(compare_subtypes)=effective_in_all_doses
+
+compare_subtypes[1,]<-apply(glioma_ae_d7, 2, mean)
+compare_subtypes[2,]<-apply(glioblastoma_ae_d7, 2, mean)
+compare_subtypes[3,]<-apply(astrocytoma_ae_d7, 2, mean)
+compare_subtypes[4,]<-apply(medulloblastoma_ae_d7, 2, mean)
+
+```
+
+##Looking at targets of our effective drugs
+
+```{r}
+##mtor
+#just trying some stuff on a particular example
+mtor_cnv=(brain_cancer_cnv[,grep("MTOR", colnames(brain_cancer_cnv))])
+mtor_exp=(brain_cancer_exp[,grep("MTOR", colnames(brain_cancer_exp))])
+mtor_achilles=(brain_cancer_achilles[,grep("MTOR", colnames(brain_cancer_achilles))])
+cmtor <- apply(mtor_cnv, 2, mean) #all values show a deletion of these genes in our cell lines
+emtor <- apply(mtor_exp, 2, mean) #however all of them seem to be over expressed
+amtor <- apply(mtor_achilles, 2, mean)# more essential (mTOR)
+MTOR <- c(cmtor[1],emtor[6],amtor[6])
+
+
+##top
+top_cnv=(brain_cancer_cnv[,grep("TOP", colnames(brain_cancer_cnv))])
+top_exp=(brain_cancer_exp[,grep("TOP", colnames(brain_cancer_exp))])
+top_achilles=(brain_cancer_achilles[,grep("TOP", colnames(brain_cancer_achilles))])
+ctop <- apply(top_cnv, 2, mean) #all values show a deletion of these genes in our cell lines, approx. only 1 allele is deleted
+etop <- apply(top_exp, 2, mean) #however very unique expression levels
+atop <- apply(top_achilles, 2, mean)#some are more essential (TOP2A,TOP3A) than others
+TOP1 <- c(ctop[7],etop[13],atop[5])
+TOP2A <- c(ctop[4],etop[3],atop[7])
+TOP2B <- c(ctop[10],etop[1],atop[8])
+
+##AURK
+aurk_cnv=(brain_cancer_cnv[,grep("AURK", colnames(brain_cancer_cnv))])
+aurk_exp=(brain_cancer_exp[,grep("AURK", colnames(brain_cancer_exp))])
+aurk_achilles=(brain_cancer_achilles[,grep("AURK", colnames(brain_cancer_achilles))])
+caurk <- apply(aurk_cnv, 2, mean) #all values show a deletion of these genes in our cell lines, approx. only 1 allele is deleted
+eaurk <- apply(aurk_exp, 2, mean) #however some of them seem to be over expressed: AURKC <0 vs. AURKA/AIP1/B > 6
+aaurk <- apply(aurk_achilles, 2, mean)#some are more essential (AURKA, AURKB)
+AURKA <- c(caurk[5],eaurk[1],aaurk[1])
+AURKB <- c(caurk[3],eaurk[4],aaurk[3])
+AURKC <- c(caurk[4],eaurk[2],aaurk[4])
+
+##JAK
+jak_cnv=(brain_cancer_cnv[,grep("JAK", colnames(brain_cancer_cnv))])
+jak_exp=(brain_cancer_exp[,grep("JAK", colnames(brain_cancer_exp))])
+jak_achilles=(brain_cancer_achilles[,grep("JAK", colnames(brain_cancer_achilles))])
+cjak <- apply(jak_cnv, 2, mean) #all values show a deletion of these genes in our cell lines, approx. only 1 allele is deleted
+ejak <- apply(jak_exp, 2, mean) #seem to be over expressed: JAK2 (2,5), JAK1 (5,7)
+ajak <- apply(jak_achilles, 2, mean)#max. is -0,2 (JAK3)
+JAK1 <- c(cjak[1],ejak[4],ajak[1])
+JAK2 <- c(cjak[7],ejak[1],ajak[2])
+JAK3 <- c(cjak[3],ejak[2],ajak[3])
+
+##KIF
+kif_cnv=(brain_cancer_cnv[,grep("KIF", colnames(brain_cancer_cnv))])
+kif_exp=(brain_cancer_exp[,grep("KIF", colnames(brain_cancer_exp))])
+kif_achilles=(brain_cancer_achilles[,grep("KIF", colnames(brain_cancer_achilles))])
+ckif <- apply(kif_cnv, 2, mean) 
+ekif <- apply(kif_exp, 2, mean) 
+akif <- apply(kif_achilles, 2, mean)
+KIF11 <- c(ckif[12],ekif[23],akif[1])
+
+##KCNT2
+kcnt2_cnv=(brain_cancer_cnv[,grep("KCNT", colnames(brain_cancer_cnv))])
+kcnt2_exp=(brain_cancer_exp[,grep("KCNT", colnames(brain_cancer_exp))])
+kcnt2_achilles=(brain_cancer_achilles[,grep("KCNT", colnames(brain_cancer_achilles))])
+ckcnt <- apply(kcnt2_cnv, 2, mean) 
+ekcnt <- apply(kcnt2_exp, 2, mean) 
+akcnt <- apply(kcnt2_achilles, 2, mean)
+KCNT2 <- c(ckcnt[1],ekcnt[2],akcnt[2])
+
+##PIK
+pik_cnv=(brain_cancer_cnv[,grep("PIK", colnames(brain_cancer_cnv))])
+pik_exp=(brain_cancer_exp[,grep("PIK", colnames(brain_cancer_exp))])
+pik_achilles=(brain_cancer_achilles[,grep("PIK", colnames(brain_cancer_achilles))])
+cpik <- apply(pik_cnv, 2, mean) 
+epik <- apply(pik_exp, 2, mean) 
+apik <- apply(pik_achilles, 2, mean)
+PIK3CA <- c(cpik[19],epik[9],apik[6])
+PIK3CD <- c(cpik[1],epik[15],apik[8])
+PIK3CG <- c(cpik[21],epik[6],apik[9])
+PIK3CB <- c(cpik[18],epik[2],apik[7])
+
+##PSM
+psm_cnv=(brain_cancer_cnv[,grep("PSM", colnames(brain_cancer_cnv))])
+psm_exp=(brain_cancer_exp[,grep("PSM", colnames(brain_cancer_exp))])
+psm_achilles=(brain_cancer_achilles[,grep("PSM", colnames(brain_cancer_achilles))])
+cpsm <- apply(psm_cnv, 2, mean) 
+epsm <- apply(psm_exp, 2, mean) 
+apsm <- apply(psm_achilles, 2, mean)
+PSMA1 <- c(cpsm[7],epsm[27],apsm[4])
+PSMA2 <- c(cpsm[51],epsm[18],apsm[5])
+PSMA3 <- c(cpsm[16],epsm[10],apsm[6])
+PSMA4 <- c(cpsm[19],epsm[3],apsm[7])
+PSMA5 <- c(cpsm[3],epsm[32],apsm[8])
+PSMA6 <- c(cpsm[14],epsm[13],apsm[9])
+PSMA7 <- c(cpsm[38],epsm[15],apsm[10])
+PSMA8 <- c(cpsm[31],epsm[33],apsm[11])
+PSMB1 <- c(cpsm[48],epsm[1],apsm[12])
+PSMB2 <- c(cpsm[1],epsm[25],apsm[15])
+PSMB3 <- c(cpsm[24],epsm[53],apsm[16])
+PSMB4 <- c(cpsm[5],epsm[36],apsm[17])
+PSMB5 <- c(cpsm[10],epsm[12],apsm[18])
+PSMB6 <- c(cpsm[22],epsm[31],apsm[19])
+PSMB7 <- c(cpsm[54],epsm[30],apsm[20])
+PSMB8 <- c(cpsm[45],epsm[48],apsm[21])
+PSMB9 <- c(cpsm[47],epsm[52],apsm[22])
+PSMB10 <- c(cpsm[20],epsm[49],apsm[13])
+PSMB11 <- c(cpsm[11],epsm[51],apsm[14])
+
+##CDK
+cdk_cnv=(brain_cancer_cnv[,grep("CDK", colnames(brain_cancer_cnv))])
+cdk_exp=(brain_cancer_exp[,grep("CDK", colnames(brain_cancer_exp))])
+cdk_achilles=(brain_cancer_achilles[,grep("CDK", colnames(brain_cancer_achilles))])
+ccdk <- apply(cdk_cnv, 2, mean) 
+ecdk <- apply(cdk_exp, 2, mean) 
+acdk <- apply(cdk_achilles, 2, mean)
+CDK1 <- c(ccdk[5],ecdk[37],acdk[1])
+CDK2 <- c(ccdk[9],ecdk[17],acdk[12])
+CDK4 <- c(ccdk[10],ecdk[23],acdk[17])
+CDK5 <- c(ccdk[38],ecdk[33],acdk[18])
+CDK6 <- c(ccdk[37],ecdk[11],acdk[24])
+CDK7 <- c(ccdk[29],ecdk[22],acdk[25])
+CDK8 <- c(ccdk[13],ecdk[21],acdk[26])
+CDK9 <- c(ccdk[46],ecdk[24],acdk[27])
+
+##BCL2
+bcl_cnv=(brain_cancer_cnv[,grep("BCL", colnames(brain_cancer_cnv))])
+bcl_exp=(brain_cancer_exp[,grep("BCL", colnames(brain_cancer_exp))])
+bcl_achilles=(brain_cancer_achilles[,grep("BCL", colnames(brain_cancer_achilles))])
+cbcl <- apply(bcl_cnv, 2, mean) 
+ebcl <- apply(bcl_exp, 2, mean) 
+abcl <- apply(bcl_achilles, 2, mean)
+BCL2 <- c(cbcl[14],ebcl[20],abcl[4])
+
+```
+
+
+```{r}
+#set all means of cnv, exp and achilles in matrix
+mmm <- rbind(MTOR,TOP1,TOP2A,TOP2B,AURKA,AURKB,AURKC,JAK1,JAK2,JAK3,KIF11,KCNT2,PIK3CA,PIK3CB,PIK3CD,PIK3CG,PSMA1,PSMA2,PSMA3,PSMA4,PSMA5,PSMA6,PSMA7,PSMA8,PSMB1,PSMB2,PSMB3,PSMB4,PSMB5,PSMB6,PSMB7,PSMB8,PSMB9,PSMB10,PSMB11,CDK1,CDK2,CDK4,CDK5,CDK6,CDK7,CDK8,CDK9,BCL2)
+
+colnam <- c("cnv mean","exp mean","achilles mean")
+colnames(mmm) <- colnam
+#Maximum of cnv mean, exp mean and minimum (more negative more essential) achilles mean
+max(mmm[,1])
+max(mmm[,2])
+min(mmm[,3])
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
