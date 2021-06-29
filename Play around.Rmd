@@ -127,7 +127,7 @@ check_for_differences<-function(x,y){
 length(setdiff(colnames(x),colnames(y)))
 }
 
-check_for_differences()
+check_for_differences(doses_subsets_[[1]],d1)
 
 
 
@@ -185,15 +185,12 @@ select_doses_2=function(x){
 }
 doses_subsets_2<-lapply(doses_for_list_2,select_doses_2)
 
-length(setdiff(colnames(doses_subsets_2[[6]]),colnames(brain_cancer[,d6_extra])))
+check_for_differences(doses_subsets_2[[7]],d7_extra)
 
 add_extra_doses_list=function(x){
   cbind(brain_cancer[,unique(grep(paste(colnames(extra_drugs[,doses_subsets_2[[x]]]),collapse="|"), colnames(brain_cancer)))], doses_subsets_[[x]])
 }
 doses_subsets_<-lapply(doses_for_list_2,add_extra_doses_list)
-
-sapply(doses_for_list_2,check_for_differences)
-
 
 #just a quick check how many doses there are in total
 not_standard_doses=c(d1_extra,d2_extra,d3_extra,d4_extra,d5_extra,d6_extra,d7_extra,d8_extra)
@@ -217,6 +214,9 @@ d8=add_extra_doses(d8_extra,d8)
 
 ncol(d2)+ncol(d1)+ncol(d3)+ncol(d4)+ncol(d5)+ncol(d6)+ncol(d7)+ncol(d8)
 ncol(brain_cancer)
+
+
+check_for_differences(doses_subsets_[[8]],d8)
 ```
 
 ## Filter effective drugs in each dose group
@@ -238,10 +238,14 @@ effective_d7=effective_drugs(d7)
 effective_d8=effective_drugs(d8)
 
 
+check_for_differences(doses_subsets[[2]],doses_subsets_[[2]])
 
 doses_subsets <- list(d1 = d1, d2 = d2, d3 = d3, d4 = d4, d5 = d5, d6 = d6, d7 = d7, d8 = d8)
 all_effective_drugs_2<- lapply(doses_subsets, effective_drugs)
+all_effective_drugs_<-lapply(doses_subsets_, effective_drugs)
+check_for_differences(all_effective_drugs_2[[3]], all_effective_drugs_[[3]])
 
+all_effective_drugs<-lapply(doses_subsets_, effective_drugs)
 
 
 ncol(all_effective_drugs[[1]])+ncol(all_effective_drugs[[2]])+ncol(all_effective_drugs[[3]])+ncol(all_effective_drugs[[4]])+ncol(all_effective_drugs[[5]])+ncol(all_effective_drugs[[6]])+ncol(all_effective_drugs[[7]])+ncol(all_effective_drugs[[8]])
@@ -271,32 +275,61 @@ effective_d8<-save_new_colnames(effective_d8)
 
 
 all_effective_drugs<-lapply(all_effective_drugs, save_new_colnames)
-length(setdiff(colnames(all_effective_drugs[[1]]),colnames(all_effective_drugs_2[[1]])))
+check_for_differences(all_effective_drugs[[4]],effective_d4)
 ## remove everything but the drug information from colnames and make them new colnames of the dataframes
 
-
+common_drugs<-function(y){
+  different<-setdiff(colnames(effective_d1), colnames(y))
   
-common_drugs<-function(x,y){
-  different<-setdiff(colnames(x), colnames(y))
+  different<-unique(grep(paste(different,collapse="|"), colnames(effective_d1)))
   
-  different<-unique(grep(paste(different,collapse="|"), colnames(x)))
-  
-  colnames(x[,-different])
+  colnames(effective_d1[,-different])
 }
+
+common_drugs_<-function(y){
+  different<-setdiff(colnames(all_effective_drugs[[1]]), colnames(all_effective_drugs[[y]]))
+  
+  different<-unique(grep(paste(different,collapse="|"), colnames(all_effective_drugs[[1]])))
+  
+  colnames(all_effective_drugs[[1]][,-different])
+}
+
+doses_interception<-lapply(doses_for_list_2, common_drugs_)
+length(setdiff(doses_interception[[5]],d1_d5))
 #function returns the names of the common drugs between 2 dataframes
 
-d1_d2=common_drugs(effective_d1,effective_d2)
-d2_d1=common_drugs(effective_d2,effective_d1)
+d1_d2=common_drugs(effective_d2)
 #both are equal, so the function works correctly
 
-d1_d3=common_drugs(effective_d1,effective_d3)
-d1_d4=common_drugs(effective_d1,effective_d4)
-d1_d5=common_drugs(effective_d1,effective_d5)
-d1_d6=common_drugs(effective_d1,effective_d6)
-d1_d7=common_drugs(effective_d1,effective_d7)
-d1_d8=common_drugs(effective_d1,effective_d8)
+d1_d3=common_drugs(effective_d3)
+d1_d4=common_drugs(effective_d4)
+d1_d5=common_drugs(effective_d5)
+d1_d6=common_drugs(effective_d6)
+d1_d7=common_drugs(effective_d7)
+d1_d8=common_drugs(effective_d8)
 
 #which drugs are present in all 8 doses?
+present_in_all_doses_<-function(a,b,c,d,e,f,g){
+ bb<-setdiff(a, b)
+ a<-a [! a %in% bb]
+ 
+ cc<-setdiff(a, c)
+ a<-a [! a %in% cc]
+ 
+ dd<-setdiff(a, d)
+ a<-a [! a %in% dd]
+ 
+ ee<-setdiff(a, e)
+ a<-a [! a %in% ee]
+ 
+ ff<-setdiff(a, f)
+ a<-a [! a %in% ff]
+ 
+ gg<-setdiff(a, g)
+ a<-a [! a %in% gg]
+ 
+ return(a)
+}
 
 present_in_all_doses<-function(a,b,c,d,e,f,g){
  bb<-setdiff(a, b)
