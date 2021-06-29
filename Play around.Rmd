@@ -123,6 +123,12 @@ select_doses=function(x){
 }
 doses_subsets_<-lapply(doses_for_list,select_doses)
 
+check_for_differences<-function(x,y){
+length(setdiff(colnames(x),colnames(y)))
+}
+
+check_for_differences()
+
 
 
 d1=brain_cancer[,dd1]
@@ -173,19 +179,20 @@ d6_extra=which(to_which_dose==6)
 d7_extra=which(to_which_dose==7)
 d8_extra=which(to_which_dose==8)
 
-
-
 doses_for_list_2<-list(1,2,3,4,5,6,7,8)
 select_doses_2=function(x){
-  brain_cancer[,grep(x, to_which_dose)]
+ unique(grep(x, to_which_dose))
 }
 doses_subsets_2<-lapply(doses_for_list_2,select_doses_2)
 
+length(setdiff(colnames(doses_subsets_2[[6]]),colnames(brain_cancer[,d6_extra])))
+
 add_extra_doses_list=function(x){
-  cbind(doses_subsets_2[[x]], doses_subsets_[[x]])
+  cbind(brain_cancer[,unique(grep(paste(colnames(extra_drugs[,doses_subsets_2[[x]]]),collapse="|"), colnames(brain_cancer)))], doses_subsets_[[x]])
 }
 doses_subsets_<-lapply(doses_for_list_2,add_extra_doses_list)
 
+sapply(doses_for_list_2,check_for_differences)
 
 
 #just a quick check how many doses there are in total
@@ -206,14 +213,11 @@ d6=add_extra_doses(d6_extra,d6)
 d7=add_extra_doses(d7_extra,d7)
 d8=add_extra_doses(d8_extra,d8)
 
-
-
 #Resumé: new data sets for each dosage with assigned outliers to closest deviation
 
 ncol(d2)+ncol(d1)+ncol(d3)+ncol(d4)+ncol(d5)+ncol(d6)+ncol(d7)+ncol(d8)
 ncol(brain_cancer)
 ```
-
 
 ## Filter effective drugs in each dose group
 
@@ -234,9 +238,9 @@ effective_d7=effective_drugs(d7)
 effective_d8=effective_drugs(d8)
 
 
-setdiff(colnames(d1), colnames(doses_subsets_[[1]])) #something is wrong
+
 doses_subsets <- list(d1 = d1, d2 = d2, d3 = d3, d4 = d4, d5 = d5, d6 = d6, d7 = d7, d8 = d8)
-all_effective_drugs<- lapply(doses_subsets, effective_drugs)
+all_effective_drugs_2<- lapply(doses_subsets, effective_drugs)
 
 
 
@@ -267,6 +271,7 @@ effective_d8<-save_new_colnames(effective_d8)
 
 
 all_effective_drugs<-lapply(all_effective_drugs, save_new_colnames)
+length(setdiff(colnames(all_effective_drugs[[1]]),colnames(all_effective_drugs_2[[1]])))
 ## remove everything but the drug information from colnames and make them new colnames of the dataframes
 
 
@@ -466,13 +471,14 @@ non_bc_exp=non_bc_exp[rowSums(is.na(non_bc_exp)) == 0,]
 non_bc_exp=as.data.frame(scale(as.matrix(non_bc_exp)))
 brain_cancer_exp_w=as.data.frame(scale(as.matrix(brain_cancer_exp)))
 
+hist(as.numeric(brain_cancer_exp_w[10,]),breaks=50,xlim = range(-3,3))
 
 # Performance of Wilcoxon
-wilcox.test(as.numeric(non_bc_exp[,234]),as.numeric(brain_cancer_exp[,234]),alternative = "two.sided", paired = F)
+wilcox.test(as.numeric(non_bc_exp[,24]),as.numeric(brain_cancer_exp_w[,24]),alternative = "two.sided", paired = F)
 
-wilcox_genes <- vector(mode = "list",length = 100)
-for(i in 1:100) {         
-  wilcox_genes[[i]] <- wilcox.test(as.numeric(non_bc_exp[,i]),as.numeric(brain_cancer_exp[,i]), alternative = "two.sided", paired = F)
+wilcox_genes <- vector(mode = "list",length=ncol(brain_cancer_exp))
+for(i in 1:ncol(brain_cancer_exp)) {         
+  wilcox_genes[[i]] <- wilcox.test(as.numeric(non_bc_exp[,i]),as.numeric(brain_cancer_exp_w[,i]), alternative = "two.sided", paired = F)
 }
 
 wilcox_pvalue_genes <- vector(length = ncol(brain_cancer_exp))
