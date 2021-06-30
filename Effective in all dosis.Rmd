@@ -692,12 +692,467 @@ ebcl <- apply(bcl_exp, 2, mean)
 abcl <- apply(bcl_achilles, 2, mean)
 BCL2 <- c(cbcl[14],ebcl[20],abcl[4])
 
+##TRPV4
+trpv_cnv=(brain_cancer_cnv[,grep("TRPV", colnames(brain_cancer_cnv))])
+trpv_exp=(brain_cancer_exp[,grep("TRPV", colnames(brain_cancer_exp))])
+trpv_achilles=(brain_cancer_achilles[,grep("TRPV", colnames(brain_cancer_achilles))])
+ctrpv <- apply(trpv_cnv, 2, mean) 
+etrpv <- apply(trpv_exp, 2, mean) 
+atrpv <- apply(trpv_achilles, 2, mean)
+TRPV4 <- c(ctrpv[1],etrpv[1],atrpv[4])
+
+##HSP90AA1
+hsp_cnv=(brain_cancer_cnv[,grep("HSP", colnames(brain_cancer_cnv))])
+hsp_exp=(brain_cancer_exp[,grep("HSP", colnames(brain_cancer_exp))])
+hsp_achilles=(brain_cancer_achilles[,grep("HSP", colnames(brain_cancer_achilles))])
+chsp <- apply(hsp_cnv, 2, mean) 
+ehsp <- apply(hsp_exp, 2, mean) 
+ahsp <- apply(hsp_achilles, 2, mean)
+HSP90AA1 <- c(chsp[15],ehsp[3],ahsp[3])
+
+##FGF2
+fgf_cnv=(brain_cancer_cnv[,grep("FGF", colnames(brain_cancer_cnv))])
+fgf_exp=(brain_cancer_exp[,grep("FGF", colnames(brain_cancer_exp))])
+fgf_achilles=(brain_cancer_achilles[,grep("FGF", colnames(brain_cancer_achilles))])
+cfgf <- apply(fgf_cnv, 2, mean) 
+efgf <- apply(fgf_exp, 2, mean) 
+afgf <- apply(fgf_achilles, 2, mean)
+FGF2<- c(cfgf[27],efgf[22],afgf[10])
+
+##FKBP1A
+fkb_cnv=(brain_cancer_cnv[,grep("FKBP1", colnames(brain_cancer_cnv))])
+fkb_exp=(brain_cancer_exp[,grep("FKBP1", colnames(brain_cancer_exp))])
+fkb_achilles=(brain_cancer_achilles[,grep("FKBP1", colnames(brain_cancer_achilles))])
+cfkb <- apply(fkb_cnv, 2, mean) 
+efkb <- apply(fkb_exp, 2, mean) 
+afkb <- apply(fkb_achilles, 2, mean)
+FKBP1A <- c(cfkb[6],efkb[1],afkb[5])
+
+##DHFR
+dhf_cnv=(brain_cancer_cnv[,grep("DHF", colnames(brain_cancer_cnv))])
+dhf_exp=(brain_cancer_exp[,grep("DHF", colnames(brain_cancer_exp))])
+dhf_achilles=(brain_cancer_achilles[,grep("DHF", colnames(brain_cancer_achilles))])
+cdhf <- apply(dhf_cnv, 2, mean) 
+edhf <- apply(dhf_exp, 2, mean) 
+adhf <- apply(dhf_achilles, 2, mean)
+DHFR <- c(cdhf[3],edhf[3],adhf[2])
+
+##TYMS
+tym_cnv=(brain_cancer_cnv[,grep("TYM", colnames(brain_cancer_cnv))])
+tym_exp=(brain_cancer_exp[,grep("TYM", colnames(brain_cancer_exp))])
+tym_achilles=(brain_cancer_achilles[,grep("TYM", colnames(brain_cancer_achilles))])
+ctym <- apply(tym_cnv, 2, mean) 
+etym <- apply(tym_exp, 2, mean) 
+atym <- apply(tym_achilles, 2, mean)
+TYMS <- c(ctym[2],etym[3],atym[3])
+
+##ATP5A1                                      ????????????????
+atp_cnv=(brain_cancer_cnv[,grep("ATP5", colnames(brain_cancer_cnv))])
+atp_exp=(brain_cancer_exp[,grep("ATP5", colnames(brain_cancer_exp))])
+atp_achilles=(brain_cancer_achilles[,grep("ATP5", colnames(brain_cancer_achilles))])
+catp <- apply(atp_cnv, 2, mean) 
+eatp <- apply(atp_exp, 2, mean) 
+aatp <- apply(atp_achilles, 2, mean)
+ATP5A1 <- c(catp[],eatp[],aatp[])
+
+##ATR
+atr_cnv=(brain_cancer_cnv[,grep("ATR", colnames(brain_cancer_cnv))])
+atr_exp=(brain_cancer_exp[,grep("ATR", colnames(brain_cancer_exp))])
+atr_achilles=(brain_cancer_achilles[,grep("ATR", colnames(brain_cancer_achilles))])
+catr <- apply(atr_cnv, 2, mean) 
+eatr <- apply(atr_exp, 2, mean) 
+aatr <- apply(atr_achilles, 2, mean)
+ATR <- c(catr[13],eatr[12],aatr[1])
+
+##LDLR
+ldl_cnv=(brain_cancer_cnv[,grep("LDLR", colnames(brain_cancer_cnv))])
+ldl_exp=(brain_cancer_exp[,grep("LDLR", colnames(brain_cancer_exp))])
+ldl_achilles=(brain_cancer_achilles[,grep("LDLR", colnames(brain_cancer_achilles))])
+cldl <- apply(ldl_cnv, 2, mean) 
+eldl <- apply(ldl_exp, 2, mean) 
+aldl <- apply(ldl_achilles, 2, mean)
+LDLR <- c(cldl[7],eldl[1],aldl[1])
+
+##CMPK1
+cmp_cnv=(brain_cancer_cnv[,grep("CMPK", colnames(brain_cancer_cnv))])
+cmp_exp=(brain_cancer_exp[,grep("CMPK", colnames(brain_cancer_exp))])
+cmp_achilles=(brain_cancer_achilles[,grep("CMPK", colnames(brain_cancer_achilles))])
+ccmp <- apply(cmp_cnv, 2, mean) 
+ecmp <- apply(cmp_exp, 2, mean) 
+acmp <- apply(cmp_achilles, 2, mean)
+CMPK1 <- c(ccmp[1],ecmp[2],acmp[1])
+
+##RRM
+rrm_cnv=(brain_cancer_cnv[,grep("RRM", colnames(brain_cancer_cnv))])
+rrm_exp=(brain_cancer_exp[,grep("RRM", colnames(brain_cancer_exp))])
+rrm_achilles=(brain_cancer_achilles[,grep("RRM", colnames(brain_cancer_achilles))])
+crrm <- apply(rrm_cnv, 2, mean) 
+errm <- apply(rrm_exp, 2, mean) 
+arrm <- apply(rrm_achilles, 2, mean)
+RRM1 <- c(crrm[2],errm[4],arrm[1])
+RRM2 <- c(crrm[7],errm[6],arrm[2])
+RRM2B <- c(crrm[9],errm[1],arrm[3])
+
+##MMP
+mmp_cnv=(brain_cancer_cnv[,grep("MMP", colnames(brain_cancer_cnv))])
+mmp_exp=(brain_cancer_exp[,grep("MMP", colnames(brain_cancer_exp))])
+mmp_achilles=(brain_cancer_achilles[,grep("MMP", colnames(brain_cancer_achilles))])
+cmmp <- apply(mmp_cnv, 2, mean) 
+emmp <- apply(mmp_exp, 2, mean) 
+ammp <- apply(mmp_achilles, 2, mean)
+MMP1 <- c(cmmp[11],emmp[23],ammp[3])
+MMP2 <- c(cmmp[24],emmp[2],ammp[12])
+MMP3 <- c(cmmp[12],emmp[15],ammp[21])
+MMP7 <- c(cmmp[6],emmp[10],ammp[22])
+MMP8 <- c(cmmp[9],emmp[6],ammp[23])
+MMP9 <- c(cmmp[30],emmp[4],ammp[24])
+MMP10 <- c(cmmp[10],emmp[19],ammp[4])
+MMP11 <- c(cmmp[31],emmp[3],ammp[5])
+MMP12 <- c(cmmp[13],emmp[25],ammp[])#?
+MMP13 <- c(cmmp[14],emmp[13],ammp[6])
+MMP14 <- c(cmmp[17],emmp[18],ammp[7])
+MMP15 <- c(cmmp[25],emmp[5],ammp[8])
+MMP16 <- c(cmmp[33],emmp[17],ammp[9])
+MMP17 <- c(cmmp[16],emmp[24],ammp[10])
+MMP19 <- c(cmmp[15],emmp[7],ammp[11])
+MMP20 <- c(cmmp[7],emmp[11],ammp[13])
+MMP21 <- c(cmmp[3],emmp[16],ammp[14])
+MMP23A <- c(cmmp[2],emmp[],ammp[])#????????????????????????????
+MMP24 <- c(cmmp[28],emmp[8],ammp[16])
+MMP25 <- c(cmmp[21],emmp[1],ammp[17])
+MMP26 <- c(cmmp[4],emmp[20],ammp[18])
+MMP27 <- c(cmmp[8],emmp[12],ammp[19])
+MMP28 <- c(cmmp[26],emmp[26],ammp[20])
+
+##AKT
+akt_cnv=(brain_cancer_cnv[,grep("AKT", colnames(brain_cancer_cnv))])
+akt_exp=(brain_cancer_exp[,grep("AKT", colnames(brain_cancer_exp))])
+akt_achilles=(brain_cancer_achilles[,grep("AKT", colnames(brain_cancer_achilles))])
+cakt <- apply(akt_cnv, 2, mean) 
+eakt <- apply(akt_exp, 2, mean) 
+aakt <- apply(akt_achilles, 2, mean)
+AKT1 <- c(cakt[2],eakt[3],aakt[1])
+AKT2 <- c(cakt[4],eakt[1],aakt[3])
+AKT3 <- c(cakt[1],eakt[2],aakt[4])
+
+##RARG
+rar_cnv=(brain_cancer_cnv[,grep("RARG", colnames(brain_cancer_cnv))])
+rar_exp=(brain_cancer_exp[,grep("RARG", colnames(brain_cancer_exp))])
+rar_achilles=(brain_cancer_achilles[,grep("RARG", colnames(brain_cancer_achilles))])
+crar <- apply(rar_cnv, 2, mean) 
+erar <- apply(rar_exp, 2, mean) 
+arar <- apply(rar_achilles, 2, mean)
+RARG <- c(crar[1],erar[1],arar[1])
+
+##RELA
+rel_cnv=(brain_cancer_cnv[,grep("REL", colnames(brain_cancer_cnv))])
+rel_exp=(brain_cancer_exp[,grep("REL", colnames(brain_cancer_exp))])
+rel_achilles=(brain_cancer_achilles[,grep("REL", colnames(brain_cancer_achilles))])
+crel <- apply(rel_cnv, 2, mean) 
+erel <- apply(rel_exp, 2, mean) 
+arel <- apply(rel_achilles, 2, mean)
+RELA <- c(crel[4],erel[13],arel[14])
+
+##ABL
+abl_cnv=(brain_cancer_cnv[,grep("ABL", colnames(brain_cancer_cnv))])
+abl_exp=(brain_cancer_exp[,grep("ABL", colnames(brain_cancer_exp))])
+abl_achilles=(brain_cancer_achilles[,grep("ABL", colnames(brain_cancer_achilles))])
+cabl <- apply(abl_cnv, 2, mean) 
+eabl <- apply(abl_exp, 2, mean) 
+aabl <- apply(abl_achilles, 2, mean)
+ABL1 <- c(cabl[11],eabl[2],aabl[1])
+ABL2 <- c(cabl[1],eabl[5],aabl[2])
+
+##BLK
+blk_cnv=(brain_cancer_cnv[,grep("BL", colnames(brain_cancer_cnv))])
+blk_exp=(brain_cancer_exp[,grep("BL", colnames(brain_cancer_exp))])
+blk_achilles=(brain_cancer_achilles[,grep("BL", colnames(brain_cancer_achilles))])
+cblk <- apply(blk_cnv, 2, mean) 
+eblk <- apply(blk_exp, 2, mean) 
+ablk <- apply(blk_achilles, 2, mean)
+BLK <- c(cblk[102],eblk[40],ablk[14])
+
+##EPHA2
+eph_cnv=(brain_cancer_cnv[,grep("EPHA", colnames(brain_cancer_cnv))])
+eph_exp=(brain_cancer_exp[,grep("EPHA", colnames(brain_cancer_exp))])
+eph_achilles=(brain_cancer_achilles[,grep("EPHA", colnames(brain_cancer_achilles))])
+ceph <- apply(eph_cnv, 2, mean) 
+eeph <- apply(eph_exp, 2, mean) 
+aeph <- apply(eph_achilles, 2, mean)
+EPHA2 <- c(ceph[1],eeph[6],aeph[3])
+
+##FGR
+fgr_cnv=(brain_cancer_cnv[,grep("FG", colnames(brain_cancer_cnv))])
+fgr_exp=(brain_cancer_exp[,grep("FG", colnames(brain_cancer_exp))])
+fgr_achilles=(brain_cancer_achilles[,grep("FG", colnames(brain_cancer_achilles))])
+cfgr <- apply(fgr_cnv, 2, mean) 
+efgr <- apply(fgr_exp, 2, mean) 
+afgr <- apply(fgr_achilles, 2, mean)
+FGR <- c(cfgr[1],efgr[1],afgr[54])
+
+##FRK
+frk_cnv=(brain_cancer_cnv[,grep("FRK", colnames(brain_cancer_cnv))])
+frk_exp=(brain_cancer_exp[,grep("FRK", colnames(brain_cancer_exp))])
+frk_achilles=(brain_cancer_achilles[,grep("FRK", colnames(brain_cancer_achilles))])
+cfrk <- apply(frk_cnv, 2, mean) 
+efrk <- apply(frk_exp, 2, mean) 
+afrk <- apply(frk_achilles, 2, mean)
+FRK <- c(cfrk[2],efrk[1],afrk[1])
+
+##FYN
+fyn_cnv=(brain_cancer_cnv[,grep("FY", colnames(brain_cancer_cnv))])
+fyn_exp=(brain_cancer_exp[,grep("FY", colnames(brain_cancer_exp))])
+fyn_achilles=(brain_cancer_achilles[,grep("FY", colnames(brain_cancer_achilles))])
+cfyn <- apply(fyn_cnv, 2, mean) 
+efyn <- apply(fyn_exp, 2, mean) 
+afyn <- apply(fyn_achilles, 2, mean)
+FYN <- c(cfyn[32],efyn[2],afyn[5])
+
+##HCK
+hck_cnv=(brain_cancer_cnv[,grep("HC", colnames(brain_cancer_cnv))])
+hck_exp=(brain_cancer_exp[,grep("HC", colnames(brain_cancer_exp))])
+hck_achilles=(brain_cancer_achilles[,grep("HC", colnames(brain_cancer_achilles))])
+chck <- apply(hck_cnv, 2, mean) 
+ehck <- apply(hck_exp, 2, mean) 
+ahck <- apply(hck_achilles, 2, mean)
+HCK <- c(chck[65],ehck[9],ahck[26])
+
+##KIT
+kit_cnv=(brain_cancer_cnv[,grep("KIT", colnames(brain_cancer_cnv))])
+kit_exp=(brain_cancer_exp[,grep("KIT", colnames(brain_cancer_exp))])
+kit_achilles=(brain_cancer_achilles[,grep("KIT", colnames(brain_cancer_achilles))])
+ckit <- apply(kit_cnv, 2, mean) 
+ekit <- apply(kit_exp, 2, mean) 
+akit <- apply(kit_achilles, 2, mean)
+KIT <- c(ckit[2],ekit[2],akit[1])
+
+##LCK
+lck_cnv=(brain_cancer_cnv[,grep("LC", colnames(brain_cancer_cnv))])
+lck_exp=(brain_cancer_exp[,grep("LC", colnames(brain_cancer_exp))])
+lck_achilles=(brain_cancer_achilles[,grep("LC", colnames(brain_cancer_achilles))])
+clck <- apply(lck_cnv, 2, mean) 
+elck <- apply(lck_exp, 2, mean) 
+alck <- apply(lck_achilles, 2, mean)
+LCK <- c(clck[16],elck[421],alck[64])
+
+##LYN
+lyn_cnv=(brain_cancer_cnv[,grep("LY", colnames(brain_cancer_cnv))])
+lyn_exp=(brain_cancer_exp[,grep("LY", colnames(brain_cancer_exp))])
+lyn_achilles=(brain_cancer_achilles[,grep("LY", colnames(brain_cancer_achilles))])
+clyn <- apply(lyn_cnv, 2, mean) 
+elyn <- apply(lyn_exp, 2, mean) 
+alyn <- apply(lyn_achilles, 2, mean)
+LYN <- c(clyn[77],elyn[73],alyn[31])
+
+##PDGFRB
+pdg_cnv=(brain_cancer_cnv[,grep("PDGF", colnames(brain_cancer_cnv))])
+pdg_exp=(brain_cancer_exp[,grep("PDGF", colnames(brain_cancer_exp))])
+pdg_achilles=(brain_cancer_achilles[,grep("PDGF", colnames(brain_cancer_achilles))])
+cpdg <- apply(pdg_cnv, 2, mean) 
+epdg <- apply(pdg_exp, 2, mean) 
+apdg <- apply(pdg_achilles, 2, mean)
+PDGFRB <- c(cpdg[5],epdg[3],apdg[6])
+
+##SRC
+src_cnv=(brain_cancer_cnv[,grep("SRC", colnames(brain_cancer_cnv))])
+src_exp=(brain_cancer_exp[,grep("SRC", colnames(brain_cancer_exp))])
+src_achilles=(brain_cancer_achilles[,grep("SRC", colnames(brain_cancer_achilles))])
+csrc <- apply(src_cnv, 2, mean) 
+esrc <- apply(src_exp, 2, mean) 
+asrc <- apply(src_achilles, 2, mean)
+SRC <- c(csrc[5],esrc[5],asrc[4])
+
+##SRMS
+srm_cnv=(brain_cancer_cnv[,grep("SRM", colnames(brain_cancer_cnv))])
+srm_exp=(brain_cancer_exp[,grep("SRM", colnames(brain_cancer_exp))])
+srm_achilles=(brain_cancer_achilles[,grep("SRM", colnames(brain_cancer_achilles))])
+csrm <- apply(srm_cnv, 2, mean) 
+esrm <- apply(srm_exp, 2, mean) 
+asrm <- apply(srm_achilles, 2, mean)
+SRMS <- c(csrm[2],esrm[2],asrm[2])
+
+##STAT5B
+sta_cnv=(brain_cancer_cnv[,grep("STAT", colnames(brain_cancer_cnv))])
+sta_exp=(brain_cancer_exp[,grep("STAT", colnames(brain_cancer_exp))])
+sta_achilles=(brain_cancer_achilles[,grep("STAT", colnames(brain_cancer_achilles))])
+csta <- apply(sta_cnv, 2, mean) 
+esta <- apply(sta_exp, 2, mean) 
+asta <- apply(sta_achilles, 2, mean)
+STAT5B <- c(csta[3],esta[8],asta[6])
+
+##YES1
+yes_cnv=(brain_cancer_cnv[,grep("YE", colnames(brain_cancer_cnv))])
+yes_exp=(brain_cancer_exp[,grep("YE", colnames(brain_cancer_exp))])
+yes_achilles=(brain_cancer_achilles[,grep("YE", colnames(brain_cancer_achilles))])
+cyes <- apply(yes_cnv, 2, mean) 
+eyes <- apply(yes_exp, 2, mean) 
+ayes <- apply(yes_achilles, 2, mean)
+YES1 <- c(cyes[5],eyes[8],ayes[8])
+
+##IMPDH
+imp_cnv=(brain_cancer_cnv[,grep("IMPDH", colnames(brain_cancer_cnv))])
+imp_exp=(brain_cancer_exp[,grep("IMPDH", colnames(brain_cancer_exp))])
+imp_achilles=(brain_cancer_achilles[,grep("IMPDH", colnames(brain_cancer_achilles))])
+cimp <- apply(imp_cnv, 2, mean) 
+eimp <- apply(imp_exp, 2, mean) 
+aimp <- apply(imp_achilles, 2, mean)
+IMPDH1 <- c(cimp[2],eimp[1],aimp[1])
+IMPDH2 <- c(cimp[1],eimp[2],aimp[2])
+
+##MELK
+mel_cnv=(brain_cancer_cnv[,grep("MEL", colnames(brain_cancer_cnv))])
+mel_exp=(brain_cancer_exp[,grep("MEL", colnames(brain_cancer_exp))])
+mel_achilles=(brain_cancer_achilles[,grep("MEL", colnames(brain_cancer_achilles))])
+cmel <- apply(mel_cnv, 2, mean) 
+emel <- apply(mel_exp, 2, mean) 
+amel <- apply(mel_achilles, 2, mean)
+MELK <- c(cmel[7],emel[6],amel[2])
+
+##PLK1
+plk_cnv=(brain_cancer_cnv[,grep("PLK", colnames(brain_cancer_cnv))])
+plk_exp=(brain_cancer_exp[,grep("PLK", colnames(brain_cancer_exp))])
+plk_achilles=(brain_cancer_achilles[,grep("PLK", colnames(brain_cancer_achilles))])
+cplk <- apply(plk_cnv, 2, mean) 
+eplk <- apply(plk_exp, 2, mean) 
+aplk <- apply(plk_achilles, 2, mean)
+PLK1 <- c(cplk[2],eplk[3],aplk[2])
+
+##NOS
+nos_cnv=(brain_cancer_cnv[,grep("NOS", colnames(brain_cancer_cnv))])
+nos_exp=(brain_cancer_exp[,grep("NOS", colnames(brain_cancer_exp))])
+nos_achilles=(brain_cancer_achilles[,grep("NOS", colnames(brain_cancer_achilles))])
+cnos <- apply(nos_cnv, 2, mean) 
+enos <- apply(nos_exp, 2, mean) 
+anos <- apply(nos_achilles, 2, mean)
+NOS1 <- c(cnos[5],enos[3],anos[7])
+NOS2 <- c(cnos[9],enos[1],anos[9])
+
+##ACVR1C
+acv_cnv=(brain_cancer_cnv[,grep("ACVR", colnames(brain_cancer_cnv))])
+acv_exp=(brain_cancer_exp[,grep("ACVR", colnames(brain_cancer_exp))])
+acv_achilles=(brain_cancer_achilles[,grep("ACVR", colnames(brain_cancer_achilles))])
+cacv <- apply(acv_cnv, 2, mean) 
+eacv <- apply(acv_exp, 2, mean) 
+aacv <- apply(acv_achilles, 2, mean)
+ACVR1C <- c(cacv[4],eacv[4],aacv[3])
+
+##TGFBR1
+tgf_cnv=(brain_cancer_cnv[,grep("TGFBR", colnames(brain_cancer_cnv))])
+tgf_exp=(brain_cancer_exp[,grep("TGFBR", colnames(brain_cancer_exp))])
+tgf_achilles=(brain_cancer_achilles[,grep("TGFBR", colnames(brain_cancer_achilles))])
+ctgf <- apply(tgf_cnv, 2, mean) 
+etgf <- apply(tgf_exp, 2, mean) 
+atgf <- apply(tgf_achilles, 2, mean)
+TGFBR1 <- c(ctgf[5],etgf[2],atgf[1])
+
+##BIRC5
+bir_cnv=(brain_cancer_cnv[,grep("BIRC", colnames(brain_cancer_cnv))])
+bir_exp=(brain_cancer_exp[,grep("BIRC", colnames(brain_cancer_exp))])
+bir_achilles=(brain_cancer_achilles[,grep("BIRC", colnames(brain_cancer_achilles))])
+cbir <- apply(bir_cnv, 2, mean) 
+ebir <- apply(bir_exp, 2, mean) 
+abir <- apply(bir_achilles, 2, mean)
+BIRC5 <- c(cbir[3],ebir[2],abir[3])
+
+##TUBB
+tub_cnv=(brain_cancer_cnv[,grep("TUBB", colnames(brain_cancer_cnv))])
+tub_exp=(brain_cancer_exp[,grep("TUBB", colnames(brain_cancer_exp))])
+tub_achilles=(brain_cancer_achilles[,grep("TUBB", colnames(brain_cancer_achilles))])
+ctub <- apply(tub_cnv, 2, mean) 
+etub <- apply(tub_exp, 2, mean) 
+atub <- apply(tub_achilles, 2, mean)
+TUBB <- c(ctub[9],etub[8],atub[1])
+
+##EGFR
+egf_cnv=(brain_cancer_cnv[,grep("EGF", colnames(brain_cancer_cnv))])
+egf_exp=(brain_cancer_exp[,grep("EGF", colnames(brain_cancer_exp))])
+egf_achilles=(brain_cancer_achilles[,grep("EGF", colnames(brain_cancer_achilles))])
+cegf <- apply(egf_cnv, 2, mean) 
+eegf <- apply(egf_exp, 2, mean) 
+aegf <- apply(egf_achilles, 2, mean)
+EGFR <- c(cegf[16],eegf[7],aegf[6])
+
+##PYGM
+pyg_cnv=(brain_cancer_cnv[,grep("PYG", colnames(brain_cancer_cnv))])
+pyg_exp=(brain_cancer_exp[,grep("PYG", colnames(brain_cancer_exp))])
+pyg_achilles=(brain_cancer_achilles[,grep("PYG", colnames(brain_cancer_achilles))])
+cpyg <- apply(pyg_cnv, 2, mean) 
+epyg <- apply(pyg_exp, 2, mean) 
+apyg <- apply(pyg_achilles, 2, mean)
+PYGM <- c(cpyg[2],epyg[1],apyg[3])
+
+##ANPEP
+anp_cnv=(brain_cancer_cnv[,grep("ANP", colnames(brain_cancer_cnv))])
+anp_exp=(brain_cancer_exp[,grep("ANP", colnames(brain_cancer_exp))])
+anp_achilles=(brain_cancer_achilles[,grep("ANP", colnames(brain_cancer_achilles))])
+canp <- apply(anp_cnv, 2, mean) 
+eanp <- apply(anp_exp, 2, mean) 
+aanp <- apply(anp_achilles, 2, mean)
+ANPEP <- c(canp[7],eanp[6],aanp[5])
+
+##LAP3
+lap_cnv=(brain_cancer_cnv[,grep("LAP", colnames(brain_cancer_cnv))])
+lap_exp=(brain_cancer_exp[,grep("LAP", colnames(brain_cancer_exp))])
+lap_achilles=(brain_cancer_achilles[,grep("LAP", colnames(brain_cancer_achilles))])
+clap <- apply(lap_cnv, 2, mean) 
+elap <- apply(lap_exp, 2, mean) 
+alap <- apply(lap_achilles, 2, mean)
+LAP3 <- c(clap[6],elap[1],alap[2])
+
+##NPEPPS
+npe_cnv=(brain_cancer_cnv[,grep("NPEP", colnames(brain_cancer_cnv))])
+npe_exp=(brain_cancer_exp[,grep("NPEP", colnames(brain_cancer_exp))])
+npe_achilles=(brain_cancer_achilles[,grep("NPEP", colnames(brain_cancer_achilles))])
+cnpe <- apply(npe_cnv, 2, mean) 
+enpe <- apply(npe_exp, 2, mean) 
+anpe <- apply(npe_achilles, 2, mean)
+NPEPPS <- c(cnpe[4],enpe[6],anpe[6])
+
+##ADA
+ada_cnv=(brain_cancer_cnv[,grep("ADA", colnames(brain_cancer_cnv))])
+ada_exp=(brain_cancer_exp[,grep("ADA", colnames(brain_cancer_exp))])
+ada_achilles=(brain_cancer_achilles[,grep("ADA", colnames(brain_cancer_achilles))])
+cada <- apply(ada_cnv, 2, mean) 
+eada <- apply(ada_exp, 2, mean) 
+aada <- apply(ada_achilles, 2, mean)
+ADA <- c(cada[45],eada[61],aada[6])
+
+##PNP
+pnp_cnv=(brain_cancer_cnv[,grep("PNP", colnames(brain_cancer_cnv))])
+pnp_exp=(brain_cancer_exp[,grep("PNP", colnames(brain_cancer_exp))])
+pnp_achilles=(brain_cancer_achilles[,grep("PNP", colnames(brain_cancer_achilles))])
+cpnp <- apply(pnp_cnv, 2, mean) 
+epnp <- apply(pnp_exp, 2, mean) 
+apnp <- apply(pnp_achilles, 2, mean)
+PNP <- c(cpnp[4],epnp[14],apnp[1])
+
+##POL
+pol_cnv=(brain_cancer_cnv[,grep("POL", colnames(brain_cancer_cnv))])
+pol_exp=(brain_cancer_exp[,grep("POL", colnames(brain_cancer_exp))])
+pol_achilles=(brain_cancer_achilles[,grep("POL", colnames(brain_cancer_achilles))])
+cpol <- apply(pol_cnv, 2, mean) 
+epol <- apply(pol_exp, 2, mean) 
+apol <- apply(pol_achilles, 2, mean)
+POLA1 <- c(cpol[66],epol[23],apol[10])
+POLE <- c(cpol[12],epol[57],apol[18])
+POLE2 <- c(cpol[15],epol[21],apol[19])
+POLE3 <- c(cpol[65],epol[45],apol[20])
+POLE4 <- c(cpol[31],epol[29],apol[21])
+
+##PARP2
+par_cnv=(brain_cancer_cnv[,grep("PARP", colnames(brain_cancer_cnv))])
+par_exp=(brain_cancer_exp[,grep("PARP", colnames(brain_cancer_exp))])
+par_achilles=(brain_cancer_achilles[,grep("PARP", colnames(brain_cancer_achilles))])
+cpar <- apply(par_cnv, 2, mean) 
+epar <- apply(par_exp, 2, mean) 
+apar <- apply(par_achilles, 2, mean)
+PARP2 <- c(cpar[6],epar[5],apar[8])
 ```
 
 
 ```{r}
 #set all means of cnv, exp and achilles in matrix
-mmm <- rbind(MTOR,TOP1,TOP2A,TOP2B,AURKA,AURKB,AURKC,JAK1,JAK2,JAK3,KIF11,KCNT2,PIK3CA,PIK3CB,PIK3CD,PIK3CG,PSMA1,PSMA2,PSMA3,PSMA4,PSMA5,PSMA6,PSMA7,PSMA8,PSMB1,PSMB2,PSMB3,PSMB4,PSMB5,PSMB6,PSMB7,PSMB8,PSMB9,PSMB10,PSMB11,CDK1,CDK2,CDK4,CDK5,CDK6,CDK7,CDK8,CDK9,BCL2)
+mmm <- rbind(MTOR,TOP1,TOP2A,TOP2B,AURKA,AURKB,AURKC,JAK1,JAK2,JAK3,KIF11,KCNT2,PIK3CA,PIK3CB,PIK3CD,PIK3CG,PSMA1,PSMA2,PSMA3,PSMA4,PSMA5,PSMA6,PSMA7,PSMA8,PSMB1,PSMB2,PSMB3,PSMB4,PSMB5,PSMB6,PSMB7,PSMB8,PSMB9,PSMB10,PSMB11,CDK1,CDK2,CDK4,CDK5,CDK6,CDK7,CDK8,CDK9,BCL2,TRPV4,HSP90AA1,FGF2,FKBP1A,DHFR,TYMS,ATR,LDLR,CMPK1,RRM1,RRM2,RRM2B,MMP1,MMP2,MMP3,MMP7,MMP8,MMP9,MMP10,MMP11,MMP13,MMP14,MMP15,MMP16,MMP17,MMP19,MMP20,MMP21,MMP24,MMP25,MMP26,MMP27,MMP28,AKT1,AKT2,AKT3,RARG,RELA,ABL1,ABL2,BLK,EPHA2,FGR,FRK,FYN,HCK,KIT,LCK,LYN,PDGFRB,SRC,SRMS,STAT5B,YES1,IMPDH1,IMPDH2,MELK,PLK1,NOS1,NOS2,ACVR1C,TGFBR1,BIRC5,TUBB,EGFR,PYGM,ANPEP,LAP3,NPEPPS,ADA,PNP,POLA1,POLE,POLE2,POLE3,POLE4,PARP2)
 
 colnam <- c("cnv mean","exp mean","achilles mean")
 colnames(mmm) <- colnam
