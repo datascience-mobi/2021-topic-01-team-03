@@ -331,6 +331,10 @@ effective_bc_treat=brain_cancer_treat[effective_in_all_doses,-c(1,2,3,4,10)]
 #Target of effective drugs
 ```{r}
 brain_cancer.effective_targets <- effective_bc_treat$target
+
+which(is.na(effective_bc_treat$target))
+
+## da fehlen halt bei diesen 8 Drogen die targets, die könnte man sonst ggf. rausnehmen 
 ```
 
 
@@ -343,6 +347,9 @@ names=brain_cancer_cl[,1] #saving the names as names
 #select wanted cell lines from all datasets
 brain_cancer=prism[names,]
 brain_cancer_achilles=prism.achilles[names,]
+
+## hier ist irgendwas schief gegangen, ab da sind super viele NA's drin 
+
 brain_cancer_cnv=prism.cnv[names,]
 brain_cancer_exp=prism.exp[names,]
 #brain_cancer_snv=prism.snv[names,] #does not make sense no cell line info, other type of filtering required
