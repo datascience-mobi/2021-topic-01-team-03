@@ -489,64 +489,9 @@ exp_p_mean=mean(exp_pvalue)
 #Conclusion: I think this was not totally useless. Although we maybe do not need to remove the genes that are normally distributed before performing the Wilcoxon test, it is a good justification for performing it, because the t-test and ANOVA are not possible because just a few genes are not normally distributed. The Wilcoxon test can be used when the samples have similarly sizes (in our case 447 and 41) and i.i.d. can be assumed. 
 # After some research I came to the conclusion that we can use these unequal sample sizes but we have to take into account that the power of our test is minimized. 
 # Power of a test: Probability for a type two error not to occur
+
 ``` 
 
-##Wilcoxon test: compare all gene from 34 brain cancer cell lines with the same gene from all other tumors
-```{r}
-# Creating dataframe with all non brain cancer cell lines
-non_bc_cl = prism.cl[!prism.cl$disease == "Brain Cancer",]
-non_bc_names=non_bc_cl[,1] 
-non_bc_exp=prism.exp[non_bc_names,]
-
-# Removal of lines with NA from new dataframe
-non_bc_exp=non_bc_exp[rowSums(is.na(non_bc_exp)) == 0,]
-
-#Z-transformation
-
-sum(rowSums(is.na(brain_cancer_exp_w))==0)
-sum(rowSums(is.na(non_bc_exp))==0)
-#no NAs found
-
-#min_non_bc<-vector(length = 443)
-#for(i in 1:443){
-  #min_non_bc[i]<-min(non_bc_exp[i,][which(non_bc_exp[i,]>0)])
-#}
-#min(min_non_bc)
-
-#min_bc<-vector(length = 34)
-#for(i in 1:34){
-  #min_bc[i]<-min(brain_cancer_exp[i,][which(brain_cancer_exp[i,]>0)])
-#}
-#pseudo_value<-min(min_bc)
-
-#brain_cancer_exp_w<-brain_cancer_exp+pseudo_value
-#non_bc_exp<-non_bc_exp+pseudo_value
-
-#non_bc_exp=as.data.frame(scale(as.matrix(non_bc_exp)))
-#brain_cancer_exp_w=as.data.frame(scale(as.matrix(brain_cancer_exp)))
-#brain_cancer_exp_w=brain_cancer_exp_w[names,]
-
-# Performance of Wilcoxon
-wilcox.test(as.numeric(non_bc_exp[,24]),as.numeric(brain_cancer_exp_w[,24]),alternative = "two.sided", paired = F)
-
-wilcox_genes <- vector(mode = "list",length=ncol(brain_cancer_exp))
-for(i in 1:ncol(brain_cancer_exp)) {         
-  wilcox_genes[[i]] <- wilcox.test(as.numeric(non_bc_exp[,i]),as.numeric(brain_cancer_exp_w[,i]), alternative = "two.sided", paired = F)
-}
-
-wilcox_pvalue_genes <- vector(length = ncol(brain_cancer_exp))
-for(i in 1:ncol(brain_cancer_exp)) {
-  wilcox_pvalue_genes[i] <- wilcox_genes[[i]]$p.value
-}
-
-length(which(wilcox_pvalue_genes<=0.05))#the amount of genes that are significantly different in expression comparing to other tumors
-
-
-#Stefan's suggestion: Two larger samples with roughly equal size can be used to run a Mann-Whitney-U/Wilcoxon test for each gene. Assumptions: 
-#H0: expression value for the gene comes from the same distribution (=same expression)
-#H1: Group gene expression values come from two distributions with different central measures (=different expression)
-
-```
 
 Caution: This is a case for the multiplicity problem. While testing thousands of hypotheses simultaneously, the chance of getting false positives is increased. There are two possibilities of adjustment.
 
@@ -556,13 +501,70 @@ Second: The Benjamini and Hochberg correction. This is a method to control the F
 
 https://www.reneshbedre.com/blog/multiple-hypothesis-testing-corrections.html
 
+##Wilcoxon test: compare all gene from 34 brain cancer cell lines with the same gene from all other tumors
+
+#Pseudovalue
+```{r}
+#min_non_bc<-vector(length = 443)
+#for(i in 1:443){
+#  min_non_bc[i]<-min(non_bc_exp[i,][which(non_bc_exp[i,]>0)])
+#}
+#min(min_non_bc)
+
+#min_bc<-vector(length = 34)
+#for(i in 1:34){
+#  min_bc[i]<-min(brain_cancer_exp_w[i,][which(brain_cancer_exp_w[i,]>0)#])
+#}
+#pseudo_value<-min(min_bc)
+```
+
+```{r}
+# Creating dataframe with all non brain cancer cell lines
+non_bc_cl = prism.cl[!prism.cl$disease == "Brain Cancer",]
+non_bc_names=non_bc_cl[,1] 
+non_bc_exp=prism.exp[non_bc_names,]
+brain_cancer_exp_w=brain_cancer_exp
+non_bc_exp=non_bc_exp[rowSums(is.na(non_bc_exp)) == 0,]
+
+#Z-transformation
+pseudo_value<-0.01435529
+non_bc_exp=non_bc_exp+pseudo_value
+brain_cancer_exp_w=brain_cancer_exp_w+pseudo_value
+
+non_bc_exp=as.data.frame(scale(as.matrix(non_bc_exp)))
+brain_cancer_exp_w=as.data.frame(scale(as.matrix(brain_cancer_exp_w)))
+
+# Removal of lines with NA from new dataframe
+brain_cancer_exp_w=as.data.frame(t(na.omit(t(brain_cancer_exp_w))))
+non_bc_exp=non_bc_exp[,colnames(brain_cancer_exp_w)]
+
+# Performance of Wilcoxon
+
+wilcox_genes <- vector(mode = "list",length=ncol(brain_cancer_exp_w))
+for(i in 1:ncol(brain_cancer_exp_w)) {         
+  wilcox_genes[[i]] <- wilcox.test(as.numeric(non_bc_exp[,i]),as.numeric(brain_cancer_exp_w[,i]), alternative = "two.sided", paired = F)
+}
+#wilcox_genes[732]
+
+wilcox_pvalue_genes <- vector(length = ncol(brain_cancer_exp_w))
+for(i in 1:ncol(brain_cancer_exp_w)) {
+  wilcox_pvalue_genes[i] <- wilcox_genes[[i]]$p.value
+}
+length(which(wilcox_pvalue_genes<=0.05))#the amount of genes that are significantly different in expression comparing to other tumors
+
+#Stefan's suggestion: Two larger samples with roughly equal size can be used to run a Mann-Whitney-U/Wilcoxon test for each gene. Assumptions: 
+#H0: expression value for the gene comes from the same distribution (=same expression)
+#H1: Group gene expression values come from two distributions with different central measures (=different expression)
+```
+
 
 ##Adjustment of multiple testing problem 
 ```{r}
 #Bonferroni correction
 wilcox_pvalue_bonf = p.adjust(wilcox_pvalue_genes, method = "bonferroni", n = length(wilcox_pvalue_genes)) #I first was confused from p-value=1 but is possible when there is absolutely no evidence to reject H0
 b_correction=which(wilcox_pvalue_bonf<=0.01)
-
+p_values_b=wilcox_pvalue_bonf[b_correction]
+  
 #Benjamini-Hochberg correction
 wilcox_pvalue_BH = p.adjust(wilcox_pvalue_genes, method = "BH", n = length(wilcox_pvalue_genes))
 bh_correction=which(wilcox_pvalue_BH<=0.01)
@@ -570,14 +572,22 @@ bh_correction=which(wilcox_pvalue_BH<=0.01)
 
 ##Fold change and volcano plot
 ```{r}
-bc_exp_mean=apply(brain_cancer_exp[,b_correction],2, mean)
-non_bc_exp_mean=apply(non_bc_exp[,b_correction],2,mean)
+yyy=prism.exp[non_bc_names,]
+View(yyy[,b_correction])
+View(brain_cancer_exp[,b_correction])
+volcano_bc=brain_cancer_exp_w[,b_correction]
+volcano_non_bc=non_bc_exp[,b_correction]
 
-logfc<-log2(bc_exp_mean/non_bc_exp_mean)
-logpv=-log10(b_correction)
-df <- data.frame(logfc,logpv)
+df<-data.frame(matrix(nrow = length(b_correction),ncol = 2))
+rownames(df)=colnames(volcano_bc)
+df[,1]=-log10(p_values_b)
+
+bc_exp_mean=apply(volcano_bc,2, mean)
+non_bc_exp_mean=apply(volcano_non_bc,2,mean)
+df[,2]=log2(abs(non_bc_exp_mean/bc_exp_mean))
+
 library(ggplot2)
-ggplot(df, aes(x=logfc, y=logpv)) +
+ggplot(df, aes(x=df[,2], y=df[,1]),ylim = range(0,1)) +
   geom_point()
 
 volcano_filtered_genes=logfc[which(logfc>=1|logfc<=-1)]
