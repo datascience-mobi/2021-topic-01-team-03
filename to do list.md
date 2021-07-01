@@ -58,5 +58,13 @@ Idea how to continue:
 - [ ] Null-Modell: Defining criteria from prism-dataset (eg stage)
 - [ ] Differences in exp/cnv values between cellsubtypes
 
+
+- Pseudo Wert addieren um 0 Werte auszugleichen (kleinster beobachteter Wert vor der Z-Transformation, global oder für cell line) 
+- (-log) als y-Achse bei Volcano plot 
+- Varianzen von Gruppen anschauen, ob diese glaubhaft ähnlich sind 
+- Histogramme vor und nach Z-Transformation 
+- y: Drug response; x: Genetics for input; data points are cell lines 
+- Evaluieren des Modells; Vergleich mit dem Nullmodell, Vergleich untereinander (durch F-Test) 
+
 Missing for report:
 - [ ] Code how we definded threshold of effectiveness and reason 

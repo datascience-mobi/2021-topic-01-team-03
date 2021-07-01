@@ -74,7 +74,9 @@ Taking it as justification for not taking subtypes into account.
 ++Subtypes in boxplots represent the efficiency++
 
 2) What are the targets of the effective drugs?
-3) Are there any genetic markers that are specific for brain cancer subtypes?
+++Part from Lennard to show that targets are not useful to use++
+
+4) Are there any genetic markers that are specific for brain cancer subtypes?
 - Examine gene targets of the effective drugs
 - Find a relationship between gene targets and brain cancer subtypes
 - Wilcoxon Signed Rank Test
