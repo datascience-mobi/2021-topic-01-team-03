@@ -503,10 +503,28 @@ non_bc_exp=non_bc_exp[rowSums(is.na(non_bc_exp)) == 0,]
 
 #Z-transformation
 
-non_bc_exp=as.data.frame(scale(as.matrix(non_bc_exp)))
-brain_cancer_exp_w=as.data.frame(scale(as.matrix(brain_cancer_exp)))
+sum(rowSums(is.na(brain_cancer_exp_w))==0)
+sum(rowSums(is.na(non_bc_exp))==0)
+#no NAs found
 
-hist(as.numeric(brain_cancer_exp_w[10,]),breaks=50,xlim = range(-3,3))
+#min_non_bc<-vector(length = 443)
+#for(i in 1:443){
+  #min_non_bc[i]<-min(non_bc_exp[i,][which(non_bc_exp[i,]>0)])
+#}
+#min(min_non_bc)
+
+#min_bc<-vector(length = 34)
+#for(i in 1:34){
+  #min_bc[i]<-min(brain_cancer_exp[i,][which(brain_cancer_exp[i,]>0)])
+#}
+#pseudo_value<-min(min_bc)
+
+#brain_cancer_exp_w<-brain_cancer_exp+pseudo_value
+#non_bc_exp<-non_bc_exp+pseudo_value
+
+#non_bc_exp=as.data.frame(scale(as.matrix(non_bc_exp)))
+#brain_cancer_exp_w=as.data.frame(scale(as.matrix(brain_cancer_exp)))
+#brain_cancer_exp_w=brain_cancer_exp_w[names,]
 
 # Performance of Wilcoxon
 wilcox.test(as.numeric(non_bc_exp[,24]),as.numeric(brain_cancer_exp_w[,24]),alternative = "two.sided", paired = F)
@@ -563,7 +581,7 @@ ggplot(df, aes(x=logfc, y=logpv)) +
   geom_point()
 
 volcano_filtered_genes=logfc[which(logfc>=1|logfc<=-1)]
-View(volcano_filtered_genes)
+
 ```
 
 ##Regression model to select relevant genes
