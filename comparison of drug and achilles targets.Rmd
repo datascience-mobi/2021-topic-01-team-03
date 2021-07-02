@@ -358,34 +358,43 @@ brain_cancer_exp=prism.exp[names,]
 
 # Selecting achilles targets
 ```{r}
-brain_cancer_achilles.mean <- apply(brain_cancer_achilles,2,mean)
-hist(brain_cancer_achilles.mean, breaks = 200)
-brain_cancer_achilles.var <- apply(brain_cancer_achilles,2,var)#variance
-hist(brain_cancer_achilles.var, breaks = 200, xlim = c(0,0.4))
-brain_cancer_achilles.relevant <- colnames(brain_cancer_achilles)[brain_cancer_achilles.mean < -0.2]
+#brain_cancer_achilles.mean <- apply(brain_cancer_achilles,2,mean)
+#hist(brain_cancer_achilles.mean, breaks = 200)
+#brain_cancer_achilles.var <- apply(brain_cancer_achilles,2,var)#variance
+#hist(brain_cancer_achilles.var, breaks = 200, xlim = c(0,0.4))
+#brain_cancer_achilles.relevant <- colnames(brain_cancer_achilles)[brain_cancer_achilles.mean < -0.2]
 ```
 
 # Compare drug and achilles targets
 ```{r}
-brain_cancer.effective_targets <- as.character(brain_cancer.effective_targets)
+brain_cancer.effective_targets <- as.character(brain_cancer.effective_targets) # convert to character
 
-for(i in brain_cancer.effective_targets){
+x <- 1
+brain_cancer.effective_targets.solo <- list() #create list
+
+for(i in brain_cancer.effective_targets) #split multiple targets
+  {
   
- strsplit 
+ brain_cancer.effective_targets.solo[[x]] <- strsplit(i, split = ", ")
+ x <- x+1
+ }
+brain_cancer.effective_targets.solo <- unlist(brain_cancer.effective_targets.solo) #list to vector
 
-x <- 0
-y <- 0
-for(i in brain_cancer.effective_targets){
-  for(j in brain_cancer_achilles.relevant){
-    
-    if(brain_cancer.effective_targets[i] == brain_cancer_achilles.relevant[j]){x = x+1}
-    
-    else if(brain_cancer.effective_targets[i] != brain_cancer_achilles.relevant[j]){y = y+1}
-  }
-}
-length(brain_cancer.effective_targets)*length(brain_cancer_achilles.relevant)
-x
-y
+brain_cancer.effective_targets.solo <- unique(brain_cancer.effective_targets.solo) # remove multiple targets
+
+brain_cancer.effective_targets.solo <- brain_cancer.effective_targets.solo[-1] # remove NA
+
+# achilles targets
+brain_cancer_achilles.targets <- brain_cancer_achilles[,which(colnames(brain_cancer_achilles) %in% brain_cancer.effective_targets.solo)] # selecting target genes in achilles
+brain_cancer.effective_targets.solo[-which(brain_cancer.effective_targets.solo %in% colnames(brain_cancer_achilles))] # missing targets
+
+# exp targets
+brain_cancer_exp.targets <- brain_cancer_exp[,which(colnames(brain_cancer_exp) %in% brain_cancer.effective_targets.solo)] # selecting target genes in exp
+brain_cancer.effective_targets.solo[-which(brain_cancer.effective_targets.solo %in% colnames(brain_cancer_exp))] # missing targets
+
+# cnv targets
+brain_cancer_cnv.targets <- brain_cancer_cnv[,which(colnames(brain_cancer_cnv) %in% brain_cancer.effective_targets.solo)] # selecting target genes in cnvVie
+brain_cancer.effective_targets.solo[-which(brain_cancer.effective_targets.solo %in% colnames(brain_cancer_cnv))] # missing targets
 
 ```
 
