@@ -223,7 +223,11 @@ check_for_differences(doses_subsets_[[8]],d8)
 ## Filter effective drugs in each dose group
 
 ```{r}
-#Lets say for now that our threshold is 0,3 so we can see how many drugs meet this criteria in each dose group
+# Defining a treshold by looking at the data set
+median(apply(brain_cancer,2,mean))
+
+
+# Lets select the drugs that go with the threshold of 0.2 in each dose group
 effective_drugs<-function(x){
   effective_x<-x[,which(apply(x,2,mean)<=0.2)]
   return(effective_x)
@@ -359,22 +363,6 @@ effective_in_all_doses=present_in_all_doses(d1_d2,d1_d3,d1_d4,d1_d5,d1_d6,d1_d7,
 #51 drugs are effective in all doses
 ```
 
-# Question 2: What are the targets of the effective drugs?
-
-##What are the targets of the effective drugs?
-
-```{r}
-brain_cancer_treat=prism.treat[colnames(brain_cancer),] #selecting only the drugs we previously filtered out from brain_cancer
-brain_cancer_treat=brain_cancer_treat[!duplicated(brain_cancer_treat$broad_id),]
-rownames(brain_cancer_treat)<-brain_cancer_treat[,1]
-effective_bc_treat=brain_cancer_treat[effective_in_all_doses,-c(1,2,3,4,10)]
-#summary(effective_bc_treat$target)
-#summary(effective_bc_treat$moa)
-#expression of these genes would be interesting to look into our cell lines
-```
-
-
-
 ## Select one relevant dose
 
 ```{r}
@@ -390,6 +378,21 @@ var(apply(all_effective_drugs[[8]],2,mean))
 
 #dose 7 has the biggest variance so we will work with it
 ```
+
+# Question 2: What are the targets of the effective drugs?
+
+##What are the targets of the effective drugs?
+
+```{r}
+brain_cancer_treat=prism.treat[colnames(brain_cancer),] #selecting only the drugs we previously filtered out from brain_cancer
+brain_cancer_treat=brain_cancer_treat[!duplicated(brain_cancer_treat$broad_id),]
+rownames(brain_cancer_treat)<-brain_cancer_treat[,1]
+effective_bc_treat=brain_cancer_treat[effective_in_all_doses,-c(1,2,3,4,10)]
+#summary(effective_bc_treat$target)
+#summary(effective_bc_treat$moa)
+#expression of these genes would be interesting to look into our cell lines
+```
+
 
 ## Drugs and subtypes relationship
 
