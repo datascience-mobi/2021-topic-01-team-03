@@ -22,50 +22,45 @@ To explore our main question, we examined four milestones:
 **3) Are there any genetic markers that are specific for brain cancer subtypes?**
 **4) What other factors contribute to drug and effectiveness prediction?**
 
-
 #Data Clean up
 
-As the datasets also contain information on other cancer types, we removed non-relevant cell lines. In addition, we classified the datasets according to brain cancer subtypes, as this information was used for later analyses. We treated NA values either by removing the cell line or by replacing it with a mean value, depending on the dataset. 
+As the datasets also contain information on other cancer types, we removed non-relevant cell lines. In addition, we classified the datasets according to brain cancer subtypes, as this information was used for later analyses. We treated NA values either by removing the cell line or by replacing it with a mean value, depending on the dataset. Since we want to take a look at the different brain cancer subtypes as part of our third milestone, we also created subtye data frames during the cleaning process. 
 
 ```{r}
 #play around lines 43 to 76 
 #also add the subtype classification in lines 80 to 91, code optimisation needed 
+#++Descriptive statistics++
+
 ```
 
 
-++Descriptive statistics++
-
 #Identification of effective drugs
 
-The `prism` data frame gives information on treatments which were used in the screening effort. These treatments include 4,518 drugs with doses ranging from 0.00061034 $\mu M to 10 $\mu M. There are 8 standard doses into which we have divided the data frame by creating a list. 
+The `prism` data frame gives information on treatments which were used in the screening effort. These treatments include 4,518 drugs with doses ranging from 0.00061034 $\mu M to 10 $\mu M. There are 8 standard doses into which we have divided the data frame by creating a list to store them. 
 
 ```{r}
 # play around lines 106 to 141 
 ```
 
-
 Nevertheless, treatments were given whose doses did not correspond to the standard one's. We have assigned these to the standard doses to which there is the least deviation, assuming that the focus of the project is on the drug itself and not on the dose used. 
 
-```{r}
-## würde ich nicht reinpacken, also den code da das m.E. relativ unnötig ist beziehungsweise direkt in einem Schritt mit der Identification of effective drugs zusammenfassen 
-```
 
-To identify the most effective drugs, we looked at the effectiveness values of the `prism` data frame. The more negative the value, the more effective the treatment. Contrary to the threshold value 0.3 of Corsello *et al.* we have set the threshold value 0.2.
+To identify the most effective drugs, we looked at the effectiveness values of the `prism` data frame. The more negative the value, the more effective the treatment. Contrary to the threshold value 0.3 of Corsello *et al.* we have set the threshold value 0.2. We found this to be useful as it corresponds to the median of the ```brain_cancer``` data frame (filtered brain cancer cell lines from the ```prism``` data frame), allowing us to select half of the drugs by this step. 
 
-In order to reduce the number of drugs and to be able to make later predictions independent of the dose, we finally selected drugs that are effective in all doses. 
-```{r}
-# play aorund lines 224 to 255, optimisation needed 
-#basicaly the entire chunk 10 which is huge 
-```
+In order to reduce the number of drugs and to be able to make later predictions for our main question independent of the dose, we selected drugs that are effective in all doses. To do this, we first identified the drugs whose mean effectiveness across all cell lines in the dose subset data frames was less than or equal to the established threshold. Second, we compared these drugs and selected the ones that are present in all subsets. Thereby we have obtained **51 drugs**.
 
-siehe effective drugs summary Lennards Datei
 
 ```{r}
-#hier würde ich einfach eine Liste mit den 51 Drogen reinpacken und direkt die d7 dosage mit der variance begründen 
+#hier würde ich einfach eine Liste mit den 51 Drogen reinpacken 
 ```
 
 
-ungefähr 75% Quantil; mean 
+We decided to chose a dose to work on with, since the model we want to establish should output drugs for treatment regardless of their concentration. We selected dose 7, 10 $\mu M, s this has the highest variance and is therefore suitable for most treatments. 
+
+```{r}
+#und direkt die d7 dosage mit der variance begründen 
+```
+
 
 ++Clustering of effective drugs++
 
