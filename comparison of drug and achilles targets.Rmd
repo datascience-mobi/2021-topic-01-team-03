@@ -388,13 +388,59 @@ brain_cancer.effective_targets.solo <- brain_cancer.effective_targets.solo[-1] #
 brain_cancer_achilles.targets <- brain_cancer_achilles[,which(colnames(brain_cancer_achilles) %in% brain_cancer.effective_targets.solo)] # selecting target genes in achilles
 brain_cancer.effective_targets.solo[-which(brain_cancer.effective_targets.solo %in% colnames(brain_cancer_achilles))] # missing targets
 
+hist(unlist(brain_cancer_achilles), breaks = 50)
+hist(unlist(brain_cancer_achilles.targets), breaks = 50)
+summary(unlist(brain_cancer_achilles))
+summary(unlist(brain_cancer_achilles.targets))
+qqplot(unlist(brain_cancer_achilles), unlist(brain_cancer_achilles.targets))
+abline(a = 0, b = 1)
+
+# achilles variance analysis
+brain_cancer_achilles.var <- apply(brain_cancer_achilles,2,function(x){var(x, na.rm = TRUE)})#variance
+brain_cancer_achilles.targets.var <- apply(brain_cancer_achilles.targets,2, function(x){var(x, na.rm = TRUE)})
+hist(unlist(brain_cancer_achilles.var), breaks = 500, xlim = c(0,0.2))
+hist(unlist(brain_cancer_achilles.targets.var), breaks = 40, xlim = c(0,0.2))
+qqplot(unlist(brain_cancer_achilles.var), unlist(brain_cancer_achilles.targets.var), xlim = c(0,0.2))
+abline(a = 0, b = 1)
+
+
 # exp targets
 brain_cancer_exp.targets <- brain_cancer_exp[,which(colnames(brain_cancer_exp) %in% brain_cancer.effective_targets.solo)] # selecting target genes in exp
 brain_cancer.effective_targets.solo[-which(brain_cancer.effective_targets.solo %in% colnames(brain_cancer_exp))] # missing targets
+
+hist(unlist(brain_cancer_exp), breaks = 50)
+hist(unlist(brain_cancer_exp.targets), breaks = 50)
+summary(unlist(brain_cancer_exp))
+summary(unlist(brain_cancer_exp.targets))
+qqplot(unlist(brain_cancer_exp), unlist(brain_cancer_exp.targets))
+abline(a = 0, b = 1)
+
+# exp variance analysis
+brain_cancer_exp.var <- apply(brain_cancer_exp,2,function(x){var(x, na.rm = TRUE)})#variance
+brain_cancer_exp.targets.var <- apply(brain_cancer_exp.targets,2, function(x){var(x, na.rm = TRUE)})
+hist(unlist(brain_cancer_exp.var), breaks = 500)
+hist(unlist(brain_cancer_exp.targets.var), breaks = 40)
+qqplot(unlist(brain_cancer_exp.var), unlist(brain_cancer_exp.targets.var), xlim = c(0,8))
+abline(a = 0, b = 1)
+
 
 # cnv targets
 brain_cancer_cnv.targets <- brain_cancer_cnv[,which(colnames(brain_cancer_cnv) %in% brain_cancer.effective_targets.solo)] # selecting target genes in cnvVie
 brain_cancer.effective_targets.solo[-which(brain_cancer.effective_targets.solo %in% colnames(brain_cancer_cnv))] # missing targets
 
+hist(unlist(brain_cancer_cnv), breaks = 50)
+hist(unlist(brain_cancer_cnv.targets), breaks = 50)
+summary(unlist(brain_cancer_cnv))
+summary(unlist(brain_cancer_cnv.targets))
+qqplot(unlist(brain_cancer_cnv), unlist(brain_cancer_cnv.targets))
+abline(a = 0, b = 1)
+
+# cnv variance analysis
+brain_cancer_cnv.var <- apply(brain_cancer_cnv,2,function(x){var(x, na.rm = TRUE)})#variance
+brain_cancer_cnv.targets.var <- apply(brain_cancer_cnv.targets,2, function(x){var(x, na.rm = TRUE)})
+hist(unlist(brain_cancer_cnv.var), breaks = 500)
+hist(unlist(brain_cancer_cnv.targets.var), breaks = 40)
+qqplot(unlist(brain_cancer_cnv.var), unlist(brain_cancer_cnv.targets.var), xlim = c(0,0.1), ylim = c(0,0.1))
+abline(a = 0, b = 1)
 ```
 
