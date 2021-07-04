@@ -361,6 +361,7 @@ present_in_all_doses<-function(a,b,c,d,e,f,g){
 
 effective_in_all_doses=present_in_all_doses(d1_d2,d1_d3,d1_d4,d1_d5,d1_d6,d1_d7,d1_d8)
 #51 drugs are effective in all doses
+
 ```
 
 ## Select one relevant dose
@@ -377,6 +378,10 @@ var(apply(all_effective_drugs[[7]],2,mean))
 var(apply(all_effective_drugs[[8]],2,mean))
 
 #dose 7 has the biggest variance so we will work with it
+
+
+#Creating a dataframe with the drugs that are effective in all cell lines and their efficiency values in d7
+effective_in_all_doses_df=subset(effective_d7, select = effective_in_all_doses)
 ```
 
 # Question 2: What are the targets of the effective drugs?
@@ -639,6 +644,26 @@ top_genes
 
 ##Regression model to select relevant genes
 ```{r}
+#Finding an universal drug that for the model by selecting the drug with the lowest gen expression variance
+
+effective_drugs_df<-data.frame(
+                    means=apply(effective_in_all_doses_df,2,mean),
+                    variance=apply(effective_in_all_doses_df,2,var))
+rownames(effective_drugs_df)= effective_in_all_doses
+effective_drugs_df=effective_drugs_df%>%arrange(variance)
+universal_drug=row.names(effective_drugs_df[1,, drop = FALSE])                            
+                               
+efficiency_ud=select(effective_d7,universal_drug)
+hist(t(efficiency_ud))                       
+
+#effective_in_all_doses_df_t=t(effective_in_all_doses_df)
+for(i in 1:ncol(effective_in_all_doses_df)){
+     hist(effective_in_all_doses_df[,i],main=effective_in_all_doses[i])
+    } 
+   
+
+
+                            
 the_genes=brain_cancer_exp[names,names(volcano_filtered_genes)]
 View(ae_d7)
 View(the_genes)
