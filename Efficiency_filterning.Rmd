@@ -665,7 +665,7 @@ boxplot(astrocytoma_ae_d7, xlba="Efficiency", ylab="Drug")
 boxplot(glioma_ae_d7, xlab="Efficiency", ylab="Drug")
 boxplot(glioblastoma_ae_d7, xlba="Efficiency", ylab="Drug")
 boxplot(medulloblastoma_ae_d7, xlba="Efficiency", ylab="Drug")
-
+boxplot(means_eff, xlba="Efficiency", ylab="Drug")
 ## calculate the means for each drug in a subtype 
 astrocytoma_ae_d7_mean = colMeans(astrocytoma_ae_d7)
 glioma_ae_d7_mean = colMeans(glioma_ae_d7)
@@ -677,41 +677,69 @@ medulloblastoma_ae_d7_mean = colMeans(medulloblastoma_ae_d7)
 means_eff <- data.frame(Astrocytoma = astrocytoma_ae_d7_mean,
                         Glioma = glioma_ae_d7_mean, 
                         Glioblastoma = glioblastoma_ae_d7_mean,  
-                        Medulloblastoma = medulloblastoma_ae_d7_mean, 
-                        Drugs = effective_in_all_doses)
+                        Medulloblastoma = medulloblastoma_ae_d7_mean)
+rownames(means_eff) = effective_in_all_doses
+
+means_drugs <- data.frame(means_eff, 
+                          Means = apply(means_eff, 1 , mean))
+
+
+## create a new boxplot that shows the overall the distribution and 
+
+p <- ggplot(new_means_eff, aes(x = subtype, y = Efficiency, color = subtype)) + 
+                         ggtitle("Subtype Boxplots") +
+                          xlab("Subtypes") + 
+                          ylab("Efficiency") + 
+  geom_boxplot(outlier.colour="red", outlier.shape=8,
+                outlier.size=4)
+p + theme(legend.position = "none")
 ```
 
 ## Plotting all of the individual subtyp means 
 
 ```{r}
 library("ggplot2")
-par(mfrow=c(2,2))
-ggplot(means_eff, aes(x = Drugs , y = Astrocytoma)) + 
-        geom_point()
 
-ggplot(means_eff, aes(x = Drugs , y = Glioma)) + 
-          geom_point()
-         
-ggplot(means_eff, aes(x = Drugs , y = Glioblastoma)) +   
-         geom_point()
+new_means_eff <- data.frame(Efficiency = c(means_drugs$Astrocytoma, means_drugs$Glioma, means_drugs$Glioblastoma, means_drugs$Medulloblastoma), 
+                            Drug_Mean = c(means_drugs$Means, means_drugs$Means, means_drugs$Means, means_drugs$Means), 
+                            subtype = c(rep("Astrocytoma", nrow(means_drugs)),
+                                      rep("Glioma", nrow(means_drugs)),
+                                      rep("Glioblastoma", nrow(means_drugs)),
+                                      rep("Medulloblastoma", nrow(means_drugs))), 
+                            Drug = c(effective_in_all_doses, effective_in_all_doses, effective_in_all_doses, effective_in_all_doses))
+## rearrange the Values in descending order 
 
-ggplot(means_eff, aes(x = Drugs , y = Medulloblastoma)) +   
-         geom_point()
+first = new_means_eff$Drug_Mean
+second = sort(new_means_eff$Drug_Mean, decreasing = TRUE)
+              
+match(first, second)
+
+
+arrangement <- data.frame(Drug_Ranks = match(first, second), 
+                                Efficiency = new_means_eff$Efficiency, 
+                                Subtype = new_means_eff$subtype,
+                                Drug = new_means_eff$Drug, 
+                                Drug_Mean = new_means_eff$Drug_Mean
+                      )
+
+pre_arrangement <- arrange(arrangement, Drug_Ranks)
+pre_arrangement <- data.frame(pre_arrangement, 
+                               Numbers = c(1:204))
+```
+
+
+```{r}
+## Plot the new, rearranged subtypes 
 
 
 
-new_means_eff <- data.frame(x = means_eff$Drugs, 
-                            y = c(means_eff$Astrocytoma, means_eff$Glioma, means_eff$Glioblastoma, means_eff$Medulloblastoma), 
-                            subtype = c(rep("Astrocytoma", nrow(means_eff)),
-                                      rep("Glioma", nrow(means_eff)),
-                                      rep("Glioblastoma", nrow(means_eff)),
-                                      rep("Medulloblastoma", nrow(means_eff))))
-ggplot(new_means_eff, aes(x = x, y = y, color = subtype)) + 
+ggplot(pre_arrangement, aes(x = Drug_Ranks , y = Efficiency, color = Subtype)) + 
                          ggtitle("Means of subtypes") +
                           xlab("Drugs") + 
                           ylab("Efficiency") + 
   
-  geom_point(aes(shape=subtype))
+  geom_point(aes(shape=Subtype))
+
 
 ##auffallend sind die Medulloblastoma, die in 31 von 51 Fällen effektiver sind als alle anderen Drogen!!!  Drogen 24, 26, 32 und 33 
 
