@@ -654,11 +654,11 @@ effective_drugs_df=effective_drugs_df%>%arrange(variance)
 universal_drug=row.names(effective_drugs_df[1,, drop = FALSE])                            
                                
 efficiency_ud=select(effective_d7,universal_drug)
-hist(t(efficiency_ud))                       
 
-#effective_in_all_doses_df_t=t(effective_in_all_doses_df)
+# Checking for distribution to find an alternative way
+
 for(i in 1:ncol(effective_in_all_doses_df)){
-     hist(effective_in_all_doses_df[,i],main=effective_in_all_doses[i])
+     hist(effective_in_all_doses_df[,i],breaks=20,main=effective_in_all_doses[i], xlim=c(0.2,-9), ylim=c(0,15), xlab="Efficiency")
     } 
    
 
