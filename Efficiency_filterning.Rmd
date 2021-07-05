@@ -720,11 +720,16 @@ arrangement <- data.frame(Drug_Ranks = match(first, second),
                                 Subtype = new_means_eff$subtype,
                                 Drug = new_means_eff$Drug, 
                                 Drug_Mean = new_means_eff$Drug_Mean
-                      )
+   
+res <- 1 
 
+for(i in c(1:51)){zv <- rep(i,4);res <- c(res, zv)}
+
+vec <- res[2:205]
 pre_arrangement <- arrange(arrangement, Drug_Ranks)
 pre_arrangement <- data.frame(pre_arrangement, 
-                               Numbers = c(1:204))
+                               Numbers = vec)
+
 ```
 
 
@@ -733,7 +738,7 @@ pre_arrangement <- data.frame(pre_arrangement,
 
 
 
-ggplot(pre_arrangement, aes(x = Drug_Ranks , y = Efficiency, color = Subtype)) + 
+ggplot(pre_arrangement, aes(x = Numbers , y = Efficiency, color = Subtype)) + 
                          ggtitle("Means of subtypes") +
                           xlab("Drugs") + 
                           ylab("Efficiency") + 
