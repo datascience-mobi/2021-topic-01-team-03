@@ -661,6 +661,26 @@ for(i in 1:ncol(effective_in_all_doses_df)){
      hist(effective_in_all_doses_df[,i],breaks=20,main=effective_in_all_doses[i], xlim=c(0.2,-9), ylim=c(0,15), xlab="Efficiency")
     } 
    
+# Decided on choosing the drug that has a uniform distribution 
+# Problem: KS test is not well suited for discrete distributions 
+
+ks_drugs <- vector(mode = "list",length=ncol(effective_in_all_doses_df)) 
+for(i in 1:ncol(effective_in_all_doses_df)) {         
+  ks_drugs[[i]] <- ks.test(as.numeric(effective_in_all_doses_df[,i]),punif(51), alternative = "two.sided", exact = TRUE)
+}
+
+
+ks_drugs_pvalue <- vector(length = ncol(effective_in_all_doses_df))
+for(i in 1:ncol(effective_in_all_doses_df)) {
+  ks_drugs_pvalue[i] <- ks_drugs[[i]]$p.value
+}
+
+
+
+
+
+
+
 
 
                             
