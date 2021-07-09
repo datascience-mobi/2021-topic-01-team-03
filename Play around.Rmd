@@ -579,6 +579,7 @@ length(which(wilcox_pvalue_genes<=0.05))#the amount of genes that are significan
 wilcox_pvalue_bonf = p.adjust(wilcox_pvalue_genes, method = "bonferroni", n = length(wilcox_pvalue_genes)) #I first was confused from p-value=1 but is possible when there is absolutely no evidence to reject H0
 b_correction=which(wilcox_pvalue_bonf<=0.01)
 p_values_b=wilcox_pvalue_bonf[b_correction]
+sig_genes=colnames(brain_cancer_exp_w)[b_correction]
 
 hist(p_values_b)
   
@@ -642,7 +643,7 @@ top_genes
 
 ```
 
-##Regression model to select relevant genes
+##Universal drug for regression model
 ```{r}
 #Finding an universal drug that for the model by selecting the drug with the lowest gen expression variance
 
@@ -666,7 +667,7 @@ for(i in 1:ncol(effective_in_all_doses_df)){
 
 ks_drugs <- vector(mode = "list",length=ncol(effective_in_all_doses_df)) 
 for(i in 1:ncol(effective_in_all_doses_df)) {         
-  ks_drugs[[i]] <- ks.test(as.numeric(effective_in_all_doses_df[,i]),"punif", mean(effective_in_all_doses_df[,i]), sd(effective_in_all_doses_df[,i]), alternative = "two.sided")
+  ks_drugs[[i]] <- ks.test(as.numeric(effective_in_all_doses_df[,i]),"punif", mean(effective_in_all_doses_df[,i]), sd(effective_in_all_doses_df[,i]), alternative = "two.sided", exact = "NULL")
 }
 
 
