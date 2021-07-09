@@ -1,0 +1,71 @@
+---
+title: "Clustering exp"
+author: "Cedrik Neber"
+date: "7/9/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+
+## Clustering of the exp value 
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+exp <- brain_cancer_exp[,top_genes]
+
+medulloblastoma_c <- apply(exp[medulloblastoma,],2, mean)
+glioblastoma_c <- apply(exp[glioblastoma,],2, mean)
+glioma_c <- apply(exp[glioma,],2, mean)
+astrocytoma_c <- apply(exp[astrocytoma,],2, mean)
+
+clustering.frame <- data.frame(Medulloblastoma = medulloblastoma_c,  
+                              Glioblastoma = glioblastoma_c, 
+                              Glioma = glioma_c, 
+                              Astrozytoma = astrocytoma_c)
+```
+
+## kmeans for the clustering.frame 
+
+```{r}
+km_c <- kmeans(clustering.frame, 4, iter.max = 20, nstart = 1)
+km_c
+
+wss <- sapply(1:8, function(k){
+  kmeans(x=clustering.frame, centers = k)$tot.withinss
+})
+plot(1:8,wss,type = 'b',pch = 19, main = "Subtypes", xlab = "Number of clusters K",
+     ylab = "Total within-clusters sum of squares")
+library(cluster)
+pam_4 <- pam(clustering.frame, k = 3)
+plot(silhouette(pam_4))
+
+
+library(factoextra)
+fviz_cluster(km_c, data = clustering.frame)
+
+fviz_nbclust(clustering.frame, kmeans, method ="wss") + geom_vline(xintercept = 4, linetype = 2) + labs(subtitle = "Elbow method")
+fviz_nbclust(clustering.frame, kmeans, method = "silhouette") + labs(subtitle = "Silhouette method")
+```
+
+
+```{r}
+ggplot(clustering.frame, aes(x =  , y = y, color = Subtype)) + 
+                         ggtitle("Means of subtypes") +
+                          xlab("x") + 
+                          ylab("y") + 
+  
+  geom_point()
+```
+
+
+
