@@ -48,22 +48,36 @@ exp_cluster <- data.frame(exp,
 
 
 library(cluster)
-pam_4 <- pam(exp, k = 4)
-plot(silhouette(pam_4))
+
+dis = dist(t(exp))
+head(dis)
+#s = silhouette(km_c$cluster, dis)
+plot(s)
+
 
 ggplot(data = exp_cluster, 
              aes(x = PTER, 
                                   y = TEC, color = Cluster)) +
   geom_point()
 
-heatmap(as.matrix(exp_num))
-librar
-ggheatmap(exp, orderCol = T, orderRow = T, dendroLineSize = 0.5,
-  fontSize = 20, colorScheme = "Spectral", scaleName = "value",
-  distMethod = "euclidean", clustMethod = "complete")
+#####heatmap(as.matrix(exp_num))
 
-ggplot(as.matrix(exp)
-geom_tile()
+#ggheatmap(exp, orderCol = T, orderRow = T, dendroLineSize = 0.5,
+  #fontSize = 20, colorScheme = "Spectral", scaleName = "value",
+  #distMethod = "euclidean", clustMethod = "complete")
+
+#ggplot(as.matrix(exp)
+#geom_tile()
+
+km_c$cluster 
+medulloblastoma 
+#3,2  
+glioblastoma 
+#4, 4, 1, 1, 1, 1, 4
+glioma 
+#3, 1, 2, 4, 2
+astrocytoma
+#2, 2, 2, 2, 2, 3, 4, 
 ```
 
 
