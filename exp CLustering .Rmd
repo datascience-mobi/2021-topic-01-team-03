@@ -1,0 +1,73 @@
+---
+title: "Clustering exp"
+author: "Cedrik Neber"
+date: "7/9/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+
+## Clustering of the exp value 
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+exp <- brain_cancer_exp[,top_genes]
+
+medulloblastoma_c <- apply(exp[medulloblastoma,],2, mean)
+#medulloblastoma_c$celline <- medulloblastoma
+glioblastoma_c <- apply(exp[glioblastoma,],2, mean)
+#glioblastoma_c$celline <- glioblastoma
+glioma_c <- apply(exp[glioma,],2, mean)
+#glioma_c$celline <- glioma
+astrocytoma_c <- apply(exp[astrocytoma,],2, mean)
+#astrocytoma_c$celline <- astrocytoma
+
+clustering.frame <- data.frame(Expression = c(medulloblastoma_c, glioblastoma_c, glioma_c, astrocytoma_c), 
+                              Subtype = c(rep("Medulloblastoma",20), rep("Glioblastoma", 20), rep("Glioma", 20), rep("Astrocytoma", 20)))
+
+
+```
+
+## kmeans for the clustering.frame 
+
+```{r}
+km_c <- kmeans(exp, 4, iter.max = 100, nstart = 1)
+km_c
+exp_cluster <- data.frame(exp, 
+                     Cluster = km_c$cluster)
+
+
+library(cluster)
+pam_4 <- pam(exp, k = 4)
+plot(silhouette(pam_4))
+
+ggplot(data = exp_cluster, 
+             aes(x = PTER, 
+                                  y = TEC, color = Cluster)) +
+  geom_point()
+
+heatmap(as.matrix(exp_num))
+librar
+ggheatmap(exp, orderCol = T, orderRow = T, dendroLineSize = 0.5,
+  fontSize = 20, colorScheme = "Spectral", scaleName = "value",
+  distMethod = "euclidean", clustMethod = "complete")
+
+ggplot(as.matrix(exp)
+geom_tile()
+```
+
+
+
+
+
+
