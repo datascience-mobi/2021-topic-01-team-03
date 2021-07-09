@@ -666,7 +666,7 @@ for(i in 1:ncol(effective_in_all_doses_df)){
 
 ks_drugs <- vector(mode = "list",length=ncol(effective_in_all_doses_df)) 
 for(i in 1:ncol(effective_in_all_doses_df)) {         
-  ks_drugs[[i]] <- ks.test(as.numeric(effective_in_all_doses_df[,i]),punif(51), alternative = "two.sided", exact = TRUE)
+  ks_drugs[[i]] <- ks.test(as.numeric(effective_in_all_doses_df[,i]),"punif", mean(effective_in_all_doses_df[,i]), sd(effective_in_all_doses_df[,i]), alternative = "two.sided")
 }
 
 
@@ -675,11 +675,18 @@ for(i in 1:ncol(effective_in_all_doses_df)) {
   ks_drugs_pvalue[i] <- ks_drugs[[i]]$p.value
 }
 
+ks_drugs_pvalue
 
 
+```
 
 
+```{r}
 
+ks_pvalue_min=min(ks_drugs_pvalue)
+
+test_vector=c(effective_in_all_doses_df[,51])
+test_ks=ks.test(as.numeric(test_vector),"punif",mean(test_vector), sd(test_vector), alternative="two.sided")
 
 
 
@@ -714,9 +721,7 @@ d_g[,2]<-sample(the_genes[1,],51)
 for(i in 1:50000) {
   r_squared[i] <- summary(lm())
 }
-
 ```
-
 
 
 # Question 4: What other factors contribute to drug effectiveness prediction?
