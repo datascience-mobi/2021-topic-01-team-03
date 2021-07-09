@@ -24,6 +24,7 @@ You can also embed plots, for example:
 exp <- brain_cancer_exp[,top_genes]
 
 medulloblastoma_c <- apply(exp[medulloblastoma,],2, mean)
+<<<<<<< HEAD
 #medulloblastoma_c$celline <- medulloblastoma
 glioblastoma_c <- apply(exp[glioblastoma,],2, mean)
 #glioblastoma_c$celline <- glioblastoma
@@ -36,11 +37,22 @@ clustering.frame <- data.frame(Expression = c(medulloblastoma_c, glioblastoma_c,
                               Subtype = c(rep("Medulloblastoma",20), rep("Glioblastoma", 20), rep("Glioma", 20), rep("Astrocytoma", 20)))
 
 
+=======
+glioblastoma_c <- apply(exp[glioblastoma,],2, mean)
+glioma_c <- apply(exp[glioma,],2, mean)
+astrocytoma_c <- apply(exp[astrocytoma,],2, mean)
+
+clustering.frame <- data.frame(Medulloblastoma = medulloblastoma_c,  
+                              Glioblastoma = glioblastoma_c, 
+                              Glioma = glioma_c, 
+                              Astrozytoma = astrocytoma_c)
+>>>>>>> 512a1fc1636767ba18439d82bae5c8b7c04116f8
 ```
 
 ## kmeans for the clustering.frame 
 
 ```{r}
+<<<<<<< HEAD
 km_c <- kmeans(exp, 4, iter.max = 100, nstart = 1)
 km_c
 exp_cluster <- data.frame(exp, 
@@ -68,6 +80,37 @@ geom_tile()
 
 
 
+=======
+km_c <- kmeans(clustering.frame, 4, iter.max = 20, nstart = 1)
+km_c
+
+wss <- sapply(1:8, function(k){
+  kmeans(x=clustering.frame, centers = k)$tot.withinss
+})
+plot(1:8,wss,type = 'b',pch = 19, main = "Subtypes", xlab = "Number of clusters K",
+     ylab = "Total within-clusters sum of squares")
+library(cluster)
+pam_4 <- pam(clustering.frame, k = 3)
+plot(silhouette(pam_4))
+
+
+library(factoextra)
+fviz_cluster(km_c, data = clustering.frame)
+
+fviz_nbclust(clustering.frame, kmeans, method ="wss") + geom_vline(xintercept = 4, linetype = 2) + labs(subtitle = "Elbow method")
+fviz_nbclust(clustering.frame, kmeans, method = "silhouette") + labs(subtitle = "Silhouette method")
+```
+
+
+```{r}
+ggplot(clustering.frame, aes(x =  , y = y, color = Subtype)) + 
+                         ggtitle("Means of subtypes") +
+                          xlab("x") + 
+                          ylab("y") + 
+  
+  geom_point()
+```
+>>>>>>> 512a1fc1636767ba18439d82bae5c8b7c04116f8
 
 
 
