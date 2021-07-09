@@ -34,6 +34,7 @@ IDEA: use same indications as in PRISM paper to start filtering for relevant gen
 ```{r Packages}
 # here is the place where we can put external packages
 library(dplyr)
+library(pheatmap)
 ```
 
 # Cleaning
@@ -643,6 +644,17 @@ top_genes
 
 ```
 
+```{r}
+pairs(brain_cancer_exp[,top_genes], col='blue', pch=1) # our genes do not correlate
+pheatmap(cor(brain_cancer_exp[,top_genes]), cluster_cols = F, cluster_rows = F, display_numbers = T) #do we need to remove one of the genes with high covariance?
+
+#brain_cancer_exp[,top_genes]
+#ae_d7
+
+#pheatmap(cbind(brain_cancer_exp[,top_genes],ae_d7[,50]), cluster_cols = F, cluster_rows = F, display_numbers = T)
+```
+
+
 ##Universal drug for regression model
 ```{r}
 #Finding an universal drug that for the model by selecting the drug with the lowest gen expression variance
@@ -667,8 +679,10 @@ for(i in 1:ncol(effective_in_all_doses_df)){
 
 ks_drugs <- vector(mode = "list",length=ncol(effective_in_all_doses_df)) 
 for(i in 1:ncol(effective_in_all_doses_df)) {         
-  ks_drugs[[i]] <- ks.test(as.numeric(effective_in_all_doses_df[,i]),"punif", mean(effective_in_all_doses_df[,i]), sd(effective_in_all_doses_df[,i]), alternative = "two.sided", exact = "NULL")
+  ks_drugs[[i]] <- ks.test(as.numeric(effective_in_all_doses_df[,i]),"punif",mean(effective_in_all_doses_df[,i]), sd(effective_in_all_doses_df[,i]),alternative = "two.sided", exact = NULL)
 }
+
+effective_in_all_doses_df[,i]
 
 
 ks_drugs_pvalue <- vector(length = ncol(effective_in_all_doses_df))
@@ -678,50 +692,90 @@ for(i in 1:ncol(effective_in_all_doses_df)) {
 
 ks_drugs_pvalue
 
+```
+
+##Regression model to find out which genes we keep for the final model  
+```{r}
+
+genes_regression=cbind(brain_cancer_exp[,top_genes],ae_d7[,50])
+colnames(genes_regression)[ncol(genes_regression)]="Drug"
+
+#in following loops we have make a regression model for each gene separately and order the genes from most useful to least. The criteria for usefulness is the r.squared of each model.
+
+reg <- vector(mode = "list",length=ncol(genes_regression)-1)
+for (i in 1:(ncol(genes_regression)-1)) {
+  reg[[i]]<-summary(lm(Drug~genes_regression[,i],genes_regression))
+}
+
+r_squared <- vector(length=ncol(genes_regression)-1)
+for(i in 1:(ncol(genes_regression)-1)) {
+  r_squared[i] <- reg[[i]]$r.squared
+}
+
+sort(r_squared, decreasing = T)[1]
+aaa=sort(r_squared, decreasing = T)
+
+sorted_genes<- vector(length=ncol(genes_regression)-1)
+for(i in 1:(ncol(genes_regression)-1)) {
+  sorted_genes[i] <- which(r_squared==aaa[i])
+}
+sorted_genes
+summary(lm(Drug~genes_regression[,sorted_genes[1]],genes_regression))
+
+
+big_regression<-summary(lm(Drug~.,genes_regression)) #regression model with all 20 genes
+
+#now we will take the regression model with all 20 genes and will try to improve it, by removing the genes with the biggest p.values
+
+coeffs=as.data.frame(big_regression$coefficients)
+coeffs=coeffs[-c(1),]
+coeffs=coeffs[order(coeffs$`Pr(>|t|)`),]
+coeffs=coeffs[-c(nrow(coeffs)),]
+
+genes_regression=cbind(brain_cancer_exp[,rownames(coeffs)],ae_d7[,50])
+colnames(genes_regression)[ncol(genes_regression)]="Drug"
+big_regression2<-summary(lm(Drug~.,genes_regression))
+big_regression
+pf(big_regression$fstatistic[1],big_regression$fstatistic[2],big_regression$fstatistic[3],lower.tail=FALSE)
 
 ```
 
-
 ```{r}
+genes_regression=cbind(brain_cancer_exp[,top_genes],ae_d7[,50])
+colnames(genes_regression)[ncol(genes_regression)]="Drug"
 
-ks_pvalue_min=min(ks_drugs_pvalue)
+YYY<-summary(lm(Drug~.,genes_regression))
 
-test_vector=c(effective_in_all_doses_df[,51])
-test_ks=ks.test(as.numeric(test_vector),"punif",mean(test_vector), sd(test_vector), alternative="two.sided")
+#loop starts
+repeat{
+  XXX<-YYY
+  pvx<-pf(XXX$fstatistic[1],XXX$fstatistic[2],XXX$fstatistic[3],lower.tail=FALSE)
+  print(pvx)
+coeffs=as.data.frame(XXX$coefficients)
+coeffs=coeffs[-c(1),]
+coeffs=coeffs[order(coeffs$`Pr(>|t|)`),]
+coeffs=coeffs[-c(nrow(coeffs)),]
+genes_regression=cbind(brain_cancer_exp[,rownames(coeffs)],ae_d7[,50])
+colnames(genes_regression)[ncol(genes_regression)]="Drug"
 
-
-
-                            
-the_genes=brain_cancer_exp[names,names(volcano_filtered_genes)]
-View(ae_d7)
-View(the_genes)
-
-d_g<-data.frame(matrix(nrow = 35,ncol = 51))
-rownames(d_g)=c("Drugs",names)
-d_g[1,]<-apply(ae_d7,2,mean)
-
-set.seed(333)
-for(i in 1:34){
-  d_g[i+1,]<-sample(the_genes[i,],51)
+YYY<-summary(lm(Drug~.,genes_regression))
+pvy<-pf(YYY$fstatistic[1],YYY$fstatistic[2],YYY$fstatistic[3],lower.tail=FALSE)
+if(pvy>=pvx){
+  break
 }
- d_g<-as.data.frame(t(d_g))
-
-#summary(lm(Drugs~a+b+c,d_g))
-
-
-#loop intent
-aa<-lm(Drugs~Genes,data = a)
-
-r_squared<- vector(length = 50000)
-
-d_g<-data.frame(matrix(nrow = 51,ncol = 2))
-colnames(d_g)=c("Drugs","Genes")
-d_g[,1]<-apply(ae_d7,2,mean)
-d_g[,2]<-sample(the_genes[1,],51)
-
-for(i in 1:50000) {
-  r_squared[i] <- summary(lm())
 }
+
+XXX
+
+#anova and not p-value to compare models?
+
+red<-lm(Drug~.,genes_regression)
+genes_regression=cbind(brain_cancer_exp[,top_genes],ae_d7[,50])
+colnames(genes_regression)[ncol(genes_regression)]="Drug"
+full<-lm(Drug~.,genes_regression)
+
+anova(red,full)#H0: modelle equivalent-> kann nicht verworfen werden-> nicht equivalent-> p value gross-> koplexere model nicht signifikant besser
+
 ```
 
 
