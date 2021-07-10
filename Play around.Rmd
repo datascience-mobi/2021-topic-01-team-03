@@ -502,14 +502,6 @@ exp_p_mean=mean(exp_pvalue)
 ``` 
 
 
-Caution: This is a case for the multiplicity problem. While testing thousands of hypotheses simultaneously, the chance of getting false positives is increased. There are two possibilities of adjustment.
-
-First: The Bonferroni correction: Correction of the FWER (family-wise error rate) so the probability of getting at least one false positive during multiple testing. In this way, the significance level alpha is adjustet to alpha/n.
-
-Second: The Benjamini and Hochberg correction. This is a method to control the FDR (false discovery rate) so the proportion of false positives among the significant results. This method is more recommended for gene expression analysis.
-
-https://www.reneshbedre.com/blog/multiple-hypothesis-testing-corrections.html
-
 ##Wilcoxon test: compare all gene from 34 brain cancer cell lines with the same gene from all other tumors
 
 #Pseudovalue
@@ -664,72 +656,37 @@ effective_drugs_df<-data.frame(
                     variance=apply(effective_in_all_doses_df,2,var))
 rownames(effective_drugs_df)= effective_in_all_doses
 effective_drugs_df=effective_drugs_df%>%arrange(variance)
-#universal_drug=row.names(effective_drugs_df[1,, drop = FALSE])                            
+universal_drug=row.names(effective_drugs_df[1,, drop = FALSE])                            
                                
 efficiency_ud=select(effective_d7,universal_drug)
+# The problem by using this drug is that the variance scales the magnitude of the observed effects. After the KS test failed to execute, we will select the drug with the highest frequency in any interval of efficiency scores. 
 
-
-# Checking for distribution to find an alternative way
+# Checking the histograms of each drug
 
 for(i in 1:ncol(effective_in_all_doses_df)){
      hist(effective_in_all_doses_df[,i],breaks=20,main=effective_in_all_doses[i], xlim=c(0.2,-9), ylim=c(0,15), xlab="Efficiency")
     } 
   
-
-# The problem by using this drug is that the variance scales the magnitude of the observed effects. After the KS test failed to execute, we will select the drug with the highest frequency in any interval of efficiency scores. 
-
 # Computing the global minimum and maximum
 
-min_eff_test=min(apply(ae_d7,2,min))
+min_eff=min(apply(ae_d7,2,min))
 max_eff=max(apply(ae_d7,2,max))
 
 # Creating a sequence for the interval
 
-interval=seq(from=min_eff, to=max_eff, by=((abs(min_eff)+max_eff))/10)
+interval=seq(from=min_eff, to=max_eff, by=((abs(min_eff)+max_eff))/34)
 
-# Cutting a vector into these intervals
 
-x=effective_in_all_doses_df[,1]
-tryout=cut(x, breaks=interval, right=TRUE, include.lowest = TRUE)
-
-# Trying to loop it
+# Put the data frame row wise in the intervals
 
 eff_intervals <- vector(mode = "list",length=ncol(ae_d7)) 
 for(i in 1:ncol(ae_d7)) {  
   eff_intervals[[i]]=table(cut(ae_d7[,i],breaks=interval,right=TRUE,include.lowest=TRUE))
   }
 
-# Extracting the maximum value
-
-#to=unlist(lapply(eff_intervals,max))
+# Extracting the maximum value and so the universal drug
 vec_max_eff=unlist(lapply(eff_intervals,max))
 uni_drug=which(vec_max_eff==max(vec_max_eff))
-
-
-
-
-
-
-# Not relevant
-
-## Decided on choosing the drug that has a uniform distribution 
-## Problem: KS test is not well suited for discrete distributions 
-
-ks_drugs <- vector(mode = "list",length=ncol(effective_in_all_doses_df)) 
-for(i in 1:ncol(effective_in_all_doses_df)) {         
-  ks_drugs[[i]] <- ks.test(as.numeric(effective_in_all_doses_df[,i]),"punif",mean(effective_in_all_doses_df[,i]), sd(effective_in_all_doses_df[,i]),alternative = "two.sided", exact = NULL)
-}
-
-effective_in_all_doses_df[,i]
-
-
-ks_drugs_pvalue <- vector(length = ncol(effective_in_all_doses_df))
-for(i in 1:ncol(effective_in_all_doses_df)) {
-  ks_drugs_pvalue[i] <- ks_drugs[[i]]$p.value
-}
-
-ks_drugs_pvalue
-
 ```
 
 ##Regression model to find out which genes we keep for the final model  
