@@ -1413,20 +1413,21 @@ bh_correction_a <- which(wilcox_pvalue_a_BH<=0.01)
 
 
 ```{r}
+#Wdh für exp
 ##### pseudo value
 # braincancer achilles var
-min_bca_var <- vector(length = 18119)
-for(i in 1:18119){
-  min_bca_var[i] <- min(brain_cancer_achilles.var[which(brain_cancer_achilles.var>0)])
-}
-min(min_bca_var)
+#min_bca_var <- vector(length = 18119)
+#for(i in 1:18119){
+#  min_bca_var[i] <- min(brain_cancer_achilles.var[which(brain_cancer_achilles.var>0)])
+#}
+#min(min_bca_var)
 
 # brain cancer achilles targets var
-min_bcat_var <- vector(length = 121)
-for(i in 1:121){
-  min_bcat_var[i]  <- min(brain_cancer_achilles.targets.var[which(brain_cancer_achilles.targets.var>0)])
-}
-pseudo_value_a_var <- min(min_bcat_var)
+#min_bcat_var <- vector(length = 121)
+#for(i in 1:121){
+#  min_bcat_var[i]  <- min(brain_cancer_achilles.targets.var[which(brain_cancer_achilles.targets.var>0)])
+#}
+#pseudo_value_a_var <- min(min_bcat_var)
 # pseudo_value_a_var if > 0 = 0.001796409
 # pseudo_value_a_var if < 0 = Inf
 
