@@ -1374,7 +1374,7 @@ pseudo_value_a <- 0.0004840532
 brain_cancer_achilles_T <- brain_cancer_achilles_T + pseudo_value_a
 brain_cancer_achilles.targets_T <- brain_cancer_achilles.targets_T + pseudo_value_a
 
-# Transformation, now 25 columns and different #row
+# Transposition, now 25 columns and different #row
 #brain_cancer_achilles_T <- t(brain_cancer_achilles_T)
 #brain_cancer_achilles.targets_T <- t(brain_cancer_achilles.targets_T)
 brain_cancer_achilles_T <- as.data.frame(t(scale(as.matrix(t(brain_cancer_achilles_T)))))
@@ -1394,11 +1394,24 @@ for(i in 1:ncol(brain_cancer_achilles.targets_T)) {
   wilcox_pvalue_a[i] <- wilcox_a[[i]]$p.value
 }
 
-length(which(wilcox_pvalue_a<=0.05))
+length(which(wilcox_pvalue_a<=0.05))# 104 out of 121 targets
 
 
 ```
+##Adjustment of multiple testing problem 
+```{r}
+# Bonferroni correction
+wilcox_pvalue_a_bonf <- p.adjust(wilcox_pvalue_a, method = "bonferroni", n = length(wilcox_pvalue_a)) 
+b_correction_a <- which(wilcox_pvalue_a_bonf<=0.01)
+p_values_a_b <- wilcox_pvalue_a_bonf[b_correction_a]
+sig_targets_a <- colnames(brain_cancer_achilles.targets_T)[b_correction_a]
 
+hist(p_values_a_b)
+  
+# Benjamini-Hochberg correction
+wilcox_pvalue_a_BH <- p.adjust(wilcox_pvalue_a, method = "BH", n = length(wilcox_pvalue_a))
+bh_correction_a <- which(wilcox_pvalue_a_BH<=0.01)
+```
 
 
 
