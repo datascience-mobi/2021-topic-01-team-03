@@ -224,7 +224,7 @@ check_for_differences(doses_subsets_[[8]],d8)
 ## Filter effective drugs in each dose group
 
 ```{r}
-# Defining a treshold by looking at the data set
+# Defining a threshold by looking at the data set
 median(apply(brain_cancer,2,mean))
 
 
@@ -664,18 +664,56 @@ effective_drugs_df<-data.frame(
                     variance=apply(effective_in_all_doses_df,2,var))
 rownames(effective_drugs_df)= effective_in_all_doses
 effective_drugs_df=effective_drugs_df%>%arrange(variance)
-universal_drug=row.names(effective_drugs_df[1,, drop = FALSE])                            
+#universal_drug=row.names(effective_drugs_df[1,, drop = FALSE])                            
                                
 efficiency_ud=select(effective_d7,universal_drug)
+
 
 # Checking for distribution to find an alternative way
 
 for(i in 1:ncol(effective_in_all_doses_df)){
      hist(effective_in_all_doses_df[,i],breaks=20,main=effective_in_all_doses[i], xlim=c(0.2,-9), ylim=c(0,15), xlab="Efficiency")
     } 
-   
-# Decided on choosing the drug that has a uniform distribution 
-# Problem: KS test is not well suited for discrete distributions 
+  
+
+# The problem by using this drug is that the variance scales the magnitude of the observed effects. After the KS test failed to execute, we will select the drug with the highest frequency in any interval of efficiency scores. 
+
+# Computing the global minimum and maximum
+
+min_eff_test=min(apply(ae_d7,2,min))
+max_eff=max(apply(ae_d7,2,max))
+
+# Creating a sequence for the interval
+
+interval=seq(from=min_eff, to=max_eff, by=((abs(min_eff)+max_eff))/10)
+
+# Cutting a vector into these intervals
+
+x=effective_in_all_doses_df[,1]
+tryout=cut(x, breaks=interval, right=TRUE, include.lowest = TRUE)
+
+# Trying to loop it
+
+eff_intervals <- vector(mode = "list",length=ncol(ae_d7)) 
+for(i in 1:ncol(ae_d7)) {  
+  eff_intervals[[i]]=table(cut(ae_d7[,i],breaks=interval,right=TRUE,include.lowest=TRUE))
+  }
+
+# Extracting the maximum value
+
+#to=unlist(lapply(eff_intervals,max))
+vec_max_eff=unlist(lapply(eff_intervals,max))
+uni_drug=which(vec_max_eff==max(vec_max_eff))
+
+
+
+
+
+
+# Not relevant
+
+## Decided on choosing the drug that has a uniform distribution 
+## Problem: KS test is not well suited for discrete distributions 
 
 ks_drugs <- vector(mode = "list",length=ncol(effective_in_all_doses_df)) 
 for(i in 1:ncol(effective_in_all_doses_df)) {         
@@ -697,7 +735,7 @@ ks_drugs_pvalue
 ##Regression model to find out which genes we keep for the final model  
 ```{r}
 
-genes_regression=cbind(brain_cancer_exp[,top_genes],ae_d7[,50])
+genes_regression=cbind(brain_cancer_exp[,top_genes],ae_d7[,uni_drug])
 colnames(genes_regression)[ncol(genes_regression)]="Drug"
 
 #in following loops we have make a regression model for each gene separately and order the genes from most useful to least. The criteria for usefulness is the r.squared of each model.
@@ -732,7 +770,7 @@ coeffs=coeffs[-c(1),]
 coeffs=coeffs[order(coeffs$`Pr(>|t|)`),]
 coeffs=coeffs[-c(nrow(coeffs)),]
 
-genes_regression=cbind(brain_cancer_exp[,rownames(coeffs)],ae_d7[,50])
+genes_regression=cbind(brain_cancer_exp[,rownames(coeffs)],ae_d7[,uni_drug])
 colnames(genes_regression)[ncol(genes_regression)]="Drug"
 big_regression2<-summary(lm(Drug~.,genes_regression))
 big_regression
@@ -741,7 +779,7 @@ pf(big_regression$fstatistic[1],big_regression$fstatistic[2],big_regression$fsta
 ```
 
 ```{r}
-genes_regression=cbind(brain_cancer_exp[,top_genes],ae_d7[,50])
+genes_regression=cbind(brain_cancer_exp[,top_genes],ae_d7[,uni_drug])
 colnames(genes_regression)[ncol(genes_regression)]="Drug"
 
 YYY<-summary(lm(Drug~.,genes_regression))
