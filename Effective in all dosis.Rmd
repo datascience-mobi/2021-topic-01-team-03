@@ -1372,18 +1372,21 @@ brain_cancer_achilles.targets_T <- na.omit(brain_cancer_achilles.targets)
 #Z-transformation
 pseudo_value_a <- 0.0004840532
 brain_cancer_achilles_T <- brain_cancer_achilles_T + pseudo_value_a
-brain_cancer_achilles.targets_T <- brain_cancer_achilles.targets_T + pseudo_value
+brain_cancer_achilles.targets_T <- brain_cancer_achilles.targets_T + pseudo_value_a
 
 # Transformation, now 25 columns and different #row
-brain_cancer_achilles_T <- t(brain_cancer_achilles_T)
-brain_cancer_achilles.targets_T <- t(brain_cancer_achilles.targets_T)
+#brain_cancer_achilles_T <- t(brain_cancer_achilles_T)
+#brain_cancer_achilles.targets_T <- t(brain_cancer_achilles.targets_T)
+brain_cancer_achilles_T <- as.data.frame(t(scale(as.matrix(t(brain_cancer_achilles_T)))))
+brain_cancer_achilles.targets_T <- as.data.frame(t(scale(as.matrix(t(brain_cancer_achilles.targets_T)))))
+
 ```
 
 ```{r}
 # Wilcoxon test
 wilcox_a <- vector(mode = "list",length=ncol(brain_cancer_achilles.targets_T))
 for(i in 1:ncol(brain_cancer_achilles.targets_T)) {         
-  wilcox_genes[[i]] <- wilcox.test(as.numeric(brain_cancer_achilles_T[,i]),as.numeric(brain_cancer_achilles.targets_T[,i]), alternative = "two.sided", paired = F)
+  wilcox_a[[i]] <- wilcox.test(as.numeric(brain_cancer_achilles_T[,i]),as.numeric(brain_cancer_achilles.targets_T[,i]), alternative = "two.sided", paired = F)
 }
 
 wilcox_pvalue_a <- vector(length = ncol(brain_cancer_achilles.targets_T))
