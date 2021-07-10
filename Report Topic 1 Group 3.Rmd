@@ -96,6 +96,17 @@ To analyse the targets of the previously described effective drugs, we
 - Compare the real effectiveness with the estimated one 
 
 
+
+Caution: This is a case for the multiplicity problem. While testing thousands of hypotheses simultaneously, the chance of getting false positives is increased. There are two possibilities of adjustment.
+
+First: The Bonferroni correction: Correction of the FWER (family-wise error rate) so the probability of getting at least one false positive during multiple testing. In this way, the significance level alpha is adjustet to alpha/n.
+
+Second: The Benjamini and Hochberg correction. This is a method to control the FDR (false discovery rate) so the proportion of false positives among the significant results. This method is more recommended for gene expression analysis.
+
+https://www.reneshbedre.com/blog/multiple-hypothesis-testing-corrections.html
+
+
+
 Rough version with possible visualizations (6 plots in total)
 
 
