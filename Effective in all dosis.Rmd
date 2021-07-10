@@ -1349,7 +1349,7 @@ https://www.reneshbedre.com/blog/multiple-hypothesis-testing-corrections.html
 ##Wilcoxon test: compare all gene from 34 brain cancer cell lines with the same gene from all other tumors
 
 ```{r}
-#####
+##### pseudo value
 #min_bcaT <- vector(length = 18119)
 #for(i in 1:18119){
 #  min_bcaT[i] <- min(brain_cancer_achilles_T[i,][which(brain_cancer_achilles_T[i,]>0)])
@@ -1370,13 +1370,11 @@ brain_cancer_achilles_T <- na.omit(brain_cancer_achilles)
 brain_cancer_achilles.targets_T <- na.omit(brain_cancer_achilles.targets)
 
 #Z-transformation
-pseudo_value_a <- 0.0004840532
-brain_cancer_achilles_T <- brain_cancer_achilles_T + pseudo_value_a
-brain_cancer_achilles.targets_T <- brain_cancer_achilles.targets_T + pseudo_value_a
+#pseudo_value_a <- 0.0004840532
+#brain_cancer_achilles_T <- brain_cancer_achilles_T + pseudo_value_a
+#brain_cancer_achilles.targets_T <- brain_cancer_achilles.targets_T + pseudo_value_a
 
 # Transposition, now 25 columns and different #row
-#brain_cancer_achilles_T <- t(brain_cancer_achilles_T)
-#brain_cancer_achilles.targets_T <- t(brain_cancer_achilles.targets_T)
 brain_cancer_achilles_T <- as.data.frame(t(scale(as.matrix(t(brain_cancer_achilles_T)))))
 brain_cancer_achilles.targets_T <- as.data.frame(t(scale(as.matrix(t(brain_cancer_achilles.targets_T)))))
 
@@ -1386,7 +1384,7 @@ brain_cancer_achilles.targets_T <- as.data.frame(t(scale(as.matrix(t(brain_cance
 # Wilcoxon test
 wilcox_a <- vector(mode = "list",length=ncol(brain_cancer_achilles.targets_T))
 for(i in 1:ncol(brain_cancer_achilles.targets_T)) {         
-  wilcox_a[[i]] <- wilcox.test(as.numeric(brain_cancer_achilles_T[,i]),as.numeric(brain_cancer_achilles.targets_T[,i]), alternative = "two.sided", paired = F)
+  wilcox_a[[i]] <- wilcox.test(as.numeric(brain_cancer_achilles_T[,i]),as.numeric(brain_cancer_achilles.targets_T[,i]), alternative = "less", paired = F)
 }
 
 wilcox_pvalue_a <- vector(length = ncol(brain_cancer_achilles.targets_T))
@@ -1412,6 +1410,45 @@ hist(p_values_a_b)
 wilcox_pvalue_a_BH <- p.adjust(wilcox_pvalue_a, method = "BH", n = length(wilcox_pvalue_a))
 bh_correction_a <- which(wilcox_pvalue_a_BH<=0.01)
 ```
+
+
+```{r}
+#Wdh für exp
+##### pseudo value
+# braincancer achilles var
+#min_bca_var <- vector(length = 18119)
+#for(i in 1:18119){
+#  min_bca_var[i] <- min(brain_cancer_achilles.var[which(brain_cancer_achilles.var>0)])
+#}
+#min(min_bca_var)
+
+# brain cancer achilles targets var
+#min_bcat_var <- vector(length = 121)
+#for(i in 1:121){
+#  min_bcat_var[i]  <- min(brain_cancer_achilles.targets.var[which(brain_cancer_achilles.targets.var>0)])
+#}
+#pseudo_value_a_var <- min(min_bcat_var)
+# pseudo_value_a_var if > 0 = 0.001796409
+# pseudo_value_a_var if < 0 = Inf
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
