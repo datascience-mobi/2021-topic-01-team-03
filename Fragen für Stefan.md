@@ -3,6 +3,8 @@
 ***14.07.21***
 - Müssen wir korrelierte Gene für das erste Regressionsmodell beachten?
 - Müssen wir beim two sided Wilcoxon test das Signifikanzlevel anpassen?
+- Welche Intervallgröße sollen wir nehmen um die universal drug zu bestimmen?
+- Regression-Fragen von Lea und Lennard
 
 
 **23.06.21**

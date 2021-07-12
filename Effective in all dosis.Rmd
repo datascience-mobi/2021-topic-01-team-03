@@ -523,6 +523,7 @@ effective_bc_treat=brain_cancer_treat[effective_in_all_doses,-c(1,2,3,4,10)]
 Targets
 
 ```{r}
+#??
 #top <- which(effective_bc_treat$moa == "topoisomerase inhibitor")
 # <- which(effective_bc_treat$moa == "mTOR inhibitor")
 #aurk <- which(effective_bc_treat$moa == "Aurora kinase inhibitor")
@@ -1347,7 +1348,7 @@ Second: The Benjamini and Hochberg correction. This is a method to control the F
 https://www.reneshbedre.com/blog/multiple-hypothesis-testing-corrections.html
 
 ##Wilcoxon test: compare all gene from 34 brain cancer cell lines with the same gene from all other tumors
-
+## Achilles
 ```{r}
 ##### pseudo value
 #min_bcaT <- vector(length = 18119)
@@ -1382,6 +1383,8 @@ brain_cancer_achilles.targets_T <- as.data.frame(t(scale(as.matrix(t(brain_cance
 
 ```{r}
 # Wilcoxon test
+# H0: The distribution of the effective targets (achilles values) is equal to the one of the achilles dataset
+# H1: The distribution of the effective targets = achilles values are "less" than the one of the achilles dataset
 wilcox_a <- vector(mode = "list",length=ncol(brain_cancer_achilles.targets_T))
 for(i in 1:ncol(brain_cancer_achilles.targets_T)) {         
   wilcox_a[[i]] <- wilcox.test(as.numeric(brain_cancer_achilles_T[,i]),as.numeric(brain_cancer_achilles.targets_T[,i]), alternative = "less", paired = F)
@@ -1392,7 +1395,7 @@ for(i in 1:ncol(brain_cancer_achilles.targets_T)) {
   wilcox_pvalue_a[i] <- wilcox_a[[i]]$p.value
 }
 
-length(which(wilcox_pvalue_a<=0.05))# 104 out of 121 targets
+length(which(wilcox_pvalue_a<=0.05))# 59
 
 
 ```
@@ -1405,6 +1408,7 @@ p_values_a_b <- wilcox_pvalue_a_bonf[b_correction_a]
 sig_targets_a <- colnames(brain_cancer_achilles.targets_T)[b_correction_a]
 
 hist(p_values_a_b)
+length(p_values_a_b)# 44 targets are from another distribution and less
   
 # Benjamini-Hochberg correction
 wilcox_pvalue_a_BH <- p.adjust(wilcox_pvalue_a, method = "BH", n = length(wilcox_pvalue_a))
@@ -1412,27 +1416,140 @@ bh_correction_a <- which(wilcox_pvalue_a_BH<=0.01)
 ```
 
 
+## Expression
 ```{r}
-#Wdh für exp
 ##### pseudo value
-# braincancer achilles var
-#min_bca_var <- vector(length = 18119)
-#for(i in 1:18119){
-#  min_bca_var[i] <- min(brain_cancer_achilles.var[which(brain_cancer_achilles.var>0)])
+#min_bceT <- vector(length = 19177)
+#for(i in 1:19177){
+#  min_bceT[i] <- min(brain_cancer_exp[i,][which(brain_cancer_exp[i,]>0)])
 #}
-#min(min_bca_var)
+#min(min_bceT)
 
-# brain cancer achilles targets var
-#min_bcat_var <- vector(length = 121)
-#for(i in 1:121){
-#  min_bcat_var[i]  <- min(brain_cancer_achilles.targets.var[which(brain_cancer_achilles.targets.var>0)])
+#min_bcetT <- vector(length = 122)
+#for(i in 1:122){
+#  min_bcetT[i]  <- min(brain_cancer_exp.targets_T[i,][which(brain_cancer_exp.targets_T[i,]>0)])
 #}
-#pseudo_value_a_var <- min(min_bcat_var)
-# pseudo_value_a_var if > 0 = 0.001796409
-# pseudo_value_a_var if < 0 = Inf
+#pseudo_value_e <- min(min_bcetT)
+# pseudo_value_e = 
+```
+
+```{r}
+# Removal of lines with NA from new dataframe --> actually there are non
+brain_cancer_exp_T <- na.omit(brain_cancer_exp)
+brain_cancer_exp.targets_T <- na.omit(brain_cancer_exp.targets)
+
+#Z-transformation
+#pseudo_value_e <- 
+#brain_cancer_exp_T <- brain_cancer_exp_T + pseudo_value_e
+#brain_cancer_exp.targets_T <- brain_cancer_exp.targets_T + pseudo_value_e
+
+# Transposition
+brain_cancer_exp_T <- as.data.frame(t(scale(as.matrix(t(brain_cancer_exp_T)))))
+brain_cancer_exp.targets_T <- as.data.frame(t(scale(as.matrix(t(brain_cancer_exp.targets_T)))))
 
 ```
 
+```{r}
+# Wilcoxon test
+# H0: The distribution of the effective targets (exp values) is equal to the one of the exp dataset
+# H1: The distribution of the effective targets = exp values are "" than the one of the exp dataset
+wilcox_e <- vector(mode = "list",length=ncol(brain_cancer_exp.targets_T))
+for(i in 1:ncol(brain_cancer_exp.targets_T)) {         
+  wilcox_e[[i]] <- wilcox.test(as.numeric(brain_cancer_exp_T[,i]),as.numeric(brain_cancer_exp.targets_T[,i]), alternative = "two.sided", paired = F)
+}
+
+wilcox_pvalue_e <- vector(length = ncol(brain_cancer_exp.targets_T))
+for(i in 1:ncol(brain_cancer_exp.targets_T)) {
+  wilcox_pvalue_e[i] <- wilcox_e[[i]]$p.value
+}
+
+length(which(wilcox_pvalue_e<=0.05))# 39 (less) /// 112 (two.sided)
+
+
+```
+##Adjustment of multiple testing problem 
+```{r}
+# Bonferroni correction
+wilcox_pvalue_e_bonf <- p.adjust(wilcox_pvalue_e, method = "bonferroni", n = length(wilcox_pvalue_e)) 
+b_correction_e <- which(wilcox_pvalue_e_bonf<=0.01)
+p_values_e_b <- wilcox_pvalue_e_bonf[b_correction_e]
+sig_targets_e <- colnames(brain_cancer_exp.targets_T)[b_correction_e]
+
+hist(p_values_e_b)
+length(p_values_e_b)# 34 (less) /// 98 (two.sided)
+  
+# Benjamini-Hochberg correction
+wilcox_pvalue_e_BH <- p.adjust(wilcox_pvalue_e, method = "BH", n = length(wilcox_pvalue_e))
+bh_correction_e <- which(wilcox_pvalue_e_BH<=0.01)
+```
+
+
+## Copy Number
+```{r}
+##### pseudo value
+#min_bccT <- vector(length = 27562)
+#for(i in 1:27562){
+#  min_bccT[i] <- min(brain_cancer_cnv_T[i,][which(brain_cancer_cnv_T[i,]>0)])
+#}
+#min(min_bccT)
+
+#min_bcctT <- vector(length = 123)
+#for(i in 1:123){
+#  min_bcctT[i]  <- min(brain_cancer_cnv.targets_T[i,][which(brain_cancer_cnv.targets_T[i,]>0)])
+#}
+#pseudo_value_c <- min(min_bcctT)
+# pseudo_value_c = 
+```
+
+```{r}
+# Removal of lines with NA from new dataframe --> actually there are non
+brain_cancer_cnv_T <- na.omit(brain_cancer_cnv)
+brain_cancer_cnv.targets_T <- na.omit(brain_cancer_cnv.targets)
+
+#Z-transformation
+#pseudo_value_c <- 
+#brain_cancer_cnv_T <- brain_cancer_cnv_T + pseudo_value_c
+#brain_cancer_cnv.targets_T <- brain_cancer_cnv.targets_T + pseudo_value_c
+
+# Transposition
+brain_cancer_cnv_T <- as.data.frame(t(scale(as.matrix(t(brain_cancer_cnv_T)))))
+brain_cancer_cnv.targets_T <- as.data.frame(t(scale(as.matrix(t(brain_cancer_cnv.targets_T)))))
+
+```
+
+```{r}
+# Wilcoxon test
+# H0: The distribution of the effective targets (cnv values) is equal to the one of the cnv dataset
+# H1: The distribution of the effective targets = cnv values are "" than the one of the cnv dataset
+wilcox_c <- vector(mode = "list",length=ncol(brain_cancer_cnv.targets_T))
+for(i in 1:ncol(brain_cancer_cnv.targets_T)) {         
+  wilcox_c[[i]] <- wilcox.test(as.numeric(brain_cancer_cnv_T[,i]),as.numeric(brain_cancer_cnv.targets_T[,i]), alternative = "two.sided", paired = F)
+}
+
+wilcox_pvalue_c <- vector(length = ncol(brain_cancer_cnv.targets_T))
+for(i in 1:ncol(brain_cancer_cnv.targets_T)) {
+  wilcox_pvalue_c[i] <- wilcox_c[[i]]$p.value
+}
+
+length(which(wilcox_pvalue_c<=0.05))# 24 (less) /// 41 (two.sided)
+
+
+```
+##Adjustment of multiple testing problem 
+```{r}
+# Bonferroni correction
+wilcox_pvalue_c_bonf <- p.adjust(wilcox_pvalue_c, method = "bonferroni", n = length(wilcox_pvalue_c)) 
+b_correction_c <- which(wilcox_pvalue_c_bonf<=0.01)
+p_values_c_b <- wilcox_pvalue_c_bonf[b_correction_c]
+sig_targets_c <- colnames(brain_cancer_cnv.targets_T)[b_correction_c]
+
+hist(p_values_c_b)
+length(p_values_c_b)# 4 (less) /// 6 (two.sided)
+  
+# Benjamini-Hochberg correction
+wilcox_pvalue_c_BH <- p.adjust(wilcox_pvalue_c, method = "BH", n = length(wilcox_pvalue_c))
+bh_correction_c <- which(wilcox_pvalue_c_BH<=0.01)
+```
 
 
 
