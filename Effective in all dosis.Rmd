@@ -523,6 +523,7 @@ effective_bc_treat=brain_cancer_treat[effective_in_all_doses,-c(1,2,3,4,10)]
 Targets
 
 ```{r}
+#??
 #top <- which(effective_bc_treat$moa == "topoisomerase inhibitor")
 # <- which(effective_bc_treat$moa == "mTOR inhibitor")
 #aurk <- which(effective_bc_treat$moa == "Aurora kinase inhibitor")
