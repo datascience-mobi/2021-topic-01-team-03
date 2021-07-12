@@ -761,6 +761,10 @@ if(pvy>=pvx){
 
 XXX
 
+final_genes=rownames(as.data.frame(XXX$coefficients))
+final_genes=final_genes[-1]
+final_genes
+
 #anova and not p-value to compare models?
 
 red<-lm(Drug~.,genes_regression)
@@ -814,6 +818,13 @@ anova(red,full)#H0: modelle equivalent-> kann nicht verworfen werden-> nicht equ
 
 # Question 4: What other factors contribute to drug effectiveness prediction?
 
+```{r}
+final_genes
+effective_in_all_doses
+ae_d7
+```
+
+
 ##Random: place to try out things
 
 ```{r random}
@@ -830,22 +841,6 @@ IDH1_cnv= select(IDH1_cnv, -c(IDH1.AS1)) # no great variance between values
 #IDH1_cnv[,-which(colnames(IDH1_cnv) %in% c("IDH1.AS1"))] #This would be a better alternative because no additional package is involved, but isn't working the way I want it because rownames (here cell lines) are also removes
 ```
 
-##Selecting relevant info from prism.snv
-
-```{r
-for (i in names){
- result<-which(prism.snv$DepMap_ID == 	
-i)
-}
-result #only delivers results for one of 34 cell lines. without saving it as result it works on all cell lines
-
-sapply(names, function(i){
-  snv<-which(prism.snv$DepMap_ID == 	
-i)
-  View(prism.snv[snv,])
-}) #works but kinda weird
-
-```
 
 ```{r}
 # maybe later relevant
