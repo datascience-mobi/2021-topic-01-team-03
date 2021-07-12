@@ -691,7 +691,6 @@ uni_drug=which(vec_max_eff==max(vec_max_eff))
 
 ##Regression model to find out which genes we keep for the final model  
 ```{r}
-
 genes_regression=cbind(brain_cancer_exp[,top_genes],ae_d7[,uni_drug])
 colnames(genes_regression)[ncol(genes_regression)]="Drug"
 
@@ -737,6 +736,45 @@ pf(big_regression$fstatistic[1],big_regression$fstatistic[2],big_regression$fsta
 
 ```{r}
 genes_regression=cbind(brain_cancer_exp[,top_genes],ae_d7[,uni_drug])
+colnames(genes_regression)[ncol(genes_regression)]="Drug"
+
+YYY<-summary(lm(Drug~.,genes_regression))
+
+#loop starts
+repeat{
+  XXX<-YYY
+  pvx<-pf(XXX$fstatistic[1],XXX$fstatistic[2],XXX$fstatistic[3],lower.tail=FALSE)
+  print(pvx)
+coeffs=as.data.frame(XXX$coefficients)
+coeffs=coeffs[-c(1),]
+coeffs=coeffs[order(coeffs$`Pr(>|t|)`),]
+coeffs=coeffs[-c(nrow(coeffs)),]
+genes_regression=cbind(brain_cancer_exp[,rownames(coeffs)],ae_d7[,uni_drug])
+colnames(genes_regression)[ncol(genes_regression)]="Drug"
+
+YYY<-summary(lm(Drug~.,genes_regression))
+pvy<-pf(YYY$fstatistic[1],YYY$fstatistic[2],YYY$fstatistic[3],lower.tail=FALSE)
+if(pvy>=pvx){
+  break
+}
+}
+
+XXX
+
+#anova and not p-value to compare models?
+
+red<-lm(Drug~.,genes_regression)
+genes_regression=cbind(brain_cancer_exp[,top_genes],ae_d7[,uni_drug])
+colnames(genes_regression)[ncol(genes_regression)]="Drug"
+full<-lm(Drug~.,genes_regression)
+
+anova(red,full)#H0: modelle equivalent-> kann nicht verworfen werden-> nicht equivalent-> p value gross-> koplexere model nicht signifikant besser
+
+```
+
+
+```{r}
+genes_regression=cbind(brain_cancer_exp[,top_genes],ae_d7[,50])
 colnames(genes_regression)[ncol(genes_regression)]="Drug"
 
 YYY<-summary(lm(Drug~.,genes_regression))
