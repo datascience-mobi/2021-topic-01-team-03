@@ -33,8 +33,8 @@ IDEA: use same indications as in PRISM paper to start filtering for relevant gen
 
 ```{r Packages}
 # here is the place where we can put external packages
-#library(dplyr)
-#library(pheatmap)
+library(dplyr)
+library(pheatmap)
 ```
 
 # Cleaning
@@ -829,7 +829,103 @@ ae_d7
 NEW CODE
 ---------------------------------
 
+# training data
+```{r}
+# <- character()
+#training_targets=prism.treat[colnames(effective_in_all_doses),]
+#sapply(effective_in_all_doses , function(x){training_targets <- c(training_targets, brain_cancer_treat[grep(x, brain_cancer_treat[,1]),7])})
 
+training_targets <- brain_cancer_treat[effective_in_all_doses,7]
+training_targets <- as.character(training_targets)
+x <- 1
+
+training_targets.solo <- list() #create list
+
+for(i in training_targets) #split multiple targets
+  {
+  
+ training_targets.solo[[x]] <- strsplit(i, split = ", ")
+ x <- x+1
+ }
+training_targets.solo <- unlist(training_targets.solo) #list to vector
+
+training_targets.solo <- unique(training_targets.solo) # remove multiple targets
+
+training_targets.solo <- training_targets.solo[-1] # remove NA
+
+training_targets.solo <- sort(training_targets.solo) # sort alphabetic
+
+training_targets.solo <- training_targets.solo[-which(training_targets.solo %in% c("ATP5A1","MMP12","MMP23A"))]#remove targets with incomplete data
+  
+#training <- data.frame()  #(row.names = training_targets.solo)
+#training <- matrix(ncol = 3, nrow = 124)
+
+## achilles
+res <- brain_cancer_achilles[,which(colnames(brain_cancer_achilles) %in% training_targets.solo )]
+
+training <- apply(res,2,function(x){mean(x, na.rm = TRUE)})
+
+training <- as.data.frame(training)
+
+## exp
+res <- brain_cancer_exp[,which(colnames(brain_cancer_exp) %in% training_targets.solo )]
+
+training_exp <- apply(res,2,function(x){mean(x, na.rm = TRUE)})
+
+training_exp <- as.data.frame(training_exp)
+
+training_exp[,2] <- row.names(training_exp)
+
+training_exp <- training_exp[order(training_exp[,2]),]
+
+# merge
+training <- cbind(training, training_exp)
+
+training <- training[,c(3,1,2)]
+
+colnames(training) <- c("targets","achilles","exp")
+
+## prism
+
+#brain_cancer_treat[which(brain_cancer_treat$target %in% training_targets.solo),1]
+
+prism.mean.d7 <- apply(d7,2,mean)
+
+prism.mean.d7 <- as.data.frame(prism.mean.d7)
+
+brain_cancer_treat.mod <- brain_cancer_treat[-grep("BRD-K08542803-001-03-1", brain_cancer_treat[,1]),] # BRD-K08542803-001-03-1 is deleted, because no prism value in d7
+
+target.to.prism <- function(target) {
+  
+  prism.target <- vector()
+  
+  broad_id  <- brain_cancer_treat.mod[grep(target,brain_cancer_treat[,7]),1]
+  
+  
+  for(i in (1:length(broad_id))) {
+    
+    prism.target <- cbind(prism.target, prism.mean.d7[grep(broad_id[i],rownames(prism.mean.d7)),1])
+    #prism.target.mean <- mean(prism.target, na.rm = TRUE)
+  }
+  
+  prism.target.mean <- mean(prism.target, na.rm = TRUE)
+  return(prism.target.mean)
+}
+
+#training_prism <- apply(training$targets,1 ,target.to.prism(x))
+
+training_prism <- vector()
+
+for(i in training$targets){
+  training_prism <- cbind(training_prism,target.to.prism(i))
+}
+
+row.names(training_prism) <- "prism"
+
+training <- cbind(training,t(training_prism))
+
+
+```
 
 
 
