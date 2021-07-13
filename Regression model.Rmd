@@ -928,4 +928,55 @@ training <- cbind(training,t(training_prism))
 ```
 
 
+## Regression model
+```{r}
+pairs(~prism+achilles+exp, data = training)
+l1 <- lm(prism~achilles+exp, data = training)
+summary(l1)
+```
+
+
+ 
+```{r}
+
+predicted.prism <- predict(l1,newdata = training)
+plot(training$prism, predicted.prism)
+abline(a=0,b=1, col="red")
+```
+
+```{r}
+devide <- sample(1:nrow(training),nrow(training)/2)
+
+dat.train <- training[devide,]
+dat.test <- training[-devide,]
+
+l2 <- lm(prism~achilles+exp, data = dat.train)
+summary(l2)
+
+pred <- predict(l2, newdata = dat.test)
+plot(dat.test$prism,pred)
+abline(a=0,b=1, col="red")
+
+
+n <- nrow(dat.train)
+rmse.test <- sqrt(1/n * sum(l2$residuals^2))
+rmse.test
+
+
+n <- nrow(dat.test)
+residuals <- dat.test$prism - pred
+rmse.test <- sqrt(1/n * sum(residuals^2))
+rmse.test
+
+```
+
+```{r}
+pca <- prcomp(training[,-c(1,4)])
+summary(pca)
+par(las=2);barplot(pca$rotation[,1],horiz = TRUE, main = "PC1")
+par(las=2);barplot(pca$rotation[,2],horiz = TRUE, main = "PC2")
+
+l.pca <- lm(training$prism~pca$x)
+summary(l.pca)
+```
 
