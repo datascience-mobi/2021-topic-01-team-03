@@ -1,7 +1,7 @@
 ---
-title: "Bioinfo Projekt"
-author: "Ilya"
-date: "5/1/2021"
+title: "Regression model"
+author: "Lennard, Lea"
+date: "13/7/2021"
 output: html_document
 ---
 
@@ -401,6 +401,7 @@ effective_bc_treat=brain_cancer_treat[effective_in_all_doses,-c(1,2,3,4,10)]
 
 
 ## Drugs and subtypes relationship
+
 ```{r}
 ae_d7 <-data.frame(matrix(nrow = 34,ncol = length(effective_in_all_doses)),row.names = rownames(brain_cancer))
 colnames(ae_d7)=effective_in_all_doses
@@ -427,7 +428,18 @@ compare_subtypes[4,]<-apply(medulloblastoma_ae_d7, 2, mean)
 
 ```
 
+##Looking at targets of our effective drugs
 
+```{r}
+#jsut trying some stuff on a particular example
+mtor_cnv=(brain_cancer_cnv[,grep("MTOR", colnames(brain_cancer_cnv))])
+mtor_exp=(brain_cancer_exp[,grep("MTOR", colnames(brain_cancer_exp))])
+mtor_achilles=(brain_cancer_achilles[,grep("MTOR", colnames(brain_cancer_achilles))])
+
+apply(mtor_cnv, 2, mean) #all values show a deletion of these genes in our cell lines
+apply(mtor_exp, 2, mean) #however all of them seem to be over expressed
+apply(mtor_achilles, 2, mean)
+```
 # Question 3: Are there any genetic markers that are specific for brain cancer subtypes?
 
 ##look for genes that flactuate a lot in cell lines
@@ -585,6 +597,7 @@ non_bc_exp_mean=apply(volcano_non_bc,2,mean, na.rm=T)
 df[,2]=log2((non_bc_exp_mean/bc_exp_mean))
 logfc=df[,2]
 
+
 library(ggplot2)
 ggplot(df, aes(x=df[,2], y=df[,1]),ylim = range(0,1)) + geom_point()
 
@@ -626,15 +639,25 @@ top_genes
 pairs(brain_cancer_exp[,top_genes], col='blue', pch=1) # our genes do not correlate
 pheatmap(cor(brain_cancer_exp[,top_genes]), cluster_cols = F, cluster_rows = F, display_numbers = T) #do we need to remove one of the genes with high covariance?
 
-grep("IQANK1", top_genes)
-grep("FAM83H", top_genes)
-best_p_values[c(4,9),2]
-top_genes=top_genes[-9]
+#brain_cancer_exp[,top_genes]
+#ae_d7
+
+#pheatmap(cbind(brain_cancer_exp[,top_genes],ae_d7[,50]), cluster_cols = F, cluster_rows = F, display_numbers = T)
 ```
 
 
 ##Universal drug for regression model
 ```{r}
+#Finding an universal drug that for the model by selecting the drug with the lowest gen expression variance
+
+effective_drugs_df<-data.frame(
+                    means=apply(effective_in_all_doses_df,2,mean),
+                    variance=apply(effective_in_all_doses_df,2,var))
+rownames(effective_drugs_df)= effective_in_all_doses
+effective_drugs_df=effective_drugs_df%>%arrange(variance)
+universal_drug=row.names(effective_drugs_df[1,, drop = FALSE])                            
+                               
+efficiency_ud=select(effective_d7,universal_drug)
 # The problem by using this drug is that the variance scales the magnitude of the observed effects. After the KS test failed to execute, we will select the drug with the highest frequency in any interval of efficiency scores. 
 
 # Checking the histograms of each drug
@@ -650,7 +673,7 @@ max_eff=max(apply(ae_d7,2,max))
 
 # Creating a sequence for the interval
 
-interval=seq(from=min_eff, to=max_eff, by=((abs(min_eff)+max_eff))/20)
+interval=seq(from=min_eff, to=max_eff, by=((abs(min_eff)+max_eff))/34)
 
 
 # Put the data frame row wise in the intervals
@@ -663,42 +686,6 @@ for(i in 1:ncol(ae_d7)) {
 # Extracting the maximum value and so the universal drug
 vec_max_eff=unlist(lapply(eff_intervals,max))
 uni_drug=which(vec_max_eff==max(vec_max_eff))
-colnames(ae_d7)[uni_drug]
-```
-
-
-##Universal drug for non_bc
-```{r}
-non_bc_d7=prism[,unique(grep(paste(colnames(d7),collapse="|"), colnames(prism)))]
-non_bc_d7=save_new_colnames(non_bc_d7)
-non_bc_d7=non_bc_d7[,effective_in_all_doses]
-
-for(i in 1:ncol(non_bc_d7)){
-  non_bc_d7[is.na(non_bc_d7[,i]), i] <- mean(non_bc_d7[,i], na.rm = TRUE)
-}
-non_bc_d7=non_bc_d7[ , colSums(is.na(non_bc_d7)) == 0]
-
-
-min_eff2=min(apply(non_bc_d7,2,min))
-max_eff2=max(apply(non_bc_d7,2,max))
-
-# Creating a sequence for the interval
-
-interval2=seq(from=min_eff2, to=max_eff2, by=((abs(min_eff2)+max_eff2))/20)
-
-
-# Put the data frame row wise in the intervals
-
-eff_intervals2 <- vector(mode = "list",length=ncol(non_bc_d7)) 
-for(i in 1:ncol(non_bc_d7)) {  
-  eff_intervals2[[i]]=table(cut(non_bc_d7[,i],breaks=interval2,right=TRUE,include.lowest=TRUE))
-  }
-
-# Extracting the maximum value and so the universal drug
-vec_max_eff2=unlist(lapply(eff_intervals2,max))
-uni_drug2=which(vec_max_eff2==max(vec_max_eff2))
-colnames(non_bc_d7)[uni_drug2]
-
 ```
 
 ##Regression model to find out which genes we keep for the final model  
@@ -788,45 +775,42 @@ anova(red,full)#H0: modelle equivalent-> kann nicht verworfen werden-> nicht equ
 
 ```
 
-#Regression model with all cell lines
+
 ```{r}
-all_cell_lines_d7=prism[,unique(grep(paste(colnames(d7),collapse="|"), colnames(prism)))]
-all_cell_lines_uni_drug=grep(colnames(ae_d7)[uni_drug], colnames(all_cell_lines_d7))
-all_cell_lines_genes=prism.exp[,top_genes]
+genes_regression=cbind(brain_cancer_exp[,top_genes],ae_d7[,50])
+colnames(genes_regression)[ncol(genes_regression)]="Drug"
 
-r<-setdiff(row.names(all_cell_lines_d7), row.names(all_cell_lines_genes))
-a=rownames(all_cell_lines_d7)[-which(r[1]==rownames(all_cell_lines_d7))]
-b=a[-which(r[2]==rownames(all_cell_lines_d7))]
-c=b[-which(r[3]==rownames(all_cell_lines_d7))]
-d=c[-which(r[4]==rownames(all_cell_lines_d7))]
-
-all_cell_lines_d7=all_cell_lines_d7[d,]
-
-genes_regression2=cbind(all_cell_lines_genes,all_cell_lines_d7[,all_cell_lines_uni_drug])
-colnames(genes_regression2)[ncol(genes_regression2)]="Drug"
-
-YY<-summary(lm(Drug~.,genes_regression2))
+YYY<-summary(lm(Drug~.,genes_regression))
 
 #loop starts
 repeat{
-  XX<-YY
-  px<-pf(XX$fstatistic[1],XX$fstatistic[2],XX$fstatistic[3],lower.tail=FALSE)
-  print(px)
-coeffs=as.data.frame(XX$coefficients)
+  XXX<-YYY
+  pvx<-pf(XXX$fstatistic[1],XXX$fstatistic[2],XXX$fstatistic[3],lower.tail=FALSE)
+  print(pvx)
+coeffs=as.data.frame(XXX$coefficients)
 coeffs=coeffs[-c(1),]
 coeffs=coeffs[order(coeffs$`Pr(>|t|)`),]
 coeffs=coeffs[-c(nrow(coeffs)),]
-genes_regression2=cbind(prism.exp[,rownames(coeffs)],all_cell_lines_d7[,all_cell_lines_uni_drug])
-colnames(genes_regression2)[ncol(genes_regression2)]="Drug"
+genes_regression=cbind(brain_cancer_exp[,rownames(coeffs)],ae_d7[,50])
+colnames(genes_regression)[ncol(genes_regression)]="Drug"
 
-YY<-summary(lm(Drug~.,genes_regression2))
-py<-pf(YY$fstatistic[1],YY$fstatistic[2],YY$fstatistic[3],lower.tail=FALSE)
-if(py>=px){
+YYY<-summary(lm(Drug~.,genes_regression))
+pvy<-pf(YYY$fstatistic[1],YYY$fstatistic[2],YYY$fstatistic[3],lower.tail=FALSE)
+if(pvy>=pvx){
   break
 }
 }
 
-XX
+XXX
+
+#anova and not p-value to compare models?
+
+red<-lm(Drug~.,genes_regression)
+genes_regression=cbind(brain_cancer_exp[,top_genes],ae_d7[,50])
+colnames(genes_regression)[ncol(genes_regression)]="Drug"
+full<-lm(Drug~.,genes_regression)
+
+anova(red,full)#H0: modelle equivalent-> kann nicht verworfen werden-> nicht equivalent-> p value gross-> koplexere model nicht signifikant besser
 
 ```
 
@@ -840,36 +824,159 @@ ae_d7
 ```
 
 
-##Random: place to try out things
 
-```{r random}
-# just trying something out
+---------------------------------
+NEW CODE
+---------------------------------
 
-#in efficiency filtering, I realized that glioma is more resistent to treatments than the other subtypes are. One prediction is that the reason for it is that glioma is not actually a subtype but could mean alot of different subtypes. Maybe IDH1 expression is a reason for differences in treatment. 
+# training data
+```{r}
+# <- character()
+#training_targets=prism.treat[colnames(effective_in_all_doses),]
+#sapply(effective_in_all_doses , function(x){training_targets <- c(training_targets, brain_cancer_treat[grep(x, brain_cancer_treat[,1]),7])})
 
-IDH1_cnv=(brain_cancer_cnv[,grep("IDH1", colnames(brain_cancer_cnv))])
+training_targets <- brain_cancer_treat[effective_in_all_doses,7]
+training_targets <- as.character(training_targets)
+x <- 1
 
-# Removing additional gene 
-library(dplyr)
-IDH1_cnv= select(IDH1_cnv, -c(IDH1.AS1)) # no great variance between values
+training_targets.solo <- list() #create list
 
-#IDH1_cnv[,-which(colnames(IDH1_cnv) %in% c("IDH1.AS1"))] #This would be a better alternative because no additional package is involved, but isn't working the way I want it because rownames (here cell lines) are also removes
+for(i in training_targets) #split multiple targets
+  {
+  
+ training_targets.solo[[x]] <- strsplit(i, split = ", ")
+ x <- x+1
+ }
+training_targets.solo <- unlist(training_targets.solo) #list to vector
+
+training_targets.solo <- unique(training_targets.solo) # remove multiple targets
+
+training_targets.solo <- training_targets.solo[-1] # remove NA
+
+training_targets.solo <- sort(training_targets.solo) # sort alphabetic
+
+training_targets.solo <- training_targets.solo[-which(training_targets.solo %in% c("ATP5A1","MMP12","MMP23A"))]#remove targets with incomplete data
+  
+#training <- data.frame()  #(row.names = training_targets.solo)
+#training <- matrix(ncol = 3, nrow = 124)
+
+## achilles
+res <- brain_cancer_achilles[,which(colnames(brain_cancer_achilles) %in% training_targets.solo )]
+
+training <- apply(res,2,function(x){mean(x, na.rm = TRUE)})
+
+training <- as.data.frame(training)
+
+## exp
+res <- brain_cancer_exp[,which(colnames(brain_cancer_exp) %in% training_targets.solo )]
+
+training_exp <- apply(res,2,function(x){mean(x, na.rm = TRUE)})
+
+training_exp <- as.data.frame(training_exp)
+
+training_exp[,2] <- row.names(training_exp)
+
+training_exp <- training_exp[order(training_exp[,2]),]
+
+# merge
+training <- cbind(training, training_exp)
+
+training <- training[,c(3,1,2)]
+
+colnames(training) <- c("targets","achilles","exp")
+
+## prism
+
+#brain_cancer_treat[which(brain_cancer_treat$target %in% training_targets.solo),1]
+
+prism.mean.d7 <- apply(d7,2,mean)
+
+prism.mean.d7 <- as.data.frame(prism.mean.d7)
+
+brain_cancer_treat.mod <- brain_cancer_treat[-grep("BRD-K08542803-001-03-1", brain_cancer_treat[,1]),] # BRD-K08542803-001-03-1 is deleted, because no prism value in d7
+
+target.to.prism <- function(target) {
+  
+  prism.target <- vector()
+  
+  broad_id  <- brain_cancer_treat.mod[grep(target,brain_cancer_treat[,7]),1]
+  
+  
+  for(i in (1:length(broad_id))) {
+    
+    prism.target <- cbind(prism.target, prism.mean.d7[grep(broad_id[i],rownames(prism.mean.d7)),1])
+    #prism.target.mean <- mean(prism.target, na.rm = TRUE)
+  }
+  
+  prism.target.mean <- mean(prism.target, na.rm = TRUE)
+  return(prism.target.mean)
+}
+
+#training_prism <- apply(training$targets,1 ,target.to.prism(x))
+
+training_prism <- vector()
+
+for(i in training$targets){
+  training_prism <- cbind(training_prism,target.to.prism(i))
+}
+
+row.names(training_prism) <- "prism"
+
+training <- cbind(training,t(training_prism))
+
+
 ```
 
 
+## Regression model
 ```{r}
-# maybe later relevant
+pairs(~prism+achilles+exp, data = training)
+l1 <- lm(prism~achilles+exp, data = training)
+summary(l1)
+```
 
-# Dividing prism.cnv in sets of subtypes
 
-glioblastoma_bc <- brain_cancer[glioblastoma,]
-medulloblastoma_bc <- brain_cancer[medulloblastoma,]
-glioma_bc <- brain_cancer[glioma,]
-astrocytoma_bc <- brain_cancer[astrocytoma,]
+ 
+```{r}
 
-gb_bc_cnv=brain_cancer_cnv[rownames(glioblastoma_bc),]
-mb_bc_cnv=brain_cancer_cnv[rownames(medulloblastoma_bc),]
-g_bc_cnv=brain_cancer_cnv[rownames(glioma_bc),]
-ac_bc_cnv=brain_cancer_cnv[rownames(astrocytoma_bc),]
+predicted.prism <- predict(l1,newdata = training)
+plot(training$prism, predicted.prism)
+abline(a=0,b=1, col="red")
+```
+
+```{r}
+devide <- sample(1:nrow(training),nrow(training)/2)
+
+dat.train <- training[devide,]
+dat.test <- training[-devide,]
+
+l2 <- lm(prism~achilles+exp, data = dat.train)
+summary(l2)
+
+pred <- predict(l2, newdata = dat.test)
+plot(dat.test$prism,pred)
+abline(a=0,b=1, col="red")
+
+
+n <- nrow(dat.train)
+rmse.test <- sqrt(1/n * sum(l2$residuals^2))
+rmse.test
+
+
+n <- nrow(dat.test)
+residuals <- dat.test$prism - pred
+rmse.test <- sqrt(1/n * sum(residuals^2))
+rmse.test
+
+```
+
+```{r}
+pca <- prcomp(training[,-c(1,4)])
+summary(pca)
+par(las=2);barplot(pca$rotation[,1],horiz = TRUE, main = "PC1")
+par(las=2);barplot(pca$rotation[,2],horiz = TRUE, main = "PC2")
+
+l.pca <- lm(training$prism~pca$x)
+summary(l.pca)
 ```
 

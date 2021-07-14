@@ -1,5 +1,12 @@
 # 2021-topic-01-team-03
 
+***14.07.21***
+- Müssen wir korrelierte Gene für das erste Regressionsmodell beachten?
+- Müssen wir beim two sided Wilcoxon test das Signifikanzlevel anpassen?
+- Welche Intervallgröße sollen wir nehmen um die universal drug zu bestimmen?
+- Regression-Fragen von Lea und Lennard
+
+
 **23.06.21**
 - Übersicht mit Stefan machen: was brauchen wir? was erwarten wir? was wollen wir?
 - Chaos Wilcoxon Test: Die Hälfte der Gene sind normal verteilt, bzw. im Durchschnitt sind sie es. Sollen wir dann doch einen t-test machen oder ist der Wilcoxon besser, weil nicht alle Gene normalverteilt sind; Inwiefern müssen Stichproben beim Wilcoxon gleichgroß sein? (bei uns 447 und 34); 

@@ -523,6 +523,7 @@ effective_bc_treat=brain_cancer_treat[effective_in_all_doses,-c(1,2,3,4,10)]
 Targets
 
 ```{r}
+#??
 #top <- which(effective_bc_treat$moa == "topoisomerase inhibitor")
 # <- which(effective_bc_treat$moa == "mTOR inhibitor")
 #aurk <- which(effective_bc_treat$moa == "Aurora kinase inhibitor")
@@ -566,6 +567,7 @@ compare_subtypes[4,]<-apply(medulloblastoma_ae_d7, 2, mean)
 ##Looking at targets of our effective drugs
 
 ```{r}
+###############################useless##############################################
 ##mtor
 #just trying some stuff on a particular example
 mtor_cnv=(brain_cancer_cnv[,grep("MTOR", colnames(brain_cancer_cnv))])
@@ -1161,6 +1163,396 @@ max(mmm[,1])
 max(mmm[,2])
 min(mmm[,3])
 ```
+
+
+```{r}
+# Question 2: What are the targets of the effective drugs?
+
+##What are the targets of the effective drugs?
+
+
+brain_cancer_treat=prism.treat[colnames(brain_cancer),] #selecting only the drugs we previously filtered out from brain_cancer
+brain_cancer_treat=brain_cancer_treat[!duplicated(brain_cancer_treat$broad_id),]
+rownames(brain_cancer_treat)<-brain_cancer_treat[,1]
+effective_bc_treat=brain_cancer_treat[effective_in_all_doses,-c(1,2,3,4,10)]
+#summary(effective_bc_treat$target)
+#summary(effective_bc_treat$moa)
+#expression of these genes would be interesting to look into our cell lines
+```
+
+#Target of effective drugs
+```{r}
+brain_cancer.effective_targets <- effective_bc_treat$target
+which(is.na(effective_bc_treat$target))
+## da fehlen halt bei diesen 8 Drogen die targets, die könnte man sonst ggf. rausnehmen 
+```
+
+
+##Selecting brain cancer specific cell lines in all data sets
+```{r}
+brain_cancer_cl=subset.data.frame(prism.cl, disease == 	"Brain Cancer") #identify the brain cancer cell lines' names
+names=brain_cancer_cl[,1] #saving the names as names
+#select wanted cell lines from all datasets
+brain_cancer=prism[names,]
+brain_cancer_achilles=prism.achilles[names,]
+## hier ist irgendwas schief gegangen, ab da sind super viele NA's drin 
+brain_cancer_cnv=prism.cnv[names,]
+brain_cancer_exp=prism.exp[names,]
+#brain_cancer_snv=prism.snv[names,] #does not make sense no cell line info, other type of filtering required
+#brain_cancer_treat=prism.treat[names,] #does not make sense no cell line info, other type of filtering required
+```
+
+# Selecting achilles targets
+```{r}
+#brain_cancer_achilles.mean <- apply(brain_cancer_achilles,2,mean)
+#hist(brain_cancer_achilles.mean, breaks = 200)
+#brain_cancer_achilles.var <- apply(brain_cancer_achilles,2,var)#variance
+#hist(brain_cancer_achilles.var, breaks = 200, xlim = c(0,0.4))
+#brain_cancer_achilles.relevant <- colnames(brain_cancer_achilles)[brain_cancer_achilles.mean < -0.2]
+```
+
+# Compare drug and achilles targets
+```{r}
+brain_cancer_treat=prism.treat[colnames(brain_cancer),] #selecting only the drugs we previously filtered out from brain_cancer
+brain_cancer_treat=brain_cancer_treat[!duplicated(brain_cancer_treat$broad_id),]
+rownames(brain_cancer_treat)<-brain_cancer_treat[,1]
+effective_bc_treat=brain_cancer_treat[effective_in_all_doses,-c(1,2,3,4,10)]
+#summary(effective_bc_treat$target)
+#summary(effective_bc_treat$moa)
+#expression of these genes would be interesting to look into our cell lines
+
+brain_cancer.effective_targets <- effective_bc_treat$target
+which(is.na(effective_bc_treat$target))
+
+brain_cancer_cl=subset.data.frame(prism.cl, disease == 	"Brain Cancer") #identify the brain cancer cell lines' names
+names=brain_cancer_cl[,1] #saving the names as names
+#select wanted cell lines from all datasets
+brain_cancer=prism[names,]
+brain_cancer_achilles=prism.achilles[names,]
+## hier ist irgendwas schief gegangen, ab da sind super viele NA's drin 
+brain_cancer_cnv=prism.cnv[names,]
+brain_cancer_exp=prism.exp[names,]
+#brain_cancer_snv=prism.snv[names,] #does not make sense no cell line info, other type of filtering required
+#brain_cancer_treat=prism.treat[names,] #does not make sense no cell line info, other type of filtering required
+
+brain_cancer.effective_targets <- as.character(brain_cancer.effective_targets) # convert to character
+x <- 1
+brain_cancer.effective_targets.solo <- list() #create list
+for(i in brain_cancer.effective_targets) #split multiple targets
+  {
+  
+ brain_cancer.effective_targets.solo[[x]] <- strsplit(i, split = ", ")
+ x <- x+1
+ }
+brain_cancer.effective_targets.solo <- unlist(brain_cancer.effective_targets.solo) #list to vector
+brain_cancer.effective_targets.solo <- unique(brain_cancer.effective_targets.solo) # remove multiple targets
+brain_cancer.effective_targets.solo <- brain_cancer.effective_targets.solo[-1] # remove NA
+# achilles targets
+brain_cancer_achilles.targets <- brain_cancer_achilles[,which(colnames(brain_cancer_achilles) %in% brain_cancer.effective_targets.solo)] # selecting target genes in achilles
+brain_cancer.effective_targets.solo[-which(brain_cancer.effective_targets.solo %in% colnames(brain_cancer_achilles))] # missing targets
+# exp targets
+brain_cancer_exp.targets <- brain_cancer_exp[,which(colnames(brain_cancer_exp) %in% brain_cancer.effective_targets.solo)] # selecting target genes in exp
+brain_cancer.effective_targets.solo[-which(brain_cancer.effective_targets.solo %in% colnames(brain_cancer_exp))] # missing targets
+# cnv targets
+brain_cancer_cnv.targets <- brain_cancer_cnv[,which(colnames(brain_cancer_cnv) %in% brain_cancer.effective_targets.solo)] # selecting target genes in cnvVie
+brain_cancer.effective_targets.solo[-which(brain_cancer.effective_targets.solo %in% colnames(brain_cancer_cnv))] # missing targets
+
+
+```
+
+# Compare drug and achilles targets
+```{r}
+brain_cancer.effective_targets <- as.character(brain_cancer.effective_targets) # convert to character
+
+x <- 1
+brain_cancer.effective_targets.solo <- list() #create list
+
+for(i in brain_cancer.effective_targets) #split multiple targets
+  {
+  
+ brain_cancer.effective_targets.solo[[x]] <- strsplit(i, split = ", ")
+ x <- x+1
+ }
+brain_cancer.effective_targets.solo <- unlist(brain_cancer.effective_targets.solo) #list to vector
+
+brain_cancer.effective_targets.solo <- unique(brain_cancer.effective_targets.solo) # remove multiple targets
+
+brain_cancer.effective_targets.solo <- brain_cancer.effective_targets.solo[-1] # remove NA
+
+# achilles targets
+brain_cancer_achilles.targets <- brain_cancer_achilles[,which(colnames(brain_cancer_achilles) %in% brain_cancer.effective_targets.solo)] # selecting target genes in achilles
+brain_cancer.effective_targets.solo[-which(brain_cancer.effective_targets.solo %in% colnames(brain_cancer_achilles))] # missing targets
+
+hist(unlist(brain_cancer_achilles), breaks = 50)
+hist(unlist(brain_cancer_achilles.targets), breaks = 50)
+summary(unlist(brain_cancer_achilles))
+summary(unlist(brain_cancer_achilles.targets))
+qqplot(unlist(brain_cancer_achilles), unlist(brain_cancer_achilles.targets))
+abline(a = 0, b = 1)
+
+# achilles variance analysis
+brain_cancer_achilles.var <- apply(brain_cancer_achilles,2,function(x){var(x, na.rm = TRUE)})#variance
+brain_cancer_achilles.targets.var <- apply(brain_cancer_achilles.targets,2, function(x){var(x, na.rm = TRUE)})
+hist(unlist(brain_cancer_achilles.var), breaks = 500, xlim = c(0,0.2))
+hist(unlist(brain_cancer_achilles.targets.var), breaks = 40, xlim = c(0,0.2))
+qqplot(unlist(brain_cancer_achilles.var), unlist(brain_cancer_achilles.targets.var), xlim = c(0,0.2))
+abline(a = 0, b = 1)
+
+
+# exp targets
+brain_cancer_exp.targets <- brain_cancer_exp[,which(colnames(brain_cancer_exp) %in% brain_cancer.effective_targets.solo)] # selecting target genes in exp
+brain_cancer.effective_targets.solo[-which(brain_cancer.effective_targets.solo %in% colnames(brain_cancer_exp))] # missing targets
+
+hist(unlist(brain_cancer_exp), breaks = 50)
+hist(unlist(brain_cancer_exp.targets), breaks = 50)
+summary(unlist(brain_cancer_exp))
+summary(unlist(brain_cancer_exp.targets))
+qqplot(unlist(brain_cancer_exp), unlist(brain_cancer_exp.targets))
+abline(a = 0, b = 1)
+
+# exp variance analysis
+brain_cancer_exp.var <- apply(brain_cancer_exp,2,function(x){var(x, na.rm = TRUE)})#variance
+brain_cancer_exp.targets.var <- apply(brain_cancer_exp.targets,2, function(x){var(x, na.rm = TRUE)})
+hist(unlist(brain_cancer_exp.var), breaks = 500)
+hist(unlist(brain_cancer_exp.targets.var), breaks = 40)
+qqplot(unlist(brain_cancer_exp.var), unlist(brain_cancer_exp.targets.var), xlim = c(0,8))
+abline(a = 0, b = 1)
+
+
+# cnv targets
+brain_cancer_cnv.targets <- brain_cancer_cnv[,which(colnames(brain_cancer_cnv) %in% brain_cancer.effective_targets.solo)] # selecting target genes in cnvVie
+brain_cancer.effective_targets.solo[-which(brain_cancer.effective_targets.solo %in% colnames(brain_cancer_cnv))] # missing targets
+
+hist(unlist(brain_cancer_cnv), breaks = 50)
+hist(unlist(brain_cancer_cnv.targets), breaks = 50)
+summary(unlist(brain_cancer_cnv))
+summary(unlist(brain_cancer_cnv.targets))
+qqplot(unlist(brain_cancer_cnv), unlist(brain_cancer_cnv.targets))
+abline(a = 0, b = 1)
+
+# cnv variance analysis
+brain_cancer_cnv.var <- apply(brain_cancer_cnv,2,function(x){var(x, na.rm = TRUE)})#variance
+brain_cancer_cnv.targets.var <- apply(brain_cancer_cnv.targets,2, function(x){var(x, na.rm = TRUE)})
+hist(unlist(brain_cancer_cnv.var), breaks = 500)
+hist(unlist(brain_cancer_cnv.targets.var), breaks = 40)
+qqplot(unlist(brain_cancer_cnv.var), unlist(brain_cancer_cnv.targets.var), xlim = c(0,0.1), ylim = c(0,0.1))
+abline(a = 0, b = 1)
+```
+
+Caution: This is a case for the multiplicity problem. While testing thousands of hypotheses simultaneously, the chance of getting false positives is increased. There are two possibilities of adjustment.
+
+First: The Bonferroni correction: Correction of the FWER (family-wise error rate) so the probability of getting at least one false positive during multiple testing. In this way, the significance level alpha is adjustet to alpha/n.
+
+Second: The Benjamini and Hochberg correction. This is a method to control the FDR (false discovery rate) so the proportion of false positives among the significant results. This method is more recommended for gene expression analysis.
+
+https://www.reneshbedre.com/blog/multiple-hypothesis-testing-corrections.html
+
+##Wilcoxon test: compare all gene from 34 brain cancer cell lines with the same gene from all other tumors
+## Achilles
+```{r}
+##### pseudo value
+#min_bcaT <- vector(length = 18119)
+#for(i in 1:18119){
+#  min_bcaT[i] <- min(brain_cancer_achilles_T[i,][which(brain_cancer_achilles_T[i,]>0)])
+#}
+#min(min_bcaT)
+
+#min_bcatT <- vector(length = 121)
+#for(i in 1:121){
+#  min_bcatT[i]  <- min(brain_cancer_achilles.targets_T[i,][which(brain_cancer_achilles.targets_T[i,]>0)])
+#}
+#pseudo_value_a <- min(min_bcatT)
+# pseudo_value_a = 0.0004840532
+```
+
+```{r}
+# Removal of lines with NA from new dataframe
+brain_cancer_achilles_T <- na.omit(brain_cancer_achilles)
+brain_cancer_achilles.targets_T <- na.omit(brain_cancer_achilles.targets)
+
+#Z-transformation
+#pseudo_value_a <- 0.0004840532
+#brain_cancer_achilles_T <- brain_cancer_achilles_T + pseudo_value_a
+#brain_cancer_achilles.targets_T <- brain_cancer_achilles.targets_T + pseudo_value_a
+
+# Transposition, now 25 columns and different #row
+brain_cancer_achilles_T <- as.data.frame(t(scale(as.matrix(t(brain_cancer_achilles_T)))))
+brain_cancer_achilles.targets_T <- as.data.frame(t(scale(as.matrix(t(brain_cancer_achilles.targets_T)))))
+
+```
+
+```{r}
+# Wilcoxon test
+# H0: The distribution of the effective targets (achilles values) is equal to the one of the achilles dataset
+# H1: The distribution of the effective targets = achilles values are "less" than the one of the achilles dataset
+wilcox_a <- vector(mode = "list",length=ncol(brain_cancer_achilles.targets_T))
+for(i in 1:ncol(brain_cancer_achilles.targets_T)) {         
+  wilcox_a[[i]] <- wilcox.test(as.numeric(brain_cancer_achilles_T[,i]),as.numeric(brain_cancer_achilles.targets_T[,i]), alternative = "less", paired = F)
+}
+
+wilcox_pvalue_a <- vector(length = ncol(brain_cancer_achilles.targets_T))
+for(i in 1:ncol(brain_cancer_achilles.targets_T)) {
+  wilcox_pvalue_a[i] <- wilcox_a[[i]]$p.value
+}
+
+length(which(wilcox_pvalue_a<=0.05))# 59
+
+
+```
+##Adjustment of multiple testing problem 
+```{r}
+# Bonferroni correction
+wilcox_pvalue_a_bonf <- p.adjust(wilcox_pvalue_a, method = "bonferroni", n = length(wilcox_pvalue_a)) 
+b_correction_a <- which(wilcox_pvalue_a_bonf<=0.01)
+p_values_a_b <- wilcox_pvalue_a_bonf[b_correction_a]
+sig_targets_a <- colnames(brain_cancer_achilles.targets_T)[b_correction_a]
+
+hist(p_values_a_b)
+length(p_values_a_b)# 44 targets are from another distribution and less
+  
+# Benjamini-Hochberg correction
+wilcox_pvalue_a_BH <- p.adjust(wilcox_pvalue_a, method = "BH", n = length(wilcox_pvalue_a))
+bh_correction_a <- which(wilcox_pvalue_a_BH<=0.01)
+```
+
+
+## Expression
+```{r}
+##### pseudo value
+#min_bceT <- vector(length = 19177)
+#for(i in 1:19177){
+#  min_bceT[i] <- min(brain_cancer_exp[i,][which(brain_cancer_exp[i,]>0)])
+#}
+#min(min_bceT)
+
+#min_bcetT <- vector(length = 122)
+#for(i in 1:122){
+#  min_bcetT[i]  <- min(brain_cancer_exp.targets_T[i,][which(brain_cancer_exp.targets_T[i,]>0)])
+#}
+#pseudo_value_e <- min(min_bcetT)
+# pseudo_value_e = 
+```
+
+```{r}
+# Removal of lines with NA from new dataframe --> actually there are non
+brain_cancer_exp_T <- na.omit(brain_cancer_exp)
+brain_cancer_exp.targets_T <- na.omit(brain_cancer_exp.targets)
+
+#Z-transformation
+#pseudo_value_e <- 
+#brain_cancer_exp_T <- brain_cancer_exp_T + pseudo_value_e
+#brain_cancer_exp.targets_T <- brain_cancer_exp.targets_T + pseudo_value_e
+
+# Transposition
+brain_cancer_exp_T <- as.data.frame(t(scale(as.matrix(t(brain_cancer_exp_T)))))
+brain_cancer_exp.targets_T <- as.data.frame(t(scale(as.matrix(t(brain_cancer_exp.targets_T)))))
+
+```
+
+```{r}
+# Wilcoxon test
+# H0: The distribution of the effective targets (exp values) is equal to the one of the exp dataset
+# H1: The distribution of the effective targets = exp values are "" than the one of the exp dataset
+wilcox_e <- vector(mode = "list",length=ncol(brain_cancer_exp.targets_T))
+for(i in 1:ncol(brain_cancer_exp.targets_T)) {         
+  wilcox_e[[i]] <- wilcox.test(as.numeric(brain_cancer_exp_T[,i]),as.numeric(brain_cancer_exp.targets_T[,i]), alternative = "two.sided", paired = F)
+}
+
+wilcox_pvalue_e <- vector(length = ncol(brain_cancer_exp.targets_T))
+for(i in 1:ncol(brain_cancer_exp.targets_T)) {
+  wilcox_pvalue_e[i] <- wilcox_e[[i]]$p.value
+}
+
+length(which(wilcox_pvalue_e<=0.05))# 39 (less) /// 112 (two.sided)
+
+
+```
+##Adjustment of multiple testing problem 
+```{r}
+# Bonferroni correction
+wilcox_pvalue_e_bonf <- p.adjust(wilcox_pvalue_e, method = "bonferroni", n = length(wilcox_pvalue_e)) 
+b_correction_e <- which(wilcox_pvalue_e_bonf<=0.01)
+p_values_e_b <- wilcox_pvalue_e_bonf[b_correction_e]
+sig_targets_e <- colnames(brain_cancer_exp.targets_T)[b_correction_e]
+
+hist(p_values_e_b)
+length(p_values_e_b)# 34 (less) /// 98 (two.sided)
+  
+# Benjamini-Hochberg correction
+wilcox_pvalue_e_BH <- p.adjust(wilcox_pvalue_e, method = "BH", n = length(wilcox_pvalue_e))
+bh_correction_e <- which(wilcox_pvalue_e_BH<=0.01)
+```
+
+
+## Copy Number
+```{r}
+##### pseudo value
+#min_bccT <- vector(length = 27562)
+#for(i in 1:27562){
+#  min_bccT[i] <- min(brain_cancer_cnv_T[i,][which(brain_cancer_cnv_T[i,]>0)])
+#}
+#min(min_bccT)
+
+#min_bcctT <- vector(length = 123)
+#for(i in 1:123){
+#  min_bcctT[i]  <- min(brain_cancer_cnv.targets_T[i,][which(brain_cancer_cnv.targets_T[i,]>0)])
+#}
+#pseudo_value_c <- min(min_bcctT)
+# pseudo_value_c = 
+```
+
+```{r}
+# Removal of lines with NA from new dataframe --> actually there are non
+brain_cancer_cnv_T <- na.omit(brain_cancer_cnv)
+brain_cancer_cnv.targets_T <- na.omit(brain_cancer_cnv.targets)
+
+#Z-transformation
+#pseudo_value_c <- 
+#brain_cancer_cnv_T <- brain_cancer_cnv_T + pseudo_value_c
+#brain_cancer_cnv.targets_T <- brain_cancer_cnv.targets_T + pseudo_value_c
+
+# Transposition
+brain_cancer_cnv_T <- as.data.frame(t(scale(as.matrix(t(brain_cancer_cnv_T)))))
+brain_cancer_cnv.targets_T <- as.data.frame(t(scale(as.matrix(t(brain_cancer_cnv.targets_T)))))
+
+```
+
+```{r}
+# Wilcoxon test
+# H0: The distribution of the effective targets (cnv values) is equal to the one of the cnv dataset
+# H1: The distribution of the effective targets = cnv values are "" than the one of the cnv dataset
+wilcox_c <- vector(mode = "list",length=ncol(brain_cancer_cnv.targets_T))
+for(i in 1:ncol(brain_cancer_cnv.targets_T)) {         
+  wilcox_c[[i]] <- wilcox.test(as.numeric(brain_cancer_cnv_T[,i]),as.numeric(brain_cancer_cnv.targets_T[,i]), alternative = "two.sided", paired = F)
+}
+
+wilcox_pvalue_c <- vector(length = ncol(brain_cancer_cnv.targets_T))
+for(i in 1:ncol(brain_cancer_cnv.targets_T)) {
+  wilcox_pvalue_c[i] <- wilcox_c[[i]]$p.value
+}
+
+length(which(wilcox_pvalue_c<=0.05))# 24 (less) /// 41 (two.sided)
+
+
+```
+##Adjustment of multiple testing problem 
+```{r}
+# Bonferroni correction
+wilcox_pvalue_c_bonf <- p.adjust(wilcox_pvalue_c, method = "bonferroni", n = length(wilcox_pvalue_c)) 
+b_correction_c <- which(wilcox_pvalue_c_bonf<=0.01)
+p_values_c_b <- wilcox_pvalue_c_bonf[b_correction_c]
+sig_targets_c <- colnames(brain_cancer_cnv.targets_T)[b_correction_c]
+
+hist(p_values_c_b)
+length(p_values_c_b)# 4 (less) /// 6 (two.sided)
+  
+# Benjamini-Hochberg correction
+wilcox_pvalue_c_BH <- p.adjust(wilcox_pvalue_c, method = "BH", n = length(wilcox_pvalue_c))
+bh_correction_c <- which(wilcox_pvalue_c_BH<=0.01)
+```
+
+
+
 
 
 
