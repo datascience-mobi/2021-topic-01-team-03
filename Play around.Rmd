@@ -640,10 +640,10 @@ top_genes
 pairs(brain_cancer_exp[,top_genes], col='blue', pch=1) # our genes do not correlate
 pheatmap(cor(brain_cancer_exp[,top_genes]), cluster_cols = F, cluster_rows = F, display_numbers = T) #do we need to remove one of the genes with high covariance?
 
-#brain_cancer_exp[,top_genes]
-#ae_d7
-
-#pheatmap(cbind(brain_cancer_exp[,top_genes],ae_d7[,50]), cluster_cols = F, cluster_rows = F, display_numbers = T)
+grep("IQANK1", top_genes)
+grep("FAM83H", top_genes)
+best_p_values[c(4,9),2]
+top_genes=top_genes[-9]
 ```
 
 
@@ -674,7 +674,7 @@ max_eff=max(apply(ae_d7,2,max))
 
 # Creating a sequence for the interval
 
-interval=seq(from=min_eff, to=max_eff, by=((abs(min_eff)+max_eff))/34)
+interval=seq(from=min_eff, to=max_eff, by=((abs(min_eff)+max_eff))/20)
 
 
 # Put the data frame row wise in the intervals
@@ -687,6 +687,7 @@ for(i in 1:ncol(ae_d7)) {
 # Extracting the maximum value and so the universal drug
 vec_max_eff=unlist(lapply(eff_intervals,max))
 uni_drug=which(vec_max_eff==max(vec_max_eff))
+colnames(ae_d7)[45]
 ```
 
 ##Regression model to find out which genes we keep for the final model  
@@ -776,42 +777,45 @@ anova(red,full)#H0: modelle equivalent-> kann nicht verworfen werden-> nicht equ
 
 ```
 
-
+#Regression model with all cell lines
 ```{r}
-genes_regression=cbind(brain_cancer_exp[,top_genes],ae_d7[,50])
-colnames(genes_regression)[ncol(genes_regression)]="Drug"
+all_cell_lines_d7=prism[,grep("::10::", colnames(prism))]
+all_cell_lines_uni_drug=grep("BRD-K79145628-001-05-5", colnames(all_cell_lines_d7))
+all_cell_lines_genes=prism.exp[,top_genes]
 
-YYY<-summary(lm(Drug~.,genes_regression))
+r<-setdiff(row.names(all_cell_lines_d7), row.names(all_cell_lines_genes))
+a=rownames(all_cell_lines_d7)[-which(r[1]==rownames(all_cell_lines_d7))]
+b=a[-which(r[2]==rownames(all_cell_lines_d7))]
+c=b[-which(r[3]==rownames(all_cell_lines_d7))]
+d=c[-which(r[4]==rownames(all_cell_lines_d7))]
+
+all_cell_lines_d7=all_cell_lines_d7[d,]
+
+genes_regression2=cbind(all_cell_lines_genes,all_cell_lines_d7[,all_cell_lines_uni_drug])
+colnames(genes_regression2)[ncol(genes_regression2)]="Drug"
+
+YY<-summary(lm(Drug~.,genes_regression2))
 
 #loop starts
 repeat{
-  XXX<-YYY
-  pvx<-pf(XXX$fstatistic[1],XXX$fstatistic[2],XXX$fstatistic[3],lower.tail=FALSE)
-  print(pvx)
-coeffs=as.data.frame(XXX$coefficients)
+  XX<-YY
+  px<-pf(XX$fstatistic[1],XX$fstatistic[2],XX$fstatistic[3],lower.tail=FALSE)
+  print(px)
+coeffs=as.data.frame(XX$coefficients)
 coeffs=coeffs[-c(1),]
 coeffs=coeffs[order(coeffs$`Pr(>|t|)`),]
 coeffs=coeffs[-c(nrow(coeffs)),]
-genes_regression=cbind(brain_cancer_exp[,rownames(coeffs)],ae_d7[,50])
-colnames(genes_regression)[ncol(genes_regression)]="Drug"
+genes_regression2=cbind(prism.exp[,rownames(coeffs)],all_cell_lines_d7[,all_cell_lines_uni_drug])
+colnames(genes_regression2)[ncol(genes_regression2)]="Drug"
 
-YYY<-summary(lm(Drug~.,genes_regression))
-pvy<-pf(YYY$fstatistic[1],YYY$fstatistic[2],YYY$fstatistic[3],lower.tail=FALSE)
-if(pvy>=pvx){
+YY<-summary(lm(Drug~.,genes_regression2))
+py<-pf(YY$fstatistic[1],YY$fstatistic[2],YY$fstatistic[3],lower.tail=FALSE)
+if(py>=px){
   break
 }
 }
 
-XXX
-
-#anova and not p-value to compare models?
-
-red<-lm(Drug~.,genes_regression)
-genes_regression=cbind(brain_cancer_exp[,top_genes],ae_d7[,50])
-colnames(genes_regression)[ncol(genes_regression)]="Drug"
-full<-lm(Drug~.,genes_regression)
-
-anova(red,full)#H0: modelle equivalent-> kann nicht verworfen werden-> nicht equivalent-> p value gross-> koplexere model nicht signifikant besser
+XX
 
 ```
 
