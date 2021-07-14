@@ -660,12 +660,6 @@ plot(km_astrocytoma_ae_d7_complete)
 
 
 ```{r}
-
-boxplot(astrocytoma_ae_d7, xlba="Efficiency", ylab="Drug")
-boxplot(glioma_ae_d7, xlab="Efficiency", ylab="Drug")
-boxplot(glioblastoma_ae_d7, xlba="Efficiency", ylab="Drug")
-boxplot(medulloblastoma_ae_d7, xlba="Efficiency", ylab="Drug")
-boxplot(means_eff, xlba="Efficiency", ylab="Drug")
 ## calculate the means for each drug in a subtype 
 astrocytoma_ae_d7_mean = colMeans(astrocytoma_ae_d7)
 glioma_ae_d7_mean = colMeans(glioma_ae_d7)
@@ -673,7 +667,6 @@ glioblastoma_ae_d7_mean = colMeans(glioblastoma_ae_d7)
 medulloblastoma_ae_d7_mean = colMeans(medulloblastoma_ae_d7)
 
 ## create a combined data frame with all the means from each subtype 
-
 means_eff <- data.frame(Astrocytoma = astrocytoma_ae_d7_mean,
                         Glioma = glioma_ae_d7_mean, 
                         Glioblastoma = glioblastoma_ae_d7_mean,  
@@ -683,6 +676,24 @@ rownames(means_eff) = effective_in_all_doses
 means_drugs <- data.frame(means_eff, 
                           Means = apply(means_eff, 1 , mean))
 
+
+boxplot(astrocytoma_ae_d7, xlba="Efficiency", ylab="Drug")
+boxplot(glioma_ae_d7, xlab="Efficiency", ylab="Drug")
+boxplot(glioblastoma_ae_d7, xlba="Efficiency", ylab="Drug")
+boxplot(medulloblastoma_ae_d7, xlba="Efficiency", ylab="Drug")
+boxplot(means_eff, xlba="Efficiency", ylab="Drug")
+
+
+
+library("ggplot2")
+
+new_means_eff <- data.frame(Efficiency = c(means_drugs$Astrocytoma, means_drugs$Glioma, means_drugs$Glioblastoma, means_drugs$Medulloblastoma), 
+                            Drug_Mean = c(means_drugs$Means, means_drugs$Means, means_drugs$Means, means_drugs$Means), 
+                            subtype = c(rep("Astrocytoma", nrow(means_drugs)),
+                                      rep("Glioma", nrow(means_drugs)),
+                                      rep("Glioblastoma", nrow(means_drugs)),
+                                      rep("Medulloblastoma", nrow(means_drugs))), 
+                            Drug = c(effective_in_all_doses, effective_in_all_doses, effective_in_all_doses, effective_in_all_doses))
 
 ## create a new boxplot that shows the overall the distribution and 
 
@@ -698,15 +709,7 @@ p + theme(legend.position = "none")
 ## Plotting all of the individual subtyp means 
 
 ```{r}
-library("ggplot2")
 
-new_means_eff <- data.frame(Efficiency = c(means_drugs$Astrocytoma, means_drugs$Glioma, means_drugs$Glioblastoma, means_drugs$Medulloblastoma), 
-                            Drug_Mean = c(means_drugs$Means, means_drugs$Means, means_drugs$Means, means_drugs$Means), 
-                            subtype = c(rep("Astrocytoma", nrow(means_drugs)),
-                                      rep("Glioma", nrow(means_drugs)),
-                                      rep("Glioblastoma", nrow(means_drugs)),
-                                      rep("Medulloblastoma", nrow(means_drugs))), 
-                            Drug = c(effective_in_all_doses, effective_in_all_doses, effective_in_all_doses, effective_in_all_doses))
 ## rearrange the Values in descending order 
 
 first = new_means_eff$Drug_Mean
@@ -719,7 +722,7 @@ arrangement <- data.frame(Drug_Ranks = match(first, second),
                                 Efficiency = new_means_eff$Efficiency, 
                                 Subtype = new_means_eff$subtype,
                                 Drug = new_means_eff$Drug, 
-                                Drug_Mean = new_means_eff$Drug_Mean
+                                Drug_Mean = new_means_eff$Drug_Mean)
    
 res <- 1 
 

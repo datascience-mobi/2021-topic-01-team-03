@@ -5,17 +5,6 @@ date: "7/9/2021"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-
 ## Clustering of the exp value 
 
 You can also embed plots, for example:
@@ -37,16 +26,61 @@ clustering.frame <- data.frame(Expression = c(medulloblastoma_c, glioblastoma_c,
 
 
 ```
+## PCA before applying the kmeans 
+
+```{r}
+#scale data before PCA 
+#exp_s <- scale(exp)
+#PCA 
+exp_pca <- prcomp(exp)
+summary(exp_pca) 
+library(factoextra)
+fviz_eig(exp_pca)
+
+```
+
 
 ## kmeans for the clustering.frame 
 
 ```{r}
-km_c <- kmeans(exp, 4, iter.max = 100, nstart = 1)
+PC <- as.data.frame(exp_pca$x)
+PC1 <- PC$PC1
+PC2 <- PC$PC2
+
+## Porper kmeans after PCA 
+
+km_c <- kmeans(exp_pca$x, 4, iter.max = 100, nstart = 1)
 km_c
-exp_cluster <- data.frame(exp, 
-                     Cluster = km_c$cluster)
 
+gg_pca <- data.frame( PC1 = PC1,
+                      PC2 = PC2, 
+                      Cell_line = rownames(exp), 
+                      Subtype = brain_cancer_cl$disease_subtype, 
+                      Cluster = km_c$cluster)
 
+ggplot(gg_pca, aes( x = PC1, y = PC2, color = Cluster, shape = Subtype)) +
+  ggtitle("Cell line clustering") +
+  xlab("PC1") + 
+  ylab("PC2")+ 
+  geom_point()
+
+ 
+
+```
+
+```{r}
+cls <- kmeans(x = exp_pca$x, centers = 4)
+km_c$cluster <- as.character(cls$cluster)
+head(cls)
+
+ggplot() +
+  geom_point(data = km_c, 
+             mapping = aes(x = PC1, 
+                                  y = PC2, 
+                                  colour = cluster))
+```
+
+```{r}
 library(cluster)
 
 dis = dist(t(exp))
@@ -54,13 +88,6 @@ head(dis)
 #s = silhouette(km_c$cluster, dis)
 plot(s)
 
-
-ggplot(data = exp_cluster, 
-             aes(x = PTER, 
-                                  y = TEC, color = Cluster)) +
-  geom_point()
-
-#####heatmap(as.matrix(exp_num))
 
 #ggheatmap(exp, orderCol = T, orderRow = T, dendroLineSize = 0.5,
   #fontSize = 20, colorScheme = "Spectral", scaleName = "value",
@@ -78,6 +105,34 @@ glioma
 #3, 1, 2, 4, 2
 astrocytoma
 #2, 2, 2, 2, 2, 3, 4, 
+```
+
+```{r}
+install.packages(FactoMineR)
+library(FactoMineR)
+res.pca <- PCA(exp, ncp = 10, graph = FALSE)
+res.hcpc <- HCPC(res.pca, graph = FALSE)
+
+dendo <- fviz_dend(res.hcpc, 
+          cex = 0.7,                    
+          palette = "jco",               
+          rect = TRUE, rect_fill = TRUE, 
+          rect_border = "jco",           
+          labels_track_height = 0.8      
+          )
+dendo
+
+
+
+cluster <- fviz_cluster(res.hcpc,
+             repel = TRUE,            
+             show.clust.cent = TRUE, 
+             palette = "jco",         
+             ggtheme = theme_minimal(),
+             main = "Cell line clustering", 
+             ggtjem = theme_minimal()
+             )
+cluster
 ```
 
 
