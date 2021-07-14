@@ -401,7 +401,6 @@ effective_bc_treat=brain_cancer_treat[effective_in_all_doses,-c(1,2,3,4,10)]
 
 
 ## Drugs and subtypes relationship
-
 ```{r}
 ae_d7 <-data.frame(matrix(nrow = 34,ncol = length(effective_in_all_doses)),row.names = rownames(brain_cancer))
 colnames(ae_d7)=effective_in_all_doses
@@ -426,19 +425,6 @@ compare_subtypes[2,]<-apply(glioblastoma_ae_d7, 2, mean)
 compare_subtypes[3,]<-apply(astrocytoma_ae_d7, 2, mean)
 compare_subtypes[4,]<-apply(medulloblastoma_ae_d7, 2, mean)
 
-```
-
-##Looking at targets of our effective drugs
-
-```{r}
-#jsut trying some stuff on a particular example
-mtor_cnv=(brain_cancer_cnv[,grep("MTOR", colnames(brain_cancer_cnv))])
-mtor_exp=(brain_cancer_exp[,grep("MTOR", colnames(brain_cancer_exp))])
-mtor_achilles=(brain_cancer_achilles[,grep("MTOR", colnames(brain_cancer_achilles))])
-
-apply(mtor_cnv, 2, mean) #all values show a deletion of these genes in our cell lines
-apply(mtor_exp, 2, mean) #however all of them seem to be over expressed
-apply(mtor_achilles, 2, mean)
 ```
 
 
@@ -649,16 +635,6 @@ top_genes=top_genes[-9]
 
 ##Universal drug for regression model
 ```{r}
-#Finding an universal drug that for the model by selecting the drug with the lowest gen expression variance
-
-effective_drugs_df<-data.frame(
-                    means=apply(effective_in_all_doses_df,2,mean),
-                    variance=apply(effective_in_all_doses_df,2,var))
-rownames(effective_drugs_df)= effective_in_all_doses
-effective_drugs_df=effective_drugs_df%>%arrange(variance)
-universal_drug=row.names(effective_drugs_df[1,, drop = FALSE])                            
-                               
-efficiency_ud=select(effective_d7,universal_drug)
 # The problem by using this drug is that the variance scales the magnitude of the observed effects. After the KS test failed to execute, we will select the drug with the highest frequency in any interval of efficiency scores. 
 
 # Checking the histograms of each drug
@@ -687,7 +663,42 @@ for(i in 1:ncol(ae_d7)) {
 # Extracting the maximum value and so the universal drug
 vec_max_eff=unlist(lapply(eff_intervals,max))
 uni_drug=which(vec_max_eff==max(vec_max_eff))
-colnames(ae_d7)[45]
+colnames(ae_d7)[uni_drug]
+```
+
+
+##Universal drug for non_bc
+```{r}
+non_bc_d7=prism[,unique(grep(paste(colnames(d7),collapse="|"), colnames(prism)))]
+non_bc_d7=save_new_colnames(non_bc_d7)
+non_bc_d7=non_bc_d7[,effective_in_all_doses]
+
+for(i in 1:ncol(non_bc_d7)){
+  non_bc_d7[is.na(non_bc_d7[,i]), i] <- mean(non_bc_d7[,i], na.rm = TRUE)
+}
+non_bc_d7=non_bc_d7[ , colSums(is.na(non_bc_d7)) == 0]
+
+
+min_eff2=min(apply(non_bc_d7,2,min))
+max_eff2=max(apply(non_bc_d7,2,max))
+
+# Creating a sequence for the interval
+
+interval2=seq(from=min_eff2, to=max_eff2, by=((abs(min_eff2)+max_eff2))/20)
+
+
+# Put the data frame row wise in the intervals
+
+eff_intervals2 <- vector(mode = "list",length=ncol(non_bc_d7)) 
+for(i in 1:ncol(non_bc_d7)) {  
+  eff_intervals2[[i]]=table(cut(non_bc_d7[,i],breaks=interval2,right=TRUE,include.lowest=TRUE))
+  }
+
+# Extracting the maximum value and so the universal drug
+vec_max_eff2=unlist(lapply(eff_intervals2,max))
+uni_drug2=which(vec_max_eff2==max(vec_max_eff2))
+colnames(non_bc_d7)[uni_drug2]
+
 ```
 
 ##Regression model to find out which genes we keep for the final model  
@@ -779,8 +790,8 @@ anova(red,full)#H0: modelle equivalent-> kann nicht verworfen werden-> nicht equ
 
 #Regression model with all cell lines
 ```{r}
-all_cell_lines_d7=prism[,grep("::10::", colnames(prism))]
-all_cell_lines_uni_drug=grep("BRD-K79145628-001-05-5", colnames(all_cell_lines_d7))
+all_cell_lines_d7=prism[,unique(grep(paste(colnames(d7),collapse="|"), colnames(prism)))]
+all_cell_lines_uni_drug=grep(colnames(ae_d7)[uni_drug], colnames(all_cell_lines_d7))
 all_cell_lines_genes=prism.exp[,top_genes]
 
 r<-setdiff(row.names(all_cell_lines_d7), row.names(all_cell_lines_genes))
