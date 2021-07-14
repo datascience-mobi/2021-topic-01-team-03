@@ -47,22 +47,22 @@ PC <- as.data.frame(exp_pca$x)
 PC1 <- PC$PC1
 PC2 <- PC$PC2
 
-## Porper kmeans after PCA 
+## Proper kmeans after PCA 
 
-km_c <- kmeans(exp_pca$x, 4, iter.max = 100, nstart = 1)
+km_c <- kmeans(exp_pca$x, 4, iter.max = 3000, nstart = 1)
 km_c
 
 gg_pca <- data.frame( PC1 = PC1,
                       PC2 = PC2, 
                       Cell_line = rownames(exp), 
                       Subtype = brain_cancer_cl$disease_subtype, 
-                      Cluster = km_c$cluster)
+                      Cluster = as.factor(km_c$cluster))
 
-ggplot(gg_pca, aes( x = PC1, y = PC2, color = Cluster, shape = Subtype)) +
+ggplot(gg_pca, aes( x = PC1, y = PC2, shape = Subtype, colour = Cluster)) +
   ggtitle("Cell line clustering") +
   xlab("PC1") + 
   ylab("PC2")+ 
-  geom_point()
+  geom_point(size = 4)
 
  
 
