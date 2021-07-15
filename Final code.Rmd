@@ -131,8 +131,6 @@ questionable_drugs=prism.treat[colnames(deviation),]#we dont know if we can use 
 ## Working on drugs that do not fit the standard doses
 
 ```{r}
-#Stefan's suggestion: assigning the outliers to closest standard doses
-
 #Calculation of all differences between questionable drugs and standard doses
 std_doses <- c(0.00061034,0.0024414,0.00976562,0.0390625,0.15625,0.625,10,2.5) #vector with standard dosages
 
@@ -377,7 +375,6 @@ for(i in 1:ncol(brain_cancer_exp_w)) {
 }
 length(which(wilcox_pvalue_genes<=0.05))#the amount of genes that are significantly different in expression comparing to other tumors
 
-#Stefan's suggestion: Two larger samples with roughly equal size can be used to run a Mann-Whitney-U/Wilcoxon test for each gene. Assumptions: 
 #H0: expression value for the gene comes from the same distribution (=same expression)
 #H1: Group gene expression values come from two distributions with different central measures (=different expression)
 ```
@@ -436,15 +433,6 @@ ggplot(df, aes(x=df[,2], y=df[,1]),ylim = range(0,1))+
 
 top_genes=rownames(best_p_values)
 top_genes
-
-
-#absolute fold change + kleinste p values (obere quadranten) top x gene aussuchen
-
-#regression gegen drug die in brain cancer besonders gut ist und in anderen cell lines nicht, universal drug aussuchen
-
-#braincancer exp höher als bei non_bc
-#welche sind die gene mit höchsten pvalue
-
 ```
 
 ```{r}
@@ -462,8 +450,6 @@ top_genes
 ##Universal drug for regression model
 
 ```{r}
-# The problem by using this drug is that the variance scales the magnitude of the observed effects. After the KS test failed to execute, we will select the drug with the highest frequency in any interval of efficiency scores. 
-
 # Checking the histograms of each drug
 
 for(i in 1:ncol(ae_d7)){
