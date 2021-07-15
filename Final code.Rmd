@@ -332,27 +332,27 @@ non_bc_exp=prism.exp[non_bc_names,]
 brain_cancer_exp_w=brain_cancer_exp
 non_bc_exp=non_bc_exp[rowSums(is.na(non_bc_exp)) == 0,]
 
-var_non_bc=apply(non_bc_exp,2,var)
-var_bc=apply(brain_cancer_exp_w,2,var)
-mean(var_non_bc)
-mean(var_bc)
-hist(var_non_bc)
-hist(var_bc)
+
 
 #Z-transformation
-min_non_bc<-vector(length = 443)
-for(i in 1:443){
-  min_non_bc[i]<-min(non_bc_exp[i,][which(non_bc_exp[i,]>0)])
+calculate_pseudo_v<-function(x,y){
+   min(x[y,][which(x[y,]>0)])
 }
-min(min_non_bc)
+#function to determine the pseudovalue for both datasets. It takes a dataframe and looks for a minimum value for each row (in this case cell line). Then it chooses only the minimum values that are bigger than 0. Out of these positive mins, it chooses the smallest one, which is our pseudo value
 
-min_bc<-vector(length = 34)
-for(i in 1:34){
-  min_bc[i]<-min(brain_cancer_exp_w[i,][which(brain_cancer_exp_w[i,]>0)])
+pseudo_value1<-calculate_pseudo_v(non_bc_exp,nrow(non_bc_exp))
+pseudo_value2<-calculate_pseudo_v(brain_cancer_exp_w, nrow(brain_cancer_exp_w))
+#Now we have 2 pseudo values from 2 datasets, we wil compare them in the following loop to determine the ultimate pseudo value to apply on both datasets
+
+if(pseudo_value1==pseudo_value2){
+  pseudo_value<-pseudo_value1
+} else if(pseudo_value1>pseudo_value2) {
+  pseudo_value<-pseudo_value2
+} else {
+  pseudo_value<-pseudo_value1
 }
-pseudo_value<-min(min_bc)
 
-#pseudo_value<-0.01435529
+
 non_bc_exp=non_bc_exp+pseudo_value
 brain_cancer_exp_w=brain_cancer_exp_w+pseudo_value
 
@@ -580,13 +580,9 @@ all_cell_lines_d7=prism[,unique(grep(paste(colnames(doses_subsets_[[d7]]),collap
 all_cell_lines_uni_drug=grep(colnames(ae_d7)[uni_drug], colnames(all_cell_lines_d7))
 all_cell_lines_genes=prism.exp[,top_genes]
 
-r<-setdiff(row.names(all_cell_lines_d7), row.names(all_cell_lines_genes))
-a=rownames(all_cell_lines_d7)[-which(r[1]==rownames(all_cell_lines_d7))]
-b=a[-which(r[2]==rownames(all_cell_lines_d7))]
-c=b[-which(r[3]==rownames(all_cell_lines_d7))]
-d=c[-which(r[4]==rownames(all_cell_lines_d7))]
+remove<-setdiff(row.names(all_cell_lines_d7), row.names(all_cell_lines_genes))
+all_cell_lines_d7=all_cell_lines_d7[-unique(grep(paste(remove,collapse="|"), rownames(all_cell_lines_d7))),]
 
-all_cell_lines_d7=all_cell_lines_d7[d,]
 
 genes_regression2=cbind(all_cell_lines_genes,all_cell_lines_d7[,all_cell_lines_uni_drug])
 colnames(genes_regression2)[ncol(genes_regression2)]="Drug"
