@@ -878,12 +878,18 @@ training_exp[,2] <- row.names(training_exp)
 
 training_exp <- training_exp[order(training_exp[,2]),]
 
-# merge
-training <- cbind(training, training_exp)
+## cnv
+res <- brain_cancer_cnv[,which(colnames(brain_cancer_cnv) %in% training_targets.solo )]
 
-training <- training[,c(3,1,2)]
+training_cnv <- apply(res,2,function(x){mean(x, na.rm = TRUE)})
 
-colnames(training) <- c("targets","achilles","exp")
+training_cnv <- as.data.frame(training_cnv)
+
+training_cnv[,2] <- row.names(training_cnv)
+
+training_cnv <- training_cnv[order(training_cnv[,2]),]
+
+
 
 ## prism
 
@@ -916,22 +922,36 @@ target.to.prism <- function(target) {
 
 training_prism <- vector()
 
-for(i in training$targets){
-  training_prism <- cbind(training_prism,target.to.prism(i))
+#for(i in training$targets){
+#  training_prism <- cbind(training_prism,target.to.prism(i))
+#}
+
+
+for(i in training_targets.solo){
+ training_prism <- cbind(training_prism,target.to.prism(i))
 }
 
-row.names(training_prism) <- "prism"
 
-training <- cbind(training,t(training_prism))
 
+#row.names(training_prism) <- "prism"
+
+#training <- cbind(training,t(training_prism))
+
+# merge
+training <- cbind(training, training_exp, training_cnv, t(training_prism))
+
+training <- training[,c(3,1,2,4,6)]
+
+colnames(training) <- c("targets","achilles","exp","cnv","prism")
 
 ```
 
 
 ## Regression model
 ```{r}
-pairs(~prism+achilles+exp, data = training)
-l1 <- lm(prism~achilles+exp, data = training)
+pairs(~prism+achilles+exp+cnv, data = training, )
+
+l1 <- lm(prism~achilles+exp+cnv, data = training)
 summary(l1)
 ```
 
@@ -950,7 +970,7 @@ devide <- sample(1:nrow(training),nrow(training)/2)
 dat.train <- training[devide,]
 dat.test <- training[-devide,]
 
-l2 <- lm(prism~achilles+exp, data = dat.train)
+l2 <- lm(prism~achilles+exp+cnv, data = dat.train)
 summary(l2)
 
 pred <- predict(l2, newdata = dat.test)
@@ -971,12 +991,55 @@ rmse.test
 ```
 
 ```{r}
-pca <- prcomp(training[,-c(1,4)])
+pca <- prcomp(training[,-c(1,5)])
 summary(pca)
 par(las=2);barplot(pca$rotation[,1],horiz = TRUE, main = "PC1")
 par(las=2);barplot(pca$rotation[,2],horiz = TRUE, main = "PC2")
+par(las=2);barplot(pca$rotation[,3],horiz = TRUE, main = "PC3")
 
 l.pca <- lm(training$prism~pca$x)
 summary(l.pca)
+```
+
+```{r}
+
+multiple.lm.values <- matrix(ncol = 8)
+
+for(i in c(1:5000)){
+
+devide <- sample(1:nrow(training),nrow(training)/2)
+
+dat.train <- training[devide,]
+dat.test <- training[-devide,]
+
+l2 <- lm(prism~achilles+exp+cnv, data = dat.train)
+#summary(l2)
+
+pred <- predict(l2, newdata = dat.test)
+#plot(dat.test$prism,pred)
+#abline(a=0,b=1, col="red")
+
+
+n <- nrow(dat.train)
+rmse.test <- sqrt(1/n * sum(l2$residuals^2))
+rmse.test
+
+
+n <- nrow(dat.test)
+residuals <- dat.test$prism - pred
+rmse.test <- sqrt(1/n * sum(residuals^2))
+rmse.test
+
+res <- c(summary(l2)$fstatistic, summary(l2)$adj.r.squared, l2$coefficients)
+
+multiple.lm.values <- rbind(multiple.lm.values,res) 
+
+}
+hist(multiple.lm.values[,4], breaks = 50)
+hist(multiple.lm.values[,5], breaks = 50)
+hist(multiple.lm.values[,6], breaks = 50)
+hist(multiple.lm.values[,7], breaks = 50)
+hist(multiple.lm.values[,8], breaks = 50)
+summary(multiple.lm.values[,4])
 ```
 
