@@ -61,17 +61,58 @@ We decided to chose a dose to work on with, since the model we want to establish
 #und direkt die d7 dosage mit der variance begründen 
 ```
 
+# Identification of genetic markers
 
-++Clustering of effective drugs++
+For this milestone, we wanted to look at brain cancer subtypes. Thereby the column ```disease_subtype``` of the ```prism.cl``` dataset gives information about the subtype whereby a distinction is made between astrocytoma, medulloblastoma, glioblastoma and glioma. 
+
++++ Boxplots von Cedrik+++
+
+In these boxplots, one can see the distribution of the effectiveness scores of the 51 effective drugs in the subtypes. These can be used to compare the distributions of the effectiveness values for the subtypes. The median in astrocytoma, glioblastoma and glioma is in the middle of the box, which indicates a symmetrical distribution. 
+The box of medulloblastoma differs from those of the other subtypes. It is larger and thus there is a greater spread of data points. In addition, the median is right-shifted and at a lower effective score. 
+
+Although the boxplots provide information that the treatments worked differently effectively for the subtypes, they do not indicate whether there are drugs that worked well specifically for one subtype.  
+
+
++++
+
+
+To find out which genes are expressed significantly different in brain cancer cell lines compared to other cancers, a statistical test can be applied. For this purpose, it must first be examined whether the available data is normally distributed.
+A statistical test, the Shapiro Wilks test, can also be used for this purpose. Here, the H0 hypothesis assumes that the distribution is a normal distribution. If the p-value is small, the H0 hypothesis is rejected and it is assumed that the data are not normally distributed. 
+The test was applied to the 19177 genes so the columns of the prism.exp dataset to determine the across the 34 cell lines. 
+Of these, 9799 p-values were less than or equal to the 0.05 significance level and thus only half of the genes were normally distributed. We then decided to apply a non-parametric test.  
+
+## Wilcoxon Rank Sum test
+
+We decided to apply an unpaired Wilcoxon Rank Sum test. For this we created the dataset ```non_bc_exp```, which takes all cell lines from the ```prism.exp``` dataset that do not belong to the brain cancer disease type. There are 447 cell lines in it, for example from lung cancer, skin cancer, pancreatic cancer or ovarian cancer. Although these data sets are not the same size, this is not a problem in this case, as the test is based on ranking the individual values.
+
+Before applying the test, however, we had to take into account that we perform a Z-transformation by which the values are centered and scaled to match the different ranges of the variation. In addition, we had to take into account that for some genes the expression value was zero. Therefore, we added a so-called pseudocount, which is the lowest expression value per data set. 
+
+When performing the loop to the Wilcoxon test, the H0 hypothesis is tested simultaneously for all genes. This leads to a multiplicity problem in which the probability of increasing the number of false positive test results is increased. To adjust the number of significant p-values for this problem, we consider two types of corrections. The Bonferroni and the Benjamini-Hochberg corrections. 
 
 ```{r}
-# Diagram ist im efficiency filtering, benötigt werden die Chunks 15 & 16 
+# Chunk from Wilcoxon test?
 ```
 
+Thereby, the number of genes that are significantly differentially expressed differ strongly: The Bonferroni correction results in 1859 genes and the Benjamini-Hochberg correction results in 8948 genes. We have chosen to continue with the Bonferroni correction genes, although this correction is more conservative. 
 
-Taking it as justification for not taking subtypes into account.
+To visualize differentially expressed genes one can use a volcano plot. The statistical significance of the gene is plotted in relation to the magnitude of the difference between the two datasets at a negative base 2 log fold change. We decided to extract genes whose log2 fold change is less than or equal to -1 and greater than or equal to 1, respectively. These genes are shown in blue in the plot. Additionally, we have extracted the top 20 genes with the smallest p-value, which are highlighted in red.
 
-++Subtypes in boxplots represent the efficiency++
+## Linear regression model with universal drug
+
+In preparation for our final milestone, we want to further reduce the number of genes. To do this, we used a linear regression model to model the effectiveness score of a drug based on the 20 genes filtered. The drug used should have a consistent effect for all brain cancer cell lines. Therefore, we filtered out a universal drug by dividing the range of efficacy values into intervals and then determining the interval with the highest number of cell lines responding to treatment for all drugs. 
+
+From this, it returned the drug with the Broad ID "BRD-K79145628-001-05-5". To verify our previous steps, we also applied the code used to the non-brain cancer cell lines. Our assumption was confirmed that this drug is the universal one only for the brain cancer cell lines. 
+
+++++
+Korrelierte Gene
+
+Regressionsmodell
+
+
+
+
+
+
 
 2) What are the targets of the effective drugs?
 
@@ -95,15 +136,6 @@ To analyse the targets of the previously described effective drugs, we
 - Regression model with PCA
 - Compare the real effectiveness with the estimated one 
 
-
-
-Caution: This is a case for the multiplicity problem. While testing thousands of hypotheses simultaneously, the chance of getting false positives is increased. There are two possibilities of adjustment.
-
-First: The Bonferroni correction: Correction of the FWER (family-wise error rate) so the probability of getting at least one false positive during multiple testing. In this way, the significance level alpha is adjustet to alpha/n.
-
-Second: The Benjamini and Hochberg correction. This is a method to control the FDR (false discovery rate) so the proportion of false positives among the significant results. This method is more recommended for gene expression analysis.
-
-https://www.reneshbedre.com/blog/multiple-hypothesis-testing-corrections.html
 
 
 
