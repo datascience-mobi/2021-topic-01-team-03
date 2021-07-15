@@ -34,6 +34,7 @@ IDEA: use same indications as in PRISM paper to start filtering for relevant gen
 # here is the place where we can put external packages
 library(dplyr)
 library(pheatmap)
+library(ggplot2)
 ```
 
 # Cleaning
@@ -415,7 +416,6 @@ non_bc_exp_mean=apply(volcano_non_bc,2,mean, na.rm=T)
 df[,2]=log2((non_bc_exp_mean/bc_exp_mean))
 logfc=df[,2]
 
-library(ggplot2)
 
 highlight_df <- df %>% filter(logfc>=1|logfc<=-1)
 bp<-sort(highlight_df[,1],decreasing = T)[1:20]
@@ -428,6 +428,8 @@ for (y in 1:length(bp)) {
 
 
 ggplot(df, aes(x=df[,2], y=df[,1]),ylim = range(0,1))+
+  xlab("Log2-Fold-Change") + 
+  ylab("-log10(p-value)") + 
   geom_point() +
   geom_point(data=highlight_df, aes(x=highlight_df[,2], y=highlight_df[,1]), color='blue') +
   geom_point(data=best_p_values, aes(x=best_p_values[,2], y=best_p_values[,1]), color='red')
