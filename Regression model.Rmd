@@ -1046,6 +1046,9 @@ summary(multiple.lm.values[,4])
 
 ## Improved regression model
 ```{r}
+
+final_genes <- final_genes[-c(1, 2, 3)]
+
 line_target.search <- function(cellline, target){
 
 #cellline <- "ACH-000007"
@@ -1122,6 +1125,22 @@ line_target.search <- function(cellline, target){
 ```
 
 
+```{r}
+celllines <- brain_cancer_achilles[,1]
+celllines <- cbind(celllines, rownames(brain_cancer_achilles))
+celllines <- na.omit(celllines)
+
+training1 <- data.frame()
+
+for (i in celllines[,2]){
+  print(i)
+  for (j in training_targets.solo){
+    #line_target.search(i, j)
+    print(j)
+    training1 <- rbind(training1, line_target.search(i,j))
+  }
+}
+```
 
 
 
