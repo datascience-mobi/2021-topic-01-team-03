@@ -14,6 +14,8 @@ load("../2021-topic-01-team-03/dataset/cellline_datasets.rda")
 
 prism: effect of the treatment (columns) on cell growth of cell lines (rows).For example, BRD-A00077618-236-07-6::0.0024414::HTS002 indicates treatment with the drug BRD-A00077618-236-07-6, with a dose of 2.4 nM, in assay HTS002. Values represent log fold changes with respect to a control DMSO experiment.
 
+
+
 prism.treat:information about the treatment (row) and the drug used
 
 prism.cl: cell lines' info
@@ -35,6 +37,7 @@ IDEA: use same indications as in PRISM paper to start filtering for relevant gen
 library(dplyr)
 library(pheatmap)
 library(ggplot2)
+library(factoextra)
 ```
 
 # Cleaning
@@ -287,7 +290,120 @@ medulloblastoma_ae_d7=ae_d7[medulloblastoma,]
 ```
 
 
+## Effective drugs and subtype analysis
+
+```{r}
+
+## calculate the means for each drug in a subtype 
+astrocytoma_ae_d7_mean = colMeans(astrocytoma_ae_d7)
+glioma_ae_d7_mean = colMeans(glioma_ae_d7)
+glioblastoma_ae_d7_mean = colMeans(glioblastoma_ae_d7)
+medulloblastoma_ae_d7_mean = colMeans(medulloblastoma_ae_d7)
+
+## create a combined data frame with all the means from each subtype 
+means_eff <- data.frame(Astrocytoma = astrocytoma_ae_d7_mean,
+                        Glioma = glioma_ae_d7_mean, 
+                        Glioblastoma = glioblastoma_ae_d7_mean,  
+                        Medulloblastoma = medulloblastoma_ae_d7_mean)
+rownames(means_eff) = effective_in_all_doses
+
+means_drugs <- data.frame(means_eff, 
+                          Means = apply(means_eff, 1 , mean))
+
+new_means_eff <- data.frame(Efficiency = c(means_drugs$Astrocytoma, means_drugs$Glioma, means_drugs$Glioblastoma, means_drugs$Medulloblastoma), 
+                            Drug_Mean = c(means_drugs$Means, means_drugs$Means, means_drugs$Means, means_drugs$Means), 
+                            subtype = c(rep("Astrocytoma", nrow(means_drugs)),
+                                      rep("Glioma", nrow(means_drugs)),
+                                      rep("Glioblastoma", nrow(means_drugs)),
+                                      rep("Medulloblastoma", nrow(means_drugs))), 
+                            Drug = c(effective_in_all_doses, effective_in_all_doses, effective_in_all_doses, effective_in_all_doses))
+
+## create a new boxplot that shows the overall the distribution and 
+
+p <- ggplot(new_means_eff, aes(x = subtype, y = Efficiency, color = subtype)) + 
+                         ggtitle("Subtype Boxplots") +
+                          xlab("Subtypes") + 
+                          ylab("Efficiency") + 
+  geom_boxplot(outlier.colour="red", outlier.shape=8,
+                outlier.size=4)
+p + theme(legend.position = "none")
+
+
+## rearrange the Values in descending order 
+
+first = new_means_eff$Drug_Mean
+second = sort(new_means_eff$Drug_Mean, decreasing = TRUE)
+              
+
+
+arrangement <- data.frame(Drug_Ranks = match(first, second), 
+                                Efficiency = new_means_eff$Efficiency, 
+                                Subtype = new_means_eff$subtype,
+                                Drug = new_means_eff$Drug, 
+                                Drug_Mean = new_means_eff$Drug_Mean)
+res <- 1 
+
+for(i in c(1:51)){zv <- rep(i,4);res <- c(res, zv)}
+
+vec <- res[2:205]
+pre_arrangement <- arrange(arrangement, Drug_Ranks)
+pre_arrangement <- data.frame(pre_arrangement, 
+                               Numbers = vec)
+
+## Plot the new, rearranged subtypes 
+ggplot(pre_arrangement, aes(x = Numbers , y = Efficiency, color = Subtype)) + 
+                         ggtitle("Means of subtypes") +
+                          xlab("Drugs") + 
+                          ylab("Efficiency") + 
+  
+  geom_point(aes(shape=Subtype))
+
+```
+
+
+
 # Question 3: Are there any genetic markers that are specific for brain cancer subtypes?
+
+
+
+## Clustering of the exp value 
+
+```{r}
+#PCA before applying the kmeans 
+
+exp <- brain_cancer_exp
+exp_pca <- prcomp(exp)
+ 
+# plot the PC's an examine their variance 
+fviz_eig(exp_pca)
+
+
+## kmeans for the clustering.frame 
+
+set.seed(126)
+
+PC <- as.data.frame(exp_pca$x)
+PC1 <- PC$PC1
+PC2 <- PC$PC2
+
+## Proper kmeans after PCA 
+
+km_c <- kmeans(exp_pca$x, 4, iter.max = 10000, nstart = 1)
+
+## create a new data frame for the ggplot visualisation 
+gg_pca <- data.frame( PC1 = PC1,
+                      PC2 = PC2, 
+                      Cell_line = rownames(exp), 
+                      Subtype = brain_cancer_cl$disease_subtype, 
+                      Cluster = as.factor(km_c$cluster))
+
+ggplot(gg_pca, aes( x = PC1, y = PC2, shape = Cluster, colour = Subtype)) +
+  ggtitle("Cell line clustering") +
+  xlab("PC1") + 
+  ylab("PC2")+ 
+  geom_point(size = 4)
+
+```
 
 
 ##Performance of Shapiro Test to investigate whether gene expressions are normally distributed. 
@@ -322,7 +438,6 @@ exp_p_mean=mean(exp_pvalue)
 
 
 ##Wilcoxon test: compare all gene from 34 brain cancer cell lines with the same gene from all other tumors
-
 ```{r}
 # Creating dataframe with all non brain cancer cell lines
 non_bc_cl = prism.cl[!prism.cl$disease == "Brain Cancer",]
