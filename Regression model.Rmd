@@ -1043,3 +1043,86 @@ hist(multiple.lm.values[,8], breaks = 50)
 summary(multiple.lm.values[,4])
 ```
 
+
+## Improved regression model
+```{r}
+line_target.search <- function(cellline, target){
+
+#cellline <- "ACH-000007"
+#target <- "LPL"
+  
+  res <- data.frame(row.names = c(cellline, target))
+  
+  lts.line_gen <- prism.exp[grep(cellline,row.names(prism.exp)),which(colnames(prism.exp) %in% final_genes)] # selecting exp from 9 important gens
+    
+  lts.achilles <- prism.achilles[grep(cellline,row.names(prism.achilles)), which(target == colnames(prism.achilles))] # selecting achilles
+  
+  lts.exp <- prism.exp[grep(cellline,row.names(prism.exp)), which(target == colnames(prism.exp))] # selecting exp
+  
+  lts.cnv <- prism.cnv[grep(cellline,row.names(prism.cnv)), which(target == colnames(prism.cnv))] # selecting cnv
+  
+  ## target to drug to prism
+  
+  # finding drugs to target
+  
+  drug.line <- vector()
+  
+  for(i in 1:nrow(prism.treat)){
+    
+    target.in.line <- unlist(strsplit(as.character(prism.treat[i,7]), split = ", ")) == target
+    
+    if(sum(target.in.line, na.rm = TRUE) > 0){
+      drug.line <- cbind(drug.line, i)
+    }
+  }
+  
+  drugs.from.target <- unique(prism.treat[drug.line,1])
+  
+  # finding prism values to drugs
+  
+  drug.col <- vector()
+  
+  for(i in 1:ncol(prism)){
+    
+    drug.in.col <- unlist(strsplit(as.character(colnames(prism)[i]), split = "::"))[1] == drugs.from.target
+    
+    if(sum(drug.in.col, na.rm = TRUE) > 0){
+      drug.col <- cbind(drug.col, i)
+    }
+  }
+  
+  # dosis check
+  
+  drug.dose <- vector()
+  
+  for(i in drug.col){
+    
+     if( 6.25 < as.numeric(unlist(strsplit(as.character(colnames(prism)[i]), split = "::"))[2]) && as.numeric(unlist(strsplit(as.character(colnames(prism)[i]), split = "::"))[2]) <= 10 )
+       {drug.dose <- cbind(drug.dose,i) } # right dose for d7???
+    
+  }
+  
+  # prism value
+  
+  lts.prism <- mean(as.numeric(prism[grep(cellline,row.names(prism)), drug.dose]), na.rm = TRUE)
+    
+  # combine
+  
+  res <- cbind(lts.line_gen,lts.achilles,lts.exp, lts.cnv, lts.prism)
+  
+  row.names(res) <- paste(cellline, target)
+  
+  colnames(res) <- c(final_genes,"achilles","exp","cnv","prism")
+  
+  return(res)
+  
+}
+
+
+```
+
+
+
+
+
+
