@@ -27,13 +27,15 @@ fviz_eig(exp_pca)
 ## kmeans for the clustering.frame 
 
 ```{r}
+set.seed(126)
+
 PC <- as.data.frame(exp_pca$x)
 PC1 <- PC$PC1
 PC2 <- PC$PC2
 
 ## Proper kmeans after PCA 
 
-km_c <- kmeans(exp_pca$x, 4, iter.max = 20, nstart = 1)
+km_c <- kmeans(exp_pca$x, 4, iter.max = 10000, nstart = 1)
 km_c
 
 ## create a new data frame for the ggplot visualisation 
@@ -43,7 +45,7 @@ gg_pca <- data.frame( PC1 = PC1,
                       Subtype = brain_cancer_cl$disease_subtype, 
                       Cluster = as.factor(km_c$cluster))
 
-ggplot(gg_pca, aes( x = PC1, y = PC2, shape = Subtype, colour = Cluster)) +
+ggplot(gg_pca, aes( x = PC1, y = PC2, shape = Cluster, colour = Subtype)) +
   ggtitle("Cell line clustering") +
   xlab("PC1") + 
   ylab("PC2")+ 
