@@ -113,12 +113,12 @@ doses_for_list=list("::0.00061034::","::0.0024414::","::0.00976562::","::0.03906
 select_doses=function(x){
   grep(x, colnames(brain_cancer))
 }
-doses_subsets_<-lapply(doses_for_list,select_doses)
+doses_subsets<-lapply(doses_for_list,select_doses)
 #we create a list where each element is a dose and it contains the positions of corresponding doses in brain_cancer dataframe
-assigned<-unlist(doses_subsets_)
+assigned<-unlist(doses_subsets)
 
-for (i in 1:length(doses_subsets_)) {
-  doses_subsets_[[i]]<-brain_cancer[,doses_subsets_[[i]]]
+for (i in 1:length(doses_subsets)) {
+  doses_subsets[[i]]<-brain_cancer[,doses_subsets[[i]]]
 }
 #we create a list where each element has only drugs corresponding to the dose
 
@@ -155,17 +155,17 @@ doses_for_list_2<-list(1,2,3,4,5,6,7,8)
 select_doses_2=function(x){
  unique(grep(x, to_which_dose))
 }
-doses_subsets_2<-lapply(doses_for_list_2,select_doses_2)
+doses_subsets2<-lapply(doses_for_list_2,select_doses_2)
 
 #just a quick check how many doses there are in total
-length(unlist(doses_subsets_2))
+length(unlist(doses_subsets2))
 nrow(questionable_drugs)
 #matches with dimension from questionable_drugs 
 
 add_extra_doses_list=function(x){
-  cbind(brain_cancer[,unique(grep(paste(colnames(extra_drugs[,doses_subsets_2[[x]]]),collapse="|"), colnames(brain_cancer)))], doses_subsets_[[x]])
+  cbind(brain_cancer[,unique(grep(paste(colnames(extra_drugs[,doses_subsets2[[x]]]),collapse="|"), colnames(brain_cancer)))], doses_subsets[[x]])
 }
-doses_subsets_<-lapply(doses_for_list_2,add_extra_doses_list)
+doses_subsets<-lapply(doses_for_list_2,add_extra_doses_list)
 
 #Adding new assigned dosages to small data frames of standard dosages 
 add_extra_doses=function(x,y){
@@ -173,7 +173,7 @@ add_extra_doses=function(x,y){
   }
 
 #New data sets for each dosage with assigned outliers to closest deviation
-sum(sapply(doses_subsets_, ncol))
+sum(sapply(doses_subsets, ncol))
 ncol(brain_cancer)
 #we did not loose any drugs
 ```
@@ -182,18 +182,18 @@ ncol(brain_cancer)
 
 ```{r}
 # Defining a threshold by looking at the data set
-threshold<-median(apply(brain_cancer,2,mean))
+threshold<-round(median(apply(brain_cancer,2,mean)),1)
 
 # Lets select the drugs that go with the threshold of 0.2 in each dose group
 effective_drugs<-function(x){
-  effective_x<-x[,which(apply(x,2,mean)<=0.2)]
+  effective_x<-x[,which(apply(x,2,mean)<=threshold)]
   return(effective_x)
 }
 
-all_effective_drugs_<-lapply(doses_subsets_, effective_drugs)
+all_effective_drugs<-lapply(doses_subsets, effective_drugs)
 
-sum(sapply(all_effective_drugs_, ncol))
-length(which(apply(brain_cancer,2,mean)<=0.2)) #this is the amount of drugs that we keep in total. We compare these 2 length to make sure that that we do not select the same drug twice. If it was the case the first length would be bigger than the second one
+sum(sapply(all_effective_drugs, ncol))
+length(which(apply(brain_cancer,2,mean)<=threshold)) #this is the amount of drugs that we keep in total. We compare these 2 length to make sure that that we do not select the same drug twice. If it was the case the first length would be bigger than the second one
 ```
 
 ##Select drugs that are effective in all doses
@@ -205,27 +205,20 @@ save_new_colnames<-function(x){
   return(x)
 }
 
-all_effective_drugs_<-lapply(all_effective_drugs_, save_new_colnames)
+all_effective_drugs<-lapply(all_effective_drugs, save_new_colnames)
 
 ## remove everything but the drug information from colnames and make them new colnames of the dataframes
 
+
 common_drugs<-function(y){
-  different<-setdiff(colnames(effective_d1), colnames(y))
+  different<-setdiff(colnames(all_effective_drugs[[1]]), colnames(all_effective_drugs[[y]]))
   
-  different<-unique(grep(paste(different,collapse="|"), colnames(effective_d1)))
+  different<-unique(grep(paste(different,collapse="|"), colnames(all_effective_drugs[[1]])))
   
-  colnames(effective_d1[,-different])
+  colnames(all_effective_drugs[[1]][,-different])
 }
 
-common_drugs_<-function(y){
-  different<-setdiff(colnames(all_effective_drugs_[[1]]), colnames(all_effective_drugs_[[y]]))
-  
-  different<-unique(grep(paste(different,collapse="|"), colnames(all_effective_drugs_[[1]])))
-  
-  colnames(all_effective_drugs_[[1]][,-different])
-}
-
-doses_interception<-lapply(doses_for_list_2, common_drugs_)
+doses_interception<-lapply(doses_for_list_2, common_drugs)
 doses_interception<-doses_interception[-1]
 
 #function returns the names of the common drugs between 2 dataframes
@@ -262,13 +255,13 @@ effective_in_all_doses=present_in_all_doses(doses_interception[[1]],doses_interc
 
 ```{r}
 #we need to select the dose with the biggest variance
-variance<-vector(length =length(all_effective_drugs_))
-for(i in 1:length(all_effective_drugs_)){
-  variance[i]<-var(apply(all_effective_drugs_[[i]],2,mean))
+variance<-vector(length =length(all_effective_drugs))
+for(i in 1:length(all_effective_drugs)){
+  variance[i]<-var(apply(all_effective_drugs[[i]],2,mean))
 }
 d7<-which.max(variance)
 #dose 7 has the biggest variance so we will work with it from now on. We create a separate dataframe with 
-effective_d7=all_effective_drugs_[[d7]]
+effective_d7=all_effective_drugs[[d7]]
 ```
 
 # Question 2: What are the targets of the effective drugs?
@@ -532,7 +525,6 @@ logfc=df[,2]
 highlight_df <- df %>% filter(logfc>=1|logfc<=-1)
 bp<-sort(highlight_df[,1],decreasing = T)[1:20]
 best_p_values<-data.frame(matrix(nrow =length(bp),ncol = 2))
-best_p_values<-data.frame(matrix(nrow =length(bp),ncol = 2))
 for (y in 1:length(bp)) {
   best_p_values[y,]<-highlight_df[which(highlight_df[,1]==bp[y]),]
   rownames(best_p_values)[y]=rownames(highlight_df[which(highlight_df[,1]==bp[y]),])
@@ -600,7 +592,7 @@ colnames(ae_d7)[uni_drug]
 
 ```{r}
 #we want to see if the universal drug for all cell lines the same as for braim cancer cell lines is
-non_bc_d7=prism[,unique(grep(paste(colnames(doses_subsets_[[d7]]),collapse="|"), colnames(prism)))]
+non_bc_d7=prism[,unique(grep(paste(colnames(doses_subsets[[d7]]),collapse="|"), colnames(prism)))]
 non_bc_d7=save_new_colnames(non_bc_d7)
 non_bc_d7=non_bc_d7[,effective_in_all_doses]
 
@@ -638,30 +630,30 @@ colnames(non_bc_d7)[uni_drug2]
 genes_regression=cbind(brain_cancer_exp[,top_genes],ae_d7[,uni_drug])
 colnames(genes_regression)[ncol(genes_regression)]="Drug"
 
-YYY<-summary(lm(Drug~.,genes_regression))
+initial_regression_1<-summary(lm(Drug~.,genes_regression))
 
 #loop starts
 repeat{
-  XXX<-YYY
-  pvx<-pf(XXX$fstatistic[1],XXX$fstatistic[2],XXX$fstatistic[3],lower.tail=FALSE)
+  end_regression_1<-initial_regression_1
+  pvx<-pf(end_regression_1$fstatistic[1],end_regression_1$fstatistic[2],end_regression_1$fstatistic[3],lower.tail=FALSE)
   print(pvx)
-coeffs=as.data.frame(XXX$coefficients)
+coeffs=as.data.frame(end_regression_1$coefficients)
 coeffs=coeffs[-c(1),]
 coeffs=coeffs[order(coeffs$`Pr(>|t|)`),]
 coeffs=coeffs[-c(nrow(coeffs)),]
 genes_regression=cbind(brain_cancer_exp[,rownames(coeffs)],ae_d7[,uni_drug])
 colnames(genes_regression)[ncol(genes_regression)]="Drug"
 
-YYY<-summary(lm(Drug~.,genes_regression))
-pvy<-pf(YYY$fstatistic[1],YYY$fstatistic[2],YYY$fstatistic[3],lower.tail=FALSE)
+initial_regression_1<-summary(lm(Drug~.,genes_regression))
+pvy<-pf(initial_regression_1$fstatistic[1],initial_regression_1$fstatistic[2],initial_regression_1$fstatistic[3],lower.tail=FALSE)
 if(pvy>=pvx){
   break
 }
 }
 
-XXX
+end_regression_1
 
-final_genes=rownames(as.data.frame(XXX$coefficients))
+final_genes=rownames(as.data.frame(end_regression_1$coefficients))
 final_genes=final_genes[-1]
 final_genes
 
@@ -679,7 +671,7 @@ anova(red,full)#H0: modelle equivalent-> kann nicht verworfen werden-> nicht equ
 #Regression model with all cell lines
 ```{r}
 #we apply the same procedure for all cell lines to compare the outcome of our regression with brain cancer cell lines and determine how meaningful it is
-all_cell_lines_d7=prism[,unique(grep(paste(colnames(doses_subsets_[[d7]]),collapse="|"), colnames(prism)))]
+all_cell_lines_d7=prism[,unique(grep(paste(colnames(doses_subsets[[d7]]),collapse="|"), colnames(prism)))]
 all_cell_lines_uni_drug=grep(colnames(ae_d7)[uni_drug], colnames(all_cell_lines_d7))
 all_cell_lines_genes=prism.exp[,top_genes]
 
@@ -690,28 +682,28 @@ all_cell_lines_d7=all_cell_lines_d7[-unique(grep(paste(remove,collapse="|"), row
 genes_regression2=cbind(all_cell_lines_genes,all_cell_lines_d7[,all_cell_lines_uni_drug])
 colnames(genes_regression2)[ncol(genes_regression2)]="Drug"
 
-YY<-summary(lm(Drug~.,genes_regression2))
+initial_regression_2<-summary(lm(Drug~.,genes_regression2))
 
 #loop starts
 repeat{
-  XX<-YY
-  px<-pf(XX$fstatistic[1],XX$fstatistic[2],XX$fstatistic[3],lower.tail=FALSE)
+  end_regression_2<-initial_regression_2
+  px<-pf(end_regression_2$fstatistic[1],end_regression_2$fstatistic[2],end_regression_2$fstatistic[3],lower.tail=FALSE)
   print(px)
-coeffs=as.data.frame(XX$coefficients)
+coeffs=as.data.frame(end_regression_2$coefficients)
 coeffs=coeffs[-c(1),]
 coeffs=coeffs[order(coeffs$`Pr(>|t|)`),]
 coeffs=coeffs[-c(nrow(coeffs)),]
 genes_regression2=cbind(prism.exp[,rownames(coeffs)],all_cell_lines_d7[,all_cell_lines_uni_drug])
 colnames(genes_regression2)[ncol(genes_regression2)]="Drug"
 
-YY<-summary(lm(Drug~.,genes_regression2))
-py<-pf(YY$fstatistic[1],YY$fstatistic[2],YY$fstatistic[3],lower.tail=FALSE)
+initial_regression_2<-summary(lm(Drug~.,genes_regression2))
+py<-pf(initial_regression_2$fstatistic[1],initial_regression_2$fstatistic[2],initial_regression_2$fstatistic[3],lower.tail=FALSE)
 if(py>=px){
   break
 }
 }
 
-XX
+end_regression_2
 
 ```
 
