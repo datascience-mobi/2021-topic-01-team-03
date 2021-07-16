@@ -66,7 +66,6 @@ p + theme(legend.position = "none")
 first = new_means_eff$Drug_Mean
 second = sort(new_means_eff$Drug_Mean, decreasing = TRUE)
               
-match(first, second)
 
 
 arrangement <- data.frame(Drug_Ranks = match(first, second), 
