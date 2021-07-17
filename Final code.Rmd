@@ -629,7 +629,6 @@ colnames(genes_regression)[ncol(genes_regression)]="Drug"
 
 # linear regression model
 initial_regression_1<-summary(lm(Drug~.,genes_regression))
-
 # feature selection
 repeat{
   end_regression_1<-initial_regression_1
@@ -657,9 +656,10 @@ final_genes=final_genes[-1]
 final_genes
 
 #anova and not p-value to compare models?
-
+genes_regression=cbind(brain_cancer_exp[,final_genes],ae_d7[,uni_drug])
+colnames(genes_regression)[ncol(genes_regression)]="Drug"
 red<-lm(Drug~.,genes_regression)
-little_option<-lm(Drug~.,genes_regression)
+
 genes_regression=cbind(brain_cancer_exp[,top_genes],ae_d7[,uni_drug])
 colnames(genes_regression)[ncol(genes_regression)]="Drug"
 full<-lm(Drug~.,genes_regression)
@@ -708,9 +708,10 @@ end_regression_2
 ```
 
 ##Another LM
+
 ```{r}
 highlight_df[grep("ITGA11",rownames(highlight_df)),1]<-11.59375
-bp2<-sort(highlight_df[,1],decreasing = T)[1:24]
+bp2<-sort(highlight_df[,1],decreasing = T)[1:21]
 best_p_values2<-data.frame(matrix(nrow =length(bp2),ncol = 2))
 for (y in 1:length(bp2)) {
   best_p_values2[y,]<-highlight_df[which(highlight_df[,1]==bp2[y]),]
@@ -762,7 +763,16 @@ if(pvy>=pvx){
 
 end_regression_1
 
+
+final_genes=rownames(as.data.frame(end_regression_1$coefficients))
+final_genes=final_genes[-1]
+length(final_genes)
+
+#anova and not p-value to compare models?
+genes_regression=cbind(brain_cancer_exp[,final_genes],ae_d7[,uni_drug])
+colnames(genes_regression)[ncol(genes_regression)]="Drug"
 big_option<-lm(Drug~.,genes_regression)
+
 anova(little_option,big_option)
 ```
 
