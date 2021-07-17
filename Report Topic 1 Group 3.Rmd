@@ -28,11 +28,11 @@ names=brain_cancer_cl[,1]
 brain_cancer_exp=prism.exp[names,]
 ```
 
-Drug development is a time and investment consuming procedure. To tackle this problem various new strategy have been explored. Remdesivir, originally developed to fight Ebola, has recently been employed to treat COVID-19 infected patients. The process of using an existing drug to combat an alternate disease is known as drug repurposing. 
+Drug development is a time and investment consuming procedure. To tackle this problem, various new strategies have been explored. Remdesivir, originally developed to fight Ebola, has recently been employed to treat COVID-19 infected patients. The process of using an existing drug to combat an alternate disease is known as drug repurposing. 
 
-Numerous advantages of this method include the reduced time and decreased likelihood to fail in research and development. Using the previously gathered data from a known drug additionally reduces the overall costs. In this context, computational approaches are gaining importance, as they allow large amounts of information to be analyzed (Pushpakom *et al.*, 2019).
+Numerous advantages of this method include the reduced time and decreased likelihood to fail in research and development. Using the previously gathered data from a known drug additionally reduces the overall costs. In this context, computational approaches are gaining importance, as they allow large amounts of information from repurposing assays to be analyzed (Pushpakom *et al.*, 2019).
 
-According to the Global Cancer Statistics 2020, brain cancer is a rarer cancer type, accounting for 2,5% of all new cancer cases. Nevertheless, its mortality rate is comparatively high, which makes drug repurposing a promising approach to treat this disease.
+According to the Global Cancer Statistics 2020, brain cancer is a rare cancer type, accounting for 2,5% of all new cancer cases. Nevertheless, its mortality rate is comparatively high, which makes drug repurposing a promising approach to treat this disease.
 
 
 # Structure of our project
@@ -51,17 +51,17 @@ To explore this question, four milestones were examined:
 
 # Data Clean up
 
-As the datasets also contain information about other cancer types, irrelevant cell lines were discarded. Furthermore, the datasets were classified in accordance with the brain cancer subtypes. Cell lines with NA values were either removed or replaced with a mean value, depending on the dataset. The third milestone takes a closer look into brain cancer subtypes. To facilitate this step, additional dataframes with regard to the subtypes were created.
+As the datasets also contain information about other cancer types, irrelevant cell lines were discarded. Furthermore, the datasets were classified in accordance with the brain cancer subtypes. Cell lines with NA values were either removed or replaced with a mean value, depending on the dataset. The third milestone takes a closer look into brain cancer subtypes. To facilitate this step, additional data frames containing the individual subtypes were created.
 
 
 # Identification of effective drugs
 
 The `prism` data frame gives information on treatments which were used in the original effectiveness screening. These treatments include 4,518 drugs with dosages ranging from 0.00061034 $\mu$M to 10 $\mu$M. Analysis of the data identified 8 standard dosages, which were then divided into separate data frames and stored in a list. 
 
-Several dosages were identified, that did not correspond to the standard set of dosages. These outliers were assigned to the dosage with the least deviation, respectively. The idea of the assignment is to analyse the provided data via the drugs, as opposed to the assigned dosages. In this data set, the lowest values indicate the highest effectiveness. To identify the most effective drugs, the values of the `prism` data frame were analysed. Contrary to the threshold value 0.3 of Corsello *et al.* the threshold in this investigation was set to 0.2. This value was found to correspond to the median of the ```brain_cancer``` data frame (filtered brain cancer cell lines from the ```prism``` data frame), allowing the discard of over half of the provided drugs in this step. 
+Several dosages were identified, that did not correspond to the standard set of dosages. These outliers were assigned to the dosage with the least deviation, respectively. The idea of the assignment is to analyse the provided data via the drugs, as opposed to the assigned dosages. In this data set, the lowest values indicate the highest effectiveness. To identify the most effective drugs, the values of the `prism` data frame were analysed. Contrary to the threshold value 0.3 of Corsello *et al.* the threshold in this investigation was set to 0.2. This value was found to correspond to the median of the ```brain_cancer``` data frame (filtered brain cancer cell lines from the ```prism``` data frame), allowing the removal of over half of the provided drugs in this step. 
 
-In order to reduce the number of drugs and to be able to make later predictions, only drugs were selected that are effective in all doses. First, the drugs whose mean effectiveness across all cell lines in the dose subset data frames was less than or equal to the established threshold were identified. Second, these drugs were compared to each other and only drugs present in all subsets were kept, allowing the identification of **51 drugs**.
-Subsequently, a single dosage was chosen for the further analysis, as the model aims to establish the output of drugs for suited for treatments, regardless of their concentration. Dosage 7 was selected due to its high variance, in comparison to the other dosages, of 10 $\mu$M. 
+In order to reduce the number of drugs and to be able to make accurate predictions later on, only drugs were selected that are effective in all doses. First, the drugs whose mean effectiveness across all cell lines in the dose subset data frames was less than or equal to the established threshold were identified. Second, these drugs were compared to each other and only drugs present in all subsets were kept, allowing the identification of **51 drugs**. These drugs were saved in the ```effective_in_all_doses``` vector.
+Subsequently, a single dosage was chosen for the further analysis, as the model aims to establish the output of drugs for suited for treatments, regardless of their concentration. Dosage 7 was selected due to its high variance in comparison to the other dosages, of 10 $\mu$M. 
 
 ```{r eval=FALSE, echo=FALSE, fig.dim= c(5,4), fig.cap= 'Figure 1: Average subtype effectivness per drug'}
 
@@ -94,7 +94,7 @@ rownames(means_eff) = effective_in_all_doses
 means_drugs <- data.frame(means_eff, 
                           Means = apply(means_eff, 1 , mean))
 
-new_means_eff <- data.frame(Efficiency = c(means_drugs$Astrocytoma, means_drugs$Glioma, means_drugs$Glioblastoma, means_drugs$Medulloblastoma), 
+new_means_eff <- data.frame(Effectiveness = c(means_drugs$Astrocytoma, means_drugs$Glioma, means_drugs$Glioblastoma, means_drugs$Medulloblastoma), 
                             Drug_Mean = c(means_drugs$Means, means_drugs$Means, means_drugs$Means, means_drugs$Means), 
                             subtype = c(rep("Astrocytoma", nrow(means_drugs)),
                                       rep("Glioma", nrow(means_drugs)),
@@ -110,7 +110,7 @@ second = sort(new_means_eff$Drug_Mean, decreasing = TRUE)
 
 
 arrangement <- data.frame(Drug_Ranks = match(first, second), 
-                                Efficiency = new_means_eff$Efficiency, 
+                                Effectiveness = new_means_eff$Effectiveness, 
                                 Subtype = new_means_eff$subtype,
                                 Drug = new_means_eff$Drug, 
                                 Drug_Mean = new_means_eff$Drug_Mean)
@@ -123,16 +123,16 @@ pre_arrangement <- data.frame(pre_arrangement,
                                Numbers = vec)
 
 ## Plot the new, rearranged subtypes 
-ggplot(pre_arrangement, aes(x = Numbers , y = Efficiency, color = Subtype)) + 
+ggplot(pre_arrangement, aes(x = Numbers , y = Effectiveness, color = Subtype)) + 
                          ggtitle("Means of subtypes") +
                           xlab("Drugs") + 
-                          ylab("Efficiency") + 
+                          ylab("Effectiveness") + 
   
   geom_point(aes(shape=Subtype))
 ```
 
 
-**Figure 1** represents the average effectiveness of each drug for each subtype. The means of the identified drugs have effectiveness scores ranging from 0.2 to  approximately -10. There is a linear relationship between means' effectiveness and drugs. There is general tendency for medulloblastoma cell lines to be more effected by the drug treatment.However, these could be attributed to the fact that medulloblastoma, with only two cell lines, contributes the least amount of data.
+**Figure 1** represents the average effectiveness of each drug for each subtype. The means of the identified drugs have effectiveness scores ranging from 0.2 to  approximately -8.2. In the graph shown, the drugs were ranked to show the trend int heir effectiveness. Overall, there is general tendency for medulloblastoma cell lines to be more effected by the drug treatment. For 31 out of the 51 drugs, medulloblastoma cell lines shown the highest effectiveness scores. However, these could be attributed to the fact that medulloblastoma, with only two cell lines, as opposed to the 20 glioblastoma cell lines. 
 
 # Identification of drug targets
 
@@ -142,16 +142,13 @@ Lea&Lennard
 
 # Identification of genetic markers
 
-For this milestone, a further look at brain cancer subtypes was taken. This information could be relevant for the final regression model. The column ```disease_subtype``` of the ```prism.cl``` dataset gives information about the subtype whereby a distinction is made between astrocytoma, medulloblastoma, glioblastoma and glioma. 
+For this milestone, a further look at brain cancer subtypes was taken. This information could be relevant for the final regression model. The column ```disease_subtype``` of the ```prism.cl``` dataset gives information about the subtype, whereby a distinction is made between astrocytoma, medulloblastoma, glioblastoma and glioma. 
 
-```{r eval=FALSE, echo=FALSE, fig.dim= c(5,4), fig.cap= 'Gene expression clustering'}
+```{r eval=FALSE, echo=FALSE, fig.dim= c(5,4), fig.cap= 'Figure 2: Gene expression clustering'}
 #PCA before applying the kmeans 
 
 exp <- brain_cancer_exp
 exp_pca <- prcomp(exp)
- 
-# plot the PC's an examine their variance 
-fviz_eig(exp_pca)
 
 
 ## kmeans for the clustering.frame 
@@ -179,38 +176,15 @@ ggplot(gg_pca, aes( x = PC1, y = PC2, shape = Cluster, colour = Subtype)) +
   geom_point(size = 4)
 
 ```
-Cedrik beschreibt das plot
+Figure 2 shows a clustering of the two PC's with the highest variance of the cell lines by subtype. The data used is the expression data from the brain cancer subtypes. In the first step a PCA was conducted to reduce the dimensionality of the data frame before using the kmeans method to cluster the obtained principle components. This graph aims to analyse the correlation of the gene expression of the cell lines and the subtypes they belong to. As can be seen, there is no link between the clusters and the subtypes, making the continuous analysis using the subtypes obsolete. Furthermore, the clustering in itself does not seem to be conclusive (see cluster 1). Even an alternate number of itertions in the kmeans did not change that. 
 
-```{r eval=FALSE, echo=FALSE, fig.dim= c(5,4), fig.cap= 'Distribution of effectivness scores in each subtype'}
-## create a new boxplot that shows the overall the distribution and 
-
-p <- ggplot(new_means_eff, aes(x = subtype, y = Efficiency, color = subtype)) + 
-                         ggtitle("Subtype Boxplots") +
-                          xlab("Subtypes") + 
-                          ylab("Efficiency") + 
-  geom_boxplot(outlier.colour="red", outlier.shape=8,
-                outlier.size=4)
-p + theme(legend.position = "none")
-```
-IS THIS RELEVANT???
-
-In these boxplots, one can see the distribution of the effectiveness scores of the 51 effective drugs in the subtypes. These can be used to compare the distributions of the effectiveness values for the subtypes. The median in astrocytoma, glioblastoma and glioma is in the middle of the box, which indicates a symmetrical distribution. 
-The box of medulloblastoma differs from those of the other subtypes. It is larger and thus there is a greater spread of data points. In addition, the median is right-shifted and at a lower effective score. 
-Although the boxplots provide information that the treatments worked differently effectively for the subtypes, they do not indicate whether there are drugs that worked well specifically for one subtype.  
-
-
-+++
-
-
-To find out which genes are expressed significantly different in brain cancer cell lines compared to other cancers, a statistical test can be applied. For this purpose, it must first be examined whether the available data is normally distributed.
+To find out which genes are expressed significantly differently in brain cancer cell lines compared to other cancers, a statistical test can be applied. For this purpose, it must first be examined whether the available data is normally distributed.
 A statistical test, the Shapiro Wilks test, can be used for this evaluation. In this case, the H0 hypothesis states that the distribution is a normal distribution. If the p-value is smaller than the significance level, the H0 hypothesis is rejected and it is assumed that the data is not normally distributed. 
-The test was applied to the 19177 genes from the ```prism.exp``` dataset to determine the expression across the 34 cell lines. A signifcance level of 0.05 was set. As a result, 9799 p-values were less than or equal to this value, thus approximately half of the genes were normally distributed. This is the reason a non-parametric test was conducted.  
+The test was applied to the 19177 genes from the ```prism.exp``` dataset to determine the expression across the 34 cell lines. A significance level of 0.05 was set. As a result, 9799 p-values were less than or equal to this value, thus approximately half of the genes were normally distributed. This is the reason a non-parametric test was conducted.  
 
 ## Wilcoxon Rank Sum test
 
-We applied an unpaired Wilcoxon Rank Sum test to identify differential expression. For this we created the dataset ```non_bc_exp```, which takes all cell lines from the ```prism.exp``` dataset that do not belong to the brain cancer disease type. There are 447 cell lines in it from lung cancer, skin cancer, pancreatic cancer or ovarian cancer. Although our data sets are not the same size, this is not a problem in this case, as the test is based on ranking the individual values.
-
-Before applying the test, however, we had to take into account that we perform a Z-transformation by which the values from the two datasets are centered and scaled to match the different ranges of the variation. In addition, we had to take into account that for some genes the expression value was zero. Therefore, we added a so-called pseudocount, which was in our case the lowest expression value per data set. 
+An unpaired Wilcoxon Rank Sum test was used to identify differential gene expression. In this test two different datasets were compared. The H0 hypothesis is that expression values of both samples come from the same distribution.  The first dataset was ```non_bc_exp```, which has all the cell lines from the ```prism.exp``` dataset except from the brain cancer disease type. There are 447 cell lines in total from lung, skin, pancreatic and ovarian cancers. The second dataset is the ```brain_cancer_exp```, which contains the gene expression of the 34 brain cancer cell lines.  Although these data sets are not identical in size, this is not a problem, as the test is based on ranking the individual values. Some genes have an expression value of 0. To avoid following complications (for example log2-fold-change calculation) the lowest expression value for each dataset, so called ```pseudo_count```, was added. The pseudo values were equal for both datasets.
 
 
 ```{r echo=FALSE}
@@ -265,11 +239,11 @@ for(i in 1:ncol(brain_cancer_exp_w)) {
 }
 ```
 
-When performing the Wilcoxon test between the two datasets ```non_bc_exp``` and ```brain_cancer_exp```, the H0 hypothesis that the gen expressions are from the same distribution is tested simultaneously for all genes. This leads to a multiplicity problem in which the probability of increasing the number of false positive test results is increased. To adjust the number of significant p-values for this problem, we consider two types of corrections. The Benjamini-Hochberg and the Bonferroni and corrections. 
+In this non-parametric test the H0 hypothesis is tested simultaneously for all genes. This leads to a multiplicity problem, in which the probability of increasing false positive test results is increased. To adjust the number of significant p-values occurring for this problem, we consider two types of corrections. The Benjamini-Hochberg and the Bonferroni corrections. 
 
-Thereby, the number of genes that are significantly differential expressed differs strongly: The Benjamini-Hochberg correction results in 8948 genes, the Bonferroni correction in ***1859 genes***. We have chosen to continue with the Bonferroni correction genes, since this correction is more conservative and controls the type I error, so the number of false positives (keeping genes that are not significant) what we want prioritized to avoid. 
+Consequently, the number of genes that are significantly differentially expressed differs drastically. The Benjamini-Hochberg correction results in 8948 genes, meanwhile the Bonferroni correction in ***1859 genes***. The Bonferroni correction was chosen, since it is more conservative and controls the type I error. Therefore the number of false positives (keeping genes that are not significant) is avoided. 
 
-```{r echo=FALSE, fig.dim= c(5,4), fig.cap= 'Volcano plot of significant differential expressed genes'}
+```{r echo=FALSE, fig.dim= c(5,4), fig.cap= 'Figure 3: Volcano plot of significant differential expressed genes'}
 
 #P values of Wilcoxon test genes
 wilcox_pvalue_genes <- vector(length = ncol(brain_cancer_exp_w))
@@ -315,28 +289,31 @@ ggplot(df, aes(x=df[,2], y=df[,1]),ylim = range(0,1))+
   geom_point(data=highlight_df, aes(x=highlight_df[,2], y=highlight_df[,1]), color='blue') +
   geom_point(data=best_p_values, aes(x=best_p_values[,2], y=best_p_values[,1]), color='red')
 ```
-
-
-
-
-To visualize differential expressed genes one can use a volcano plot. This plots the statistical significance of a gene in relation to the magnitude of the difference between the two datasets at a negative base 2 log-fold-change. Through this plot we could extract genes whose log2-fold-change is less than or equal to -1 and greater than or equal to 1, respectively. These genes are shown in blue in the plot. Additionally, we selected the top 20 genes with the smallest p-value, which are highlighted in red.
+To visualizes differentially expressed genes a volcano plot can be used, as shown on the **Figure 3**. Each gene expression difference can be represented by the log2-fold-change on the x-axes. The y-axes displays the -log10 of each p-value. First, the genes were filtered according to the log2-fold-change. Only the genes, which value was less or equal to -1 and greater or equal to 1 were kept. These genes are shown in blue on the plot. Following that, the top 20 genes with the biggest -log10 p-value were extracted and highlighted in red.
 
 ## Linear regression model with universal drug
 
-In preparation for our final milestone, we wanted to further reduce the number of significant genes for brain cancer. 
-For this, we wanted to extract a drug from our effective drugs in doses 7 that has a consistent effect for all brain cancer cell lines. Therefore, we filtered out an universal drug by dividing the range of effectiveness scores into intervals and then determining the interval with the highest number of cell lines responding to a treatment within all effective drugs. From this, it returned the drug with the Broad ID "BRD-K79145628-001-05-5". +++
+From these top 20 genes, the ones with the most influence on drug effectiveness were selected. An effective drug from dosage 7 that has an overall consistent effect on the cell lines needs to be determined.  Therefore, a "universal drug" was filtered out by dividing the range of effectiveness scores into equally sized intervals. For each drug an interval with the highest amount of responding cell lines was selected. The determined universal drug is the one with the biggest count (Broad ID "BRD-K79145628-001-05-5"). 
 
-We had a demand on this drug that it was the universal drug for brain cancer only, but not for other types of cancer. By applying our code to the non-brain cancer cell lines, our expectation was met. 
+The same method was applied to the non brain cancer cell lines and after that two universal drugs were compared. They turned out to be different, which indicated that the brain cancer universal drug is specific. 
 
-With this drug, we wanted to establish a linear regression model what is a statistical method to pedict one variable by using other variables. In our model, we predicted the effectiveness score of the universal drug based on the 20 genes filtered. By setting up a multiple regression, it is important to note that no correlated variables are used. Among our top 20 genes, we found a correlation between the genes "FAM83H" and "IQANK1". We kept the gene that has a more significant p-value in the Volcano plot. 
+This drug was finally used as a reference variable for the linear regression model, in which drug effectiveness is predicted by the expression of the top 20 genes. In this case, each gene is considered as a single variable. By setting up a multiple regression, it is important to note that no correlated variables should be used. Among the top 20 genes, a high correlation between the genes "FAM83H" and "IQANK1" was found. The gene with a more significant p-value in the Wilcoxon test was kept. 
 
-The application of the linear regression model involves feature selection, that is, reducing the number of genes so that only those that contribute to a significantly better prediction of effectiveness are included in the model. Here, the p-value of the F-test was relevant for our evaluation, since it compares our model with the null model. The F-test assumes the H0 hypotheses that the tested model does not perform better than the null model, so a small p-value leads to the rejection of the H0 hypotheses. 
+The application of the linear regression model involves feature selection. It consists of a reduction in the number of variables, so that only those that contribute the most to the prediction are included in the model. The p-value of the F-test was used for the evaluation, since it compares the linear model with the null model. In the F-test the H0 hypotheses is that the tested model does not perform better than the null model, therefore a small p-value leads to the rejection of the H0 hypotheses. 
 
-We followed the strategy of removing as many genes from the model until the removal of one gene would make the p-value worse. At this event, the execution is stopped. Using this strategy, we arrive at a model with ***7 genes*** and a p-value of 1,353%. Moreover, in the output of the model, the multiple R-squared is relevant, as it indicates how much variance can be explained by the gene. This value is with 46,44% satisfactory for us.
+The following strategy was applied:
 
-To double check our result, we compared our complete model with the reduced model. For this we used the function ```anova```, which compares the variances of the residuals considering the introduced degrees of freedom. The H0 hypothesis is assumed that the two models are equivalent. Since a high p-value results, this can be rejected and it can be assumed that the complex model does not perform significantly better than our reduced model. 
+[_] All 2o genes were put in the model (model A).
+[_] Genes were ordered according to their own p-values from the highest to the lowest.
+[_] The lowest one was removed and the new linear model was performed (model B).
+[_] If p-value of model A is bigger than p-value of model B, the procedure is repeated starting from the second step.
+[_] This loop stops, the moment p-value of model A is smaller than p-value of model B.
+[_] The model has reached its optimal point.
 
-+++Interpretation von Regressionsmodell auf alle cell lines?+++
+***7 final genes*** arise from this loop with and a p-value of 1,353%. All 447 cell lines underwent the same strategy with the linear regression. As a result a drastically lower r-squared value with only 3 genes was determined to be the optimal model in this case. This indicates the specificity of these 20 genes in the brain cancer cell lines.
+
+To further check this result, the full model is compared with the reduced model using the ```anova``` function. It compares the variances of the residuals considering the introduced degrees of freedom. The H0 hypothesis is that the two models are equivalent. A p-value of **0.9446** is obtained, which suggests that the reduced model performs significantly better in comparison with the full one. 
+
 
 # Linear regression model for effectivness prediction
 

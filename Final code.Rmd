@@ -447,21 +447,21 @@ calculate_pseudo_v<-function(x,y){
 }
 #function to determine the pseudovalue for both datasets. It takes a dataframe and looks for a minimum value for each row (in this case cell line). Then it chooses only the minimum values that are bigger than 0. Out of these positive mins, it chooses the smallest one, which is our pseudo value
 
-pseudo_value1<-calculate_pseudo_v(non_bc_exp,nrow(non_bc_exp))
-pseudo_value2<-calculate_pseudo_v(brain_cancer_exp_w, nrow(brain_cancer_exp_w))
+pseudo_count1<-calculate_pseudo_v(non_bc_exp,nrow(non_bc_exp))
+pseudo_count2<-calculate_pseudo_v(brain_cancer_exp_w, nrow(brain_cancer_exp_w))
 #Now we have 2 pseudo values from 2 datasets, we wil compare them in the following loop to determine the ultimate pseudo value to apply on both datasets
 
-if(pseudo_value1==pseudo_value2){
-  pseudo_value<-pseudo_value1
-} else if(pseudo_value1>pseudo_value2) {
-  pseudo_value<-pseudo_value2
+if(pseudo_count1==pseudo_count2){
+  pseudo_count<-pseudo_count1
+} else if(pseudo_count1>pseudo_count2) {
+  pseudo_count<-pseudo_count2
 } else {
-  pseudo_value<-pseudo_value1
+  pseudo_count<-pseudo_count1
 }
 
 
-non_bc_exp=non_bc_exp+pseudo_value
-brain_cancer_exp_w=brain_cancer_exp_w+pseudo_value
+non_bc_exp=non_bc_exp+pseudo_count
+brain_cancer_exp_w=brain_cancer_exp_w+pseudo_count
 
 non_bc_exp=as.data.frame(t(scale(as.matrix(t(non_bc_exp)))))
 brain_cancer_exp_w=as.data.frame(t(scale(as.matrix(t(brain_cancer_exp_w)))))
