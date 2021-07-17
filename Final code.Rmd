@@ -445,21 +445,21 @@ calculate_pseudo_v<-function(x,y){
 }
 #function to determine the pseudovalue for both datasets. It takes a dataframe and looks for a minimum value for each row (in this case cell line). Then it chooses only the minimum values that are bigger than 0. Out of these positive mins, it chooses the smallest one, which is our pseudo value
 
-pseudo_value1<-calculate_pseudo_v(non_bc_exp,nrow(non_bc_exp))
-pseudo_value2<-calculate_pseudo_v(brain_cancer_exp_w, nrow(brain_cancer_exp_w))
+pseudo_count1<-calculate_pseudo_v(non_bc_exp,nrow(non_bc_exp))
+pseudo_count2<-calculate_pseudo_v(brain_cancer_exp_w, nrow(brain_cancer_exp_w))
 #Now we have 2 pseudo values from 2 datasets, we wil compare them in the following loop to determine the ultimate pseudo value to apply on both datasets
 
-if(pseudo_value1==pseudo_value2){
-  pseudo_value<-pseudo_value1
-} else if(pseudo_value1>pseudo_value2) {
-  pseudo_value<-pseudo_value2
+if(pseudo_count1==pseudo_count2){
+  pseudo_count<-pseudo_count1
+} else if(pseudo_count1>pseudo_count2) {
+  pseudo_count<-pseudo_count2
 } else {
-  pseudo_value<-pseudo_value1
+  pseudo_count<-pseudo_count1
 }
 
 
-non_bc_exp=non_bc_exp+pseudo_value
-brain_cancer_exp_w=brain_cancer_exp_w+pseudo_value
+non_bc_exp=non_bc_exp+pseudo_count
+brain_cancer_exp_w=brain_cancer_exp_w+pseudo_count
 
 non_bc_exp=as.data.frame(t(scale(as.matrix(t(non_bc_exp)))))
 brain_cancer_exp_w=as.data.frame(t(scale(as.matrix(t(brain_cancer_exp_w)))))
@@ -623,15 +623,18 @@ colnames(non_bc_d7)[uni_drug2]
 ##Regression model to find out which genes we keep for the final model
 
 ```{r}
+# Creating a data frame with top 20 genes and universal drug
 genes_regression=cbind(brain_cancer_exp[,top_genes],ae_d7[,uni_drug])
 colnames(genes_regression)[ncol(genes_regression)]="Drug"
 
+# linear regression model
 initial_regression_1<-summary(lm(Drug~.,genes_regression))
 
-#loop starts
+# feature selection
 repeat{
   end_regression_1<-initial_regression_1
-  pvx<-pf(end_regression_1$fstatistic[1],end_regression_1$fstatistic[2],end_regression_1$fstatistic[3],lower.tail=FALSE)
+  pvx<-pf(end_regression_1$fstatistic[1],end_regression_1$fstatistic[2],
+          end_regression_1$fstatistic[3],lower.tail=FALSE)
   print(pvx)
 coeffs=as.data.frame(end_regression_1$coefficients)
 coeffs=coeffs[-c(1),]

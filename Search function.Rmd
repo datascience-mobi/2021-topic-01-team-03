@@ -1,4 +1,11 @@
 ---
+title: "Search function"
+author: "Lennard Kleemann"
+date: "16/07/2021"
+output: html_document
+---
+
+---
 title: "Regression model"
 author: "Lennard, Lea"
 date: "13/7/2021"
@@ -1046,131 +1053,30 @@ summary(multiple.lm.values[,4])
 
 ## Improved regression model
 ```{r}
-
-final_genes <- c("IQANK1","RAB11FIP1","FOXG1","LPIN3","ERVMER34.1","PTN","VRK2")
-
-line_target.search <- function(cellline, target){
-
-#cellline <- "ACH-000007""
-#target <- "LPL"
-  
-  res <- data.frame(row.names = c(cellline, target))
-  
-  lts.line_gen <- prism.exp[grep(cellline,row.names(prism.exp)),which(colnames(prism.exp) %in% final_genes)] # selecting exp from 9 important gens
-    
-  lts.achilles <- prism.achilles[grep(cellline,row.names(prism.achilles)), which(target == colnames(prism.achilles))] # selecting achilles
-  
-  lts.exp <- prism.exp[grep(cellline,row.names(prism.exp)), which(target == colnames(prism.exp))] # selecting exp
-  
-  lts.cnv <- prism.cnv[grep(cellline,row.names(prism.cnv)), which(target == colnames(prism.cnv))] # selecting cnv
-  
-  ## target to drug to prism
-  
-  # finding drugs to target
-  
-  drug.line <- vector()
-  
-  for(i in 1:nrow(prism.treat)){
-    
-    target.in.line <- unlist(strsplit(as.character(prism.treat[i,7]), split = ", ")) == target
-    
-    if(sum(target.in.line, na.rm = TRUE) > 0){
-      drug.line <- cbind(drug.line, i)
-    }
-  }
-  
-  drugs.from.target <- unique(prism.treat[drug.line,1])
-  
-  # finding prism values to drugs
-  
-  drug.col <- vector()
-  
-  for(i in 1:ncol(prism)){
-    
-    drug.in.col <- unlist(strsplit(as.character(colnames(prism)[i]), split = "::"))[1] == drugs.from.target
-    
-    if(sum(drug.in.col, na.rm = TRUE) > 0){
-      drug.col <- cbind(drug.col, i)
-    }
-  }
-  
-  # dosis check
-  
-  drug.dose <- vector()
-  
-  for(i in drug.col){
-    
-     if( 6.25 < as.numeric(unlist(strsplit(as.character(colnames(prism)[i]), split = "::"))[2]) && as.numeric(unlist(strsplit(as.character(colnames(prism)[i]), split = "::"))[2]) <= 10 )
-       {drug.dose <- cbind(drug.dose,i) } # right dose for d7???
-    
-  }
-  
-  # prism value
-  
-  lts.prism <- mean(as.numeric(prism[grep(cellline,row.names(prism)), drug.dose]), na.rm = TRUE)
-    
-  # combine
-  
-  res <- cbind(lts.line_gen,lts.achilles,lts.exp, lts.cnv, lts.prism)
-  
-  row.names(res) <- paste(cellline, target)
-  
-  colnames(res) <- c(final_genes,"achilles","exp","cnv","prism")
-  
-  return(res)
-  
-}
-
-
-```
-
-
-```{r}
-celllines <- brain_cancer_achilles[,1]
-celllines <- cbind(celllines, rownames(brain_cancer_achilles))
-celllines <- na.omit(celllines)
-
-training1 <- data.frame()
-
-for (i in celllines[,2]){
-  print(i)
-  for (j in training_targets.solo){
-    #line_target.search(i, j)
-    print(j)
-    training1 <- rbind(training1, line_target.search(i,j))
-  }
-}
-```
-
-
-```{r}
-
-```
-
-
-## Improved search function
-```{r}
 search.prism <- function(search.mode = "t", cellline, target.or.drug, dose = 8){
 
   #mode: targe=t, drug=d
   #target/drug:target name/ broad_id
-  #dose tabel: d1-d8
-  doses.table <- data.frame()
-  doses.table <- c(0,0.00061034,0.0024414,0.00976562,0.0390625,0.15625,0.625,2.5,10)
+  #dose: d1-d8
+  doses.tabell <- data.frame()
+  doses.tabell <- c(0,0.00061034,0.0024414,0.00976562,0.0390625,0.15625,0.625,2.5,10)
   bot.v <- vector()
-  for(i in 1:c(length(doses.table)-1)){bot.v <- cbind(bot.v,c(doses.table[i]+(doses.table[c(i+1)]-doses.table[i])/2)) }
+  for(i in 1:c(length(doses.tabell)-1)){bot.v <- cbind(bot.v,c(doses.tabell[i]+(doses.tabell[c(i+1)]-doses.tabell[i])/2)) }
   bot.v <- cbind(bot.v, 10)
-  doses.table <- rbind(doses.table,bot.v)
-  doses.table[2,1] <- 0
-  row.names(doses.table) <- c("Original dosis","End of intervall")
-  colnames(doses.table) <- c("d0","d1","d2","d3","d4","d5","d6","d7","d8")
+  doses.tabell <- rbind(doses.tabell,bot.v)
+  doses.tabell[2,1] <- 0
+  row.names(doses.tabell) <- c("Original dosis","End of intervall")
+  colnames(doses.tabell) <- c("d0","d1","d2","d3","d4","d5","d6","d7","d8")
 
-  
   
   ### Mode: target
   
   if(search.mode == "t" ){  
- 
+  #cellline <- "ACH-000019" #"ACH-000007"
+  #target.or.drug <- "PRKG1" #"LPL"
+  #dose <- 3
+  
+    
   target <- target.or.drug  
   
   res <- data.frame() #row.names = c(cellline, target))
@@ -1215,8 +1121,8 @@ search.prism <- function(search.mode = "t", cellline, target.or.drug, dose = 8){
   
   
   # dosis intervall
-  lower.v <- doses.table[2,dose]
-  upper.v <- doses.table[2,dose+1]
+  lower.v <- doses.tabell[2,dose]
+  upper.v <- doses.tabell[2,dose+1]
   
   # dosis check
   
@@ -1230,7 +1136,7 @@ search.prism <- function(search.mode = "t", cellline, target.or.drug, dose = 8){
      
      drug.with.dose <- cbind(drug.with.dose,i) 
      
-     }
+     } # right dose for d7???
   }
   
   # prism values
@@ -1256,6 +1162,10 @@ search.prism <- function(search.mode = "t", cellline, target.or.drug, dose = 8){
   ###Mode: drug
   
   else if(search.mode == "d"){
+  
+  #cellline <- "ACH-000019"  #"ACH-000211"
+  #target.or.drug <- "BRD-A00077618-236-07-6" #"BRD-K23228615-001-02-8"
+  #dose <- 3 #1
     
   drug <- target.or.drug
   
@@ -1285,8 +1195,8 @@ search.prism <- function(search.mode = "t", cellline, target.or.drug, dose = 8){
  
   
   # dosis intervall
-  lower.v <- doses.table[2,dose]
-  upper.v <- doses.table[2,dose+1]
+  lower.v <- doses.tabell[2,dose]
+  upper.v <- doses.tabell[2,dose+1]
   
   # prism value
   
@@ -1327,21 +1237,8 @@ search.prism <- function(search.mode = "t", cellline, target.or.drug, dose = 8){
 ```
 
 
-```{r}
 
-celllines <- brain_cancer_achilles[,1]
-celllines <- cbind(celllines, rownames(brain_cancer_achilles))
-celllines <- na.omit(celllines)
 
-training2 <- data.frame()
 
-for (i in celllines[,2]){
-  print(i)
-  for (j in training_targets.solo){
-    #line_target.search(i, j)
-    print(j)
-    training2 <- rbind(training2, search.prism("t",i,j,8∟))
-  }
-}
-```
+
 

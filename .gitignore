@@ -1,5 +1,7 @@
 
 dataset/cellline_datasets.rda
 dataset/prism_datasets.rda
+dataset/effective_in_all_doses.csv
+dataset/ae_d7.RData
 .RData
 .Rhistory
