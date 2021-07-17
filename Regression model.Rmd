@@ -1047,11 +1047,11 @@ summary(multiple.lm.values[,4])
 ## Improved regression model
 ```{r}
 
-final_genes <- final_genes[-c(1, 2, 3)]
+final_genes <- c("IQANK1","RAB11FIP1","FOXG1","LPIN3","ERVMER34.1","PTN","VRK2")
 
 line_target.search <- function(cellline, target){
 
-#cellline <- "ACH-000007"
+#cellline <- "ACH-000007""
 #target <- "LPL"
   
   res <- data.frame(row.names = c(cellline, target))
@@ -1143,5 +1143,205 @@ for (i in celllines[,2]){
 ```
 
 
+```{r}
 
+```
+
+
+## Improved search function
+```{r}
+search.prism <- function(search.mode = "t", cellline, target.or.drug, dose = 8){
+
+  #mode: targe=t, drug=d
+  #target/drug:target name/ broad_id
+  #dose tabel: d1-d8
+  doses.table <- data.frame()
+  doses.table <- c(0,0.00061034,0.0024414,0.00976562,0.0390625,0.15625,0.625,2.5,10)
+  bot.v <- vector()
+  for(i in 1:c(length(doses.table)-1)){bot.v <- cbind(bot.v,c(doses.table[i]+(doses.table[c(i+1)]-doses.table[i])/2)) }
+  bot.v <- cbind(bot.v, 10)
+  doses.table <- rbind(doses.table,bot.v)
+  doses.table[2,1] <- 0
+  row.names(doses.table) <- c("Original dosis","End of intervall")
+  colnames(doses.table) <- c("d0","d1","d2","d3","d4","d5","d6","d7","d8")
+
+  
+  
+  ### Mode: target
+  
+  if(search.mode == "t" ){  
+ 
+  target <- target.or.drug  
+  
+  res <- data.frame() #row.names = c(cellline, target))
+  
+  lts.line_gen <- prism.exp[grep(cellline,row.names(prism.exp)),which(colnames(prism.exp) %in% final_genes)] # selecting exp from 9 important gens
+    
+  lts.achilles <- prism.achilles[grep(cellline,row.names(prism.achilles)), which(target == colnames(prism.achilles))] # selecting achilles
+  
+  lts.exp <- prism.exp[grep(cellline,row.names(prism.exp)), which(target == colnames(prism.exp))] # selecting exp
+  
+  lts.cnv <- prism.cnv[grep(cellline,row.names(prism.cnv)), which(target == colnames(prism.cnv))] # selecting cnv
+  
+  ## target to drug to prism
+  
+  # finding drugs to target
+  
+  drug.line <- vector()
+  
+  for(i in 1:nrow(prism.treat)){
+    
+    target.in.line <- unlist(strsplit(as.character(prism.treat[i,7]), split = ", ")) == target # linewise target search in prism.treat
+    
+    if(sum(target.in.line, na.rm = TRUE) > 0){
+      drug.line <- cbind(drug.line, i) # lines of drugs in prism.treat
+    }
+  }
+  
+  drugs.from.target <- unique(as.character(prism.treat[drug.line,1]))
+  
+  # finding prism values to drugs
+  
+  drug.col <- vector()
+  
+  for(i in 1:ncol(prism)){
+    
+    drug.in.col <- unlist(strsplit(as.character(colnames(prism)[i]), split = "::"))[1] == drugs.from.target # searching drugs in prism column
+    
+    if(sum(drug.in.col, na.rm = TRUE) > 0){
+      drug.col <- cbind(drug.col, i) # columns with drugs that match target
+    }
+  }
+  
+  
+  # dosis intervall
+  lower.v <- doses.table[2,dose]
+  upper.v <- doses.table[2,dose+1]
+  
+  # dosis check
+  
+  drug.with.dose <- vector()
+  
+  for(i in drug.col){
+  
+  drug.dose <- as.numeric(unlist(strsplit(as.character(colnames(prism)[i]), split = "::"))[2]) 
+  
+  if( lower.v < drug.dose && drug.dose <= upper.v ){
+     
+     drug.with.dose <- cbind(drug.with.dose,i) 
+     
+     }
+  }
+  
+  # prism values
+  
+  lts.prism <- mean(as.numeric(prism[grep(cellline,row.names(prism)), drug.with.dose]), na.rm = TRUE)
+    
+  # combine
+  
+  res <- cbind(lts.line_gen,lts.achilles,lts.exp, lts.cnv, lts.prism)
+  
+  row.names(res) <- paste(cellline, target)
+  
+  colnames(res) <- c(final_genes,"achilles","exp","cnv","prism")
+  
+  cat("Mode: cellline and target, cellline:",cellline, ", target:",target.or.drug,", dosis:", dose, "\n", "Drugs with target:", drugs.from.target, "\n")
+  
+  return(res)
+  }
+  
+  
+  
+  
+  ###Mode: drug
+  
+  else if(search.mode == "d"){
+    
+  drug <- target.or.drug
+  
+  res <- data.frame() #row.names = c(cellline, target))
+  
+  lts.line_gen <- prism.exp[grep(cellline,row.names(prism.exp)),which(colnames(prism.exp) %in% final_genes)] # selecting exp from 9 important gens
+  
+  #searching drug tagets
+  
+  targets <- as.character(prism.treat[grep(drug, prism.treat[,1]),7])
+  
+  multi.targets <- vector()
+  
+  for(i in targets){
+    
+    multi.targets <-c(multi.targets, unlist(strsplit(i,", ")))
+  }
+  
+  targets <- unique(multi.targets)
+  
+  lts.achilles <- mean(as.numeric(prism.achilles[grep(cellline,row.names(prism.achilles)), which(colnames(prism.achilles) %in% targets)]), na.rm = TRUE) # selecting achilles
+  
+  lts.exp <- mean(as.numeric(prism.exp[grep(cellline,row.names(prism.exp)), which(colnames(prism.exp) %in% targets)]), na.rm = TRUE) # selecting exp
+  
+  lts.cnv <- mean(as.numeric(prism.cnv[grep(cellline,row.names(prism.cnv)), which(colnames(prism.cnv) %in% targets)]), na.rm = TRUE) # selecting cnv
+  
+ 
+  
+  # dosis intervall
+  lower.v <- doses.table[2,dose]
+  upper.v <- doses.table[2,dose+1]
+  
+  # prism value
+  
+  drug.position <- vector()
+  
+  for(i in 1:ncol(prism)){
+    
+    act.drug <- unlist(strsplit(as.character(colnames(prism[i])), split = "::"))[1]
+    act.dose <- as.numeric(unlist(strsplit(as.character(colnames(prism[i])), split = "::"))[2])
+    
+    if (act.drug == drug && lower.v < act.dose && act.dose <= upper.v){
+      
+      drug.position <- cbind(drug.position,i)
+    }
+    
+  }
+  
+    lts.prism <- mean(as.numeric(prism[grep(cellline,row.names(prism)), drug.position]), na.rm = TRUE) 
+    
+  # combine
+  
+  res <- cbind(lts.line_gen,lts.achilles,lts.exp, lts.cnv, lts.prism)
+  
+  row.names(res) <- paste(cellline, "::", drug)
+  
+  colnames(res) <- c(final_genes,"achilles","exp","cnv","prism")
+  
+  cat("Mode: cellline and drug, cellline:",cellline, ", drug:",target.or.drug,", dosis:", dose, "\n", "Targets of the drug:", targets, "\n")
+  
+  return(res)
+  }
+  
+  else{print("select s.mode")}
+  
+}
+
+
+```
+
+
+```{r}
+
+celllines <- brain_cancer_achilles[,1]
+celllines <- cbind(celllines, rownames(brain_cancer_achilles))
+celllines <- na.omit(celllines)
+
+training2 <- data.frame()
+
+for (i in celllines[,2]){
+  print(i)
+  for (j in training_targets.solo){
+    #line_target.search(i, j)
+    print(j)
+    training2 <- rbind(training2, search.prism("t",i,j,8∟))
+  }
+}
+```
 
