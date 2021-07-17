@@ -439,8 +439,6 @@ non_bc_exp=prism.exp[non_bc_names,]
 brain_cancer_exp_w=brain_cancer_exp
 non_bc_exp=non_bc_exp[rowSums(is.na(non_bc_exp)) == 0,]
 
-
-
 #Z-transformation
 calculate_pseudo_v<-function(x,y){
    min(x[y,][which(x[y,]>0)])
@@ -530,7 +528,6 @@ for (y in 1:length(bp)) {
   rownames(best_p_values)[y]=rownames(highlight_df[which(highlight_df[,1]==bp[y]),])
 }
 
-
 ggplot(df, aes(x=df[,2], y=df[,1]),ylim = range(0,1))+
   xlab("Log2-Fold-Change") + 
   ylab("-log10(p-value)") + 
@@ -543,7 +540,6 @@ top_genes
 ```
 
 ```{r}
-pairs(brain_cancer_exp[,top_genes], col='blue', pch=1) # our genes do not correlate
 pheatmap(cor(brain_cancer_exp[,top_genes]), cluster_cols = F, cluster_rows = F, display_numbers = T) #Genes FAM83H and IQANK1 have high covariance, so we need to remove one of them before we do the linear regression. We will keep the value with higher p-value.
 
 if(best_p_values[c(grep("FAM83H", top_genes)),2]>best_p_values[c(grep("IQANK1", top_genes)),2])
@@ -660,6 +656,7 @@ final_genes
 #anova and not p-value to compare models?
 
 red<-lm(Drug~.,genes_regression)
+little_option<-lm(Drug~.,genes_regression)
 genes_regression=cbind(brain_cancer_exp[,top_genes],ae_d7[,uni_drug])
 colnames(genes_regression)[ncol(genes_regression)]="Drug"
 full<-lm(Drug~.,genes_regression)
@@ -705,6 +702,65 @@ if(py>=px){
 
 end_regression_2
 
+```
+
+##Another LM
+```{r}
+highlight_df[grep("ITGA11",rownames(highlight_df)),1]<-11.59375
+bp2<-sort(highlight_df[,1],decreasing = T)[1:24]
+best_p_values2<-data.frame(matrix(nrow =length(bp2),ncol = 2))
+for (y in 1:length(bp2)) {
+  best_p_values2[y,]<-highlight_df[which(highlight_df[,1]==bp2[y]),]
+  rownames(best_p_values2)[y]=rownames(highlight_df[which(highlight_df[,1]==bp2[y]),])
+}
+
+ggplot(df, aes(x=df[,2], y=df[,1]),ylim = range(0,1))+
+  xlab("Log2-Fold-Change") + 
+  ylab("-log10(p-value)") + 
+  geom_point() +
+  geom_point(data=highlight_df, aes(x=highlight_df[,2], y=highlight_df[,1]), color='blue') +
+  geom_point(data=best_p_values2, aes(x=best_p_values2[,2], y=best_p_values2[,1]), color='red')
+
+top_genes2=rownames(best_p_values2)
+top_genes2
+
+#pairs(brain_cancer_exp[,top_genes2], col='blue', pch=1) # our genes do not correlate
+pheatmap(cor(brain_cancer_exp[,top_genes2]), cluster_cols = F, cluster_rows = F, display_numbers = T) #Genes FAM83H and IQANK1 have high covariance, so we need to remove one of them before we do the linear regression. We will keep the value with higher p-value.
+
+if(best_p_values2[c(grep("FAM83H", top_genes2)),2]>best_p_values2[c(grep("IQANK1", top_genes2)),2])
+{top_genes2=top_genes2[-grep("IQANK1", top_genes2)]
+  } else  
+  {top_genes2=top_genes2[-grep("FAM83H", top_genes2)]}
+top_genes2
+
+genes_regression=cbind(brain_cancer_exp[,top_genes2],ae_d7[,uni_drug])
+colnames(genes_regression)[ncol(genes_regression)]="Drug"
+
+initial_regression_1<-summary(lm(Drug~.,genes_regression))
+
+#loop starts
+repeat{
+  end_regression_1<-initial_regression_1
+  pvx<-pf(end_regression_1$fstatistic[1],end_regression_1$fstatistic[2],end_regression_1$fstatistic[3],lower.tail=FALSE)
+  print(pvx)
+coeffs=as.data.frame(end_regression_1$coefficients)
+coeffs=coeffs[-c(1),]
+coeffs=coeffs[order(coeffs$`Pr(>|t|)`),]
+coeffs=coeffs[-c(nrow(coeffs)),]
+genes_regression=cbind(brain_cancer_exp[,rownames(coeffs)],ae_d7[,uni_drug])
+colnames(genes_regression)[ncol(genes_regression)]="Drug"
+
+initial_regression_1<-summary(lm(Drug~.,genes_regression))
+pvy<-pf(initial_regression_1$fstatistic[1],initial_regression_1$fstatistic[2],initial_regression_1$fstatistic[3],lower.tail=FALSE)
+if(pvy>=pvx){
+  break
+}
+}
+
+end_regression_1
+
+big_option<-lm(Drug~.,genes_regression)
+anova(little_option,big_option)
 ```
 
 
