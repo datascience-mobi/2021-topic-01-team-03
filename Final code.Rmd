@@ -627,15 +627,18 @@ colnames(non_bc_d7)[uni_drug2]
 ##Regression model to find out which genes we keep for the final model
 
 ```{r}
+# Creating a data frame with top 20 genes and universal drug
 genes_regression=cbind(brain_cancer_exp[,top_genes],ae_d7[,uni_drug])
 colnames(genes_regression)[ncol(genes_regression)]="Drug"
 
+# linear regression model
 initial_regression_1<-summary(lm(Drug~.,genes_regression))
 
-#loop starts
+# feature selection
 repeat{
   end_regression_1<-initial_regression_1
-  pvx<-pf(end_regression_1$fstatistic[1],end_regression_1$fstatistic[2],end_regression_1$fstatistic[3],lower.tail=FALSE)
+  pvx<-pf(end_regression_1$fstatistic[1],end_regression_1$fstatistic[2],
+          end_regression_1$fstatistic[3],lower.tail=FALSE)
   print(pvx)
 coeffs=as.data.frame(end_regression_1$coefficients)
 coeffs=coeffs[-c(1),]
