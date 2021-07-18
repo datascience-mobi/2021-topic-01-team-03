@@ -410,8 +410,17 @@ Lea&Lennard
 
 
 
-Literature:
+# Literature
 
-- Global Cancer Statistics 2020
-- Quelle zu subtypes
-- Quelle zu Bonferroni vs BH
+Chen, R., Smith-Cohn, M., Cohen, A.L., and Colman, H. (2017). Glioma Subclassifications and Their Clinical Significance. Neurotherapeutics 14, 284-297.
+
+Corsello, S. M., Nagari, R. T., Spangler, R. D., Rossen, J., Kocak, M., Bryan, J. G., … Golub, T. R. (2020). Discovering the anticancer potential of non-oncology drugs by systematic viability profiling. Nature Cancer, 1(2), 235–248.
+
+Fang, Z., Du, R., and Cui, X. (2012). Uniform approximation is more appropriate for Wilcoxon Rank-Sum Test in gene set analysis. PLoS One 7, e31505.
+
+Pushpakom, S., Iorio, F., Eyers, P. A., Escott, K. J., Hopper, S., Wells, A., … Pirmohamed, M. (2019). Drug repurposing: progress, challenges and recommendations. Nature Reviews Drug Discovery, 18(1), 41–58.
+
+Sung, H., Ferlay, J., Siegel, R.L., Laversanne, M., Soerjomataram, I., Jemal, A., and Bray, F. (2021). Global Cancer Statistics 2020: GLOBOCAN Estimates of Incidence and Mortality Worldwide for 36 Cancers in 185 Countries. CA Cancer J Clin 71, 209-249.
+
+Tan, Y.D., and Xu, H. (2014). A general method for accurate estimation of false discovery rates in identification of differentially expressed genes. Bioinformatics 30, 2018-2025.
+
