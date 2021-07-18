@@ -70,7 +70,7 @@ Several dosages were identified, that did not correspond to the standard set of 
 In order to reduce the number of drugs and to be able to make accurate predictions later on, only drugs were selected that are effective in all doses. First, the drugs whose mean effectiveness across all cell lines in the dose subset data frames was less than or equal to the established threshold were identified. Second, these drugs were compared to each other and only drugs present in all subsets were kept, allowing the identification of **51 drugs**. These drugs were saved in the ```effective_in_all_doses``` vector.
 Subsequently, a single dosage was chosen for the further analysis, as the model aims to establish the output of drugs for suited for treatments, regardless of their concentration. Dosage 7 was selected due to its high variance in comparison to the other dosages, of 10 $\mu$M. 
 
-```{r echo= FALSE,fig.dim= c(5,3), fig.cap= 'Average subtype effectivness per drug'}
+```{r echo= FALSE,fig.dim= c(6,3), fig.align='left', fig.cap= 'Average subtype effectivness per drug'}
 
 medulloblastoma=brain_cancer_cl$DepMap_ID[grep("Medulloblastoma", brain_cancer_cl$disease_subtype)]#we obtain the names of the cell lines that are classified as medulloblastoma
 glioblastoma=brain_cancer_cl$DepMap_ID[grep("Glioblastoma", brain_cancer_cl$disease_subtype)]
@@ -142,7 +142,7 @@ Figure 1 represents the average effectiveness of each drug for each subtype. The
 
 For this milestone, a further look at brain cancer subtypes was taken. This information could be relevant for the final regression model. The column ```disease_subtype``` of the ```prism.cl``` dataset gives information about the subtype, whereby a distinction is made between astrocytoma, medulloblastoma, glioblastoma and glioma. 
 
-```{r echo=FALSE, fig.dim= c(5,4), fig.cap= 'Gene expression clustering'}
+```{r echo=FALSE, fig.dim= c(7,4), fi.align= 'left', fig.cap= 'Gene expression clustering'}
 #PCA before applying the kmeans 
 
 exp <- brain_cancer_exp
@@ -180,6 +180,7 @@ Figure 2 shows a clustering of the two PC's with the highest variance of the cel
 To find out which genes are expressed significantly differently in brain cancer cell lines compared to other cancers, a statistical test can be applied. For this purpose, it must first be examined whether the available data is normally distributed.
 A statistical test, the Shapiro Wilks test, can be used for this evaluation. In this case, the H0 hypothesis states that the distribution is a normal distribution. If the p-value is smaller than the significance level, the H0 hypothesis is rejected and it is assumed that the data is not normally distributed. 
 The test was applied to the 19177 genes from the ```prism.exp``` dataset to determine the expression across the 34 cell lines. A significance level of 0.05 was set. As a result, 9799 p-values were less than or equal to this value, thus approximately half of the genes were normally distributed. This is the reason a non-parametric test was conducted.  
+\newpage
 
 ## Wilcoxon Rank Sum test
 
@@ -226,7 +227,7 @@ brain_cancer_exp_w=as.data.frame(t(na.omit(t(brain_cancer_exp_w))))
 non_bc_exp=non_bc_exp[,colnames(brain_cancer_exp_w)]
 ```
 
-```{r}
+```{r eval = TRUE, include=FALSE}
 
 # Performance of Wilcoxon test
 
@@ -291,6 +292,7 @@ top_genes=rownames(best_p_values)
 ```
 
 To visualizes differentially expressed genes a volcano plot can be used, as shown on the Figure 3. Each gene expression difference can be represented by the log2-fold-change on the x-axes. The y-axes displays the -log10 of each p-value. First, the genes were filtered according to the log2-fold-change. Only the genes, which value was less or equal to -1 and greater or equal to 1 were kept. These genes are shown in blue on the plot. Following that, the top 20 genes with the biggest -log10 p-value were extracted and highlighted in red.
+\newpage
 
 ## Linear regression model with universal drug
 
@@ -369,6 +371,7 @@ end_regression_1 # 5.
 final_genes=rownames(as.data.frame(end_regression_1$coefficients))
 final_genes=final_genes[-1] # 6.
 ```
+\newpage
 
 The following strategy was applied:
 
