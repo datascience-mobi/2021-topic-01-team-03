@@ -267,6 +267,7 @@ effective_d7=all_effective_drugs[[d7]]
 # Question 2: What are the targets of the effective drugs?
 
 ## Drugs and subtypes relationship
+
 ```{r}
 ae_d7 <-data.frame(matrix(nrow = 34,ncol = length(effective_in_all_doses)),row.names = rownames(brain_cancer))
 colnames(ae_d7)=effective_in_all_doses
@@ -281,7 +282,6 @@ astrocytoma_ae_d7=ae_d7[astrocytoma,]
 medulloblastoma_ae_d7=ae_d7[medulloblastoma,]
 
 ```
-
 
 ## Effective drugs and subtype analysis
 
@@ -353,11 +353,135 @@ ggplot(pre_arrangement, aes(x = Numbers , y = Efficiency, color = Subtype)) +
 
 ```
 
+##What are the targets of the effective drugs?
 
+```{r}
+brain_cancer_treat=prism.treat[colnames(brain_cancer),] #selecting only the drugs we previously filtered out from brain_cancer
+brain_cancer_treat=brain_cancer_treat[!duplicated(brain_cancer_treat$broad_id),]
+rownames(brain_cancer_treat)<-brain_cancer_treat[,1]
+effective_bc_treat=brain_cancer_treat[effective_in_all_doses,-c(1,2,3,4,10)]
+```
+
+#Target of effective drugs
+
+```{r}
+brain_cancer.effective_targets <- effective_bc_treat$target
+
+which(is.na(effective_bc_treat$target))
+
+## da fehlen halt bei diesen 8 Drogen die targets, die könnte man sonst ggf. rausnehmen 
+```
+
+##Selecting brain cancer specific cell lines in all data sets
+
+```{r}
+brain_cancer_cl=subset.data.frame(prism.cl, disease == 	"Brain Cancer") #identify the brain cancer cell lines' names
+
+names=brain_cancer_cl[,1] #saving the names as names
+
+#select wanted cell lines from all datasets
+brain_cancer=prism[names,]
+brain_cancer_achilles=prism.achilles[names,]
+
+## hier ist irgendwas schief gegangen, ab da sind super viele NA's drin 
+
+brain_cancer_cnv=prism.cnv[names,]
+brain_cancer_exp=prism.exp[names,]
+#brain_cancer_snv=prism.snv[names,] #does not make sense no cell line info, other type of filtering required
+#brain_cancer_treat=prism.treat[names,] #does not make sense no cell line info, other type of filtering required
+```
+
+# Selecting achilles targets
+
+```{r}
+#brain_cancer_achilles.mean <- apply(brain_cancer_achilles,2,mean)
+#hist(brain_cancer_achilles.mean, breaks = 200)
+#brain_cancer_achilles.var <- apply(brain_cancer_achilles,2,var)#variance
+#hist(brain_cancer_achilles.var, breaks = 200, xlim = c(0,0.4))
+#brain_cancer_achilles.relevant <- colnames(brain_cancer_achilles)[brain_cancer_achilles.mean < -0.2]
+```
+
+# Compare drug and achilles targets
+
+```{r}
+brain_cancer.effective_targets <- as.character(brain_cancer.effective_targets) # convert to character
+
+x <- 1
+brain_cancer.effective_targets.solo <- list() #create list
+
+for(i in brain_cancer.effective_targets) #split multiple targets
+  {
+  
+ brain_cancer.effective_targets.solo[[x]] <- strsplit(i, split = ", ")
+ x <- x+1
+ }
+brain_cancer.effective_targets.solo <- unlist(brain_cancer.effective_targets.solo) #list to vector
+
+brain_cancer.effective_targets.solo <- unique(brain_cancer.effective_targets.solo) # remove multiple targets
+
+brain_cancer.effective_targets.solo <- brain_cancer.effective_targets.solo[-1] # remove NA
+
+# achilles targets
+brain_cancer_achilles.targets <- brain_cancer_achilles[,which(colnames(brain_cancer_achilles) %in% brain_cancer.effective_targets.solo)] # selecting target genes in achilles
+brain_cancer.effective_targets.solo[-which(brain_cancer.effective_targets.solo %in% colnames(brain_cancer_achilles))] # missing targets
+
+hist(unlist(brain_cancer_achilles), breaks = 50)
+hist(unlist(brain_cancer_achilles.targets), breaks = 50)
+summary(unlist(brain_cancer_achilles))
+summary(unlist(brain_cancer_achilles.targets))
+qqplot(unlist(brain_cancer_achilles), unlist(brain_cancer_achilles.targets))
+abline(a = 0, b = 1)
+
+# achilles variance analysis
+brain_cancer_achilles.var <- apply(brain_cancer_achilles,2,function(x){var(x, na.rm = TRUE)})#variance
+brain_cancer_achilles.targets.var <- apply(brain_cancer_achilles.targets,2, function(x){var(x, na.rm = TRUE)})
+hist(unlist(brain_cancer_achilles.var), breaks = 500, xlim = c(0,0.2))
+hist(unlist(brain_cancer_achilles.targets.var), breaks = 40, xlim = c(0,0.2))
+qqplot(unlist(brain_cancer_achilles.var), unlist(brain_cancer_achilles.targets.var), xlim = c(0,0.2))
+abline(a = 0, b = 1)
+
+
+# exp targets
+brain_cancer_exp.targets <- brain_cancer_exp[,which(colnames(brain_cancer_exp) %in% brain_cancer.effective_targets.solo)] # selecting target genes in exp
+brain_cancer.effective_targets.solo[-which(brain_cancer.effective_targets.solo %in% colnames(brain_cancer_exp))] # missing targets
+
+hist(unlist(brain_cancer_exp), breaks = 50)
+hist(unlist(brain_cancer_exp.targets), breaks = 50)
+summary(unlist(brain_cancer_exp))
+summary(unlist(brain_cancer_exp.targets))
+qqplot(unlist(brain_cancer_exp), unlist(brain_cancer_exp.targets))
+abline(a = 0, b = 1)
+
+# exp variance analysis
+brain_cancer_exp.var <- apply(brain_cancer_exp,2,function(x){var(x, na.rm = TRUE)})#variance
+brain_cancer_exp.targets.var <- apply(brain_cancer_exp.targets,2, function(x){var(x, na.rm = TRUE)})
+hist(unlist(brain_cancer_exp.var), breaks = 500)
+hist(unlist(brain_cancer_exp.targets.var), breaks = 40)
+qqplot(unlist(brain_cancer_exp.var), unlist(brain_cancer_exp.targets.var), xlim = c(0,8))
+abline(a = 0, b = 1)
+
+
+# cnv targets
+brain_cancer_cnv.targets <- brain_cancer_cnv[,which(colnames(brain_cancer_cnv) %in% brain_cancer.effective_targets.solo)] # selecting target genes in cnvVie
+brain_cancer.effective_targets.solo[-which(brain_cancer.effective_targets.solo %in% colnames(brain_cancer_cnv))] # missing targets
+
+hist(unlist(brain_cancer_cnv), breaks = 50)
+hist(unlist(brain_cancer_cnv.targets), breaks = 50)
+summary(unlist(brain_cancer_cnv))
+summary(unlist(brain_cancer_cnv.targets))
+qqplot(unlist(brain_cancer_cnv), unlist(brain_cancer_cnv.targets))
+abline(a = 0, b = 1)
+
+# cnv variance analysis
+brain_cancer_cnv.var <- apply(brain_cancer_cnv,2,function(x){var(x, na.rm = TRUE)})#variance
+brain_cancer_cnv.targets.var <- apply(brain_cancer_cnv.targets,2, function(x){var(x, na.rm = TRUE)})
+hist(unlist(brain_cancer_cnv.var), breaks = 500)
+hist(unlist(brain_cancer_cnv.targets.var), breaks = 40)
+qqplot(unlist(brain_cancer_cnv.var), unlist(brain_cancer_cnv.targets.var), xlim = c(0,0.1), ylim = c(0,0.1))
+abline(a = 0, b = 1)
+```
 
 # Question 3: Are there any genetic markers that are specific for brain cancer subtypes?
-
-
 
 ## Clustering of the exp value 
 
