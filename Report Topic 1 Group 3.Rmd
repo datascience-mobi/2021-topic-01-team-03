@@ -138,11 +138,23 @@ ggplot(pre_arrangement, aes(x = Numbers , y = Effectiveness, color = Subtype)) +
 
 **Figure 1** represents the average effectiveness of each drug for each subtype. The means of the identified drugs have effectiveness scores ranging from 0.2 to  approximately -8.2. In the graph shown, the drugs were ranked to show the trend int heir effectiveness. Overall, there is general tendency for medulloblastoma cell lines to be more effected by the drug treatment. For 31 out of the 51 drugs, medulloblastoma cell lines shown the highest effectiveness scores. However, these could be attributed to the fact that medulloblastoma, with only two cell lines, as opposed to the 20 glioblastoma cell lines. 
 
+
 # Identification of drug targets
 
-Lea&Lennard 
+The 51 effective drugs which were identified in question one were used to determine their specific targets. The prsim.treat delivered this information. There were drugs which attack more than one target or had no target available. Some targets occur for different drugs. All in all 124 targets remained. To explore the data of these targets, the ``` brain_cancer_achilles ```, ``` brain_cancer_exp ``` and ``` brain_cancer_cnv ``` values were used. Not for all targets were all values available, therefore "ATP5A1", "MMP12" and "MMP23A" were not utilized for further analysis.
 
-+++QQ Plot+++
+# Analysis of the drug targets
+To find out whether the distribution of the target values from one of the datasets had the same distribution as one of the complete datasets, a qqplot was applied.
+
+# qqplot1
+# qqplot2
+# qqplot3
+
+The visualization made clear, that the distribution of the effective targets from ```prism.exp``` and ```prism.achilles``` are not representative for the complete dataset. Therefore, these two parameters seem to have a correlation to the effectiveness.
+
+To further analyze this correlation a Wilcoxon Rank Sum test was applied. For the achilles data a one-sided test was made and resulted in 59 from 121 targets, which derive from the distribution of the complete dataset.  After applying the Bonferroni correction only 44 targets left. For the exp and the cnv data a two-sided Wilcoxon test was applied. The corrected values are 41 targets for exp and 6 targets for cnv, which did not confirm the H0-hypothesis. In conclusion, the effectiveness correlates in some way with the achilles and the exp data. However, there are still other parameters, which contribute to the effectiveness for specific target.
+WILCOXON TEST ???
+
 
 # Identification of genetic markers
 
