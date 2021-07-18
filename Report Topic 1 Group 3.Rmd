@@ -142,7 +142,7 @@ Figure 1 represents the average effectiveness of each drug for each subtype. The
 
 For this milestone, a further look at brain cancer subtypes was taken. This information could be relevant for the final regression model. The column ```disease_subtype``` of the ```prism.cl``` dataset gives information about the subtype, whereby a distinction is made between astrocytoma, medulloblastoma, glioblastoma and glioma. 
 
-```{r echo=FALSE, fig.dim= c(7,4), fi.align= 'left', fig.cap= 'Gene expression clustering'}
+```{r echo=FALSE, fig.dim= c(6,3), fi.align= 'left', fig.cap= 'Gene expression clustering'}
 #PCA before applying the kmeans 
 
 exp <- brain_cancer_exp
@@ -175,7 +175,11 @@ ggplot(gg_pca, aes( x = PC1, y = PC2, shape = Cluster, colour = Subtype)) +
 
 ```
 
-Figure 2 shows a clustering of the two PC's with the highest variance of the cell lines by subtype. The data used is the expression data from the brain cancer subtypes. In the first step a PCA was conducted to reduce the dimensionality of the data frame before using the kmeans method to cluster the obtained principle components. This graph aims to analyse the correlation of the gene expression of the cell lines and the subtypes they belong to. As can be seen, there is no link between the clusters and the subtypes, making the continuous analysis using the subtypes obsolete. Furthermore, the clustering in itself does not seem to be conclusive (see cluster 1). Even an alternate number of itertions in the kmeans did not change that. 
+Figure 2 shows a clustering of the two principle components (PC) with the highest variance of the cell lines by subtype. The data used is the expression data from the brain cancer subtypes. In the first step a principle component analysis (PCA) was conducted to reduce the dimensionality of the data frame before using the kmeans method to cluster the obtained PC's. This method divides observations into clusters by assigning them to the cluster with the smallest euclidean distance to a cluster centroid. The number of expected clusters was predefined as 4. This was chosen as the graph aims to analyse the relationship of the gene expression of the cell lines and the subtypes they belong to. 
+
+As can be seen, there is no link between the clusters and the subtypes, since there is no pattern between the symbols and the colours in the plot. This makes the continuous analysis using the subtypes obsolete. Furthermore, the clustering in itself does not seem to be conclusive (see cluster 1). Even an alternate number of itertions in the kmeans did not change that. 
+
+## Shapiro Wilks test
 
 To find out which genes are expressed significantly differently in brain cancer cell lines compared to other cancers, a statistical test can be applied. For this purpose, it must first be examined whether the available data is normally distributed.
 A statistical test, the Shapiro Wilks test, can be used for this evaluation. In this case, the H0 hypothesis states that the distribution is a normal distribution. If the p-value is smaller than the significance level, the H0 hypothesis is rejected and it is assumed that the data is not normally distributed. 
@@ -184,7 +188,7 @@ The test was applied to the 19177 genes from the ```prism.exp``` dataset to dete
 
 ## Wilcoxon Rank Sum test
 
-An unpaired Wilcoxon Rank Sum test was used to identify differential gene expression. In this test two different datasets were compared. The H0 hypothesis is that expression values of both samples come from the same distribution.  The first dataset was ```non_bc_exp```, which has all the cell lines from the ```prism.exp``` dataset except from the brain cancer disease type. There are 447 cell lines in total from lung, skin, pancreatic and ovarian cancers. The second dataset is the ```brain_cancer_exp```, which contains the gene expression of the 34 brain cancer cell lines.  Although these data sets are not identical in size, this is not a problem, as the test is based on ranking the individual values. Some genes have an expression value of 0. To avoid following complications (for example log2-fold-change calculation) the lowest expression value for each dataset, so called ```pseudo_count```, was added. The pseudo values were equal for both datasets.
+An unpaired Wilcoxon Rank Sum test was used to identify differential gene expression. In this test two different datasets were compared. The H0 hypothesis is that expression values of both samples come from the same distribution.  The first dataset was ```non_bc_exp```, which has all the cell lines from the ```prism.exp``` dataset except from the brain cancer disease type. There are 447 cell lines in total from lung, skin, pancreatic and ovarian cancers. The second dataset is the ```brain_cancer_exp```, which reflects the level of gene expression of the 34 brain cancer cell lines.  Although these data sets are not identical in size, this is not a problem, as the test is based on ranking the individual values. Some genes have an expression value of 0. To avoid following complications (for example log2-fold-change calculation) the lowest expression value for each dataset, so called ```pseudo_count```, was added. The pseudo values were equal for both datasets.
 
 
 ```{r echo=FALSE}
@@ -241,7 +245,7 @@ for(i in 1:ncol(brain_cancer_exp_w)) {
 
 In this non-parametric test the H0 hypothesis is tested simultaneously for all genes. This leads to a multiplicity problem, in which the probability of increasing false positive test results is increased. To adjust the number of significant p-values occurring for this problem, we consider two types of corrections. The Benjamini-Hochberg and the Bonferroni corrections. 
 
-The number of genes that are significantly differentially expressed differs drastically. The Benjamini-Hochberg correction results in 8948 genes, meanwhile the Bonferroni correction in ***1859 genes***. The Bonferroni correction was chosen, since it is more conservative and controls the type I error. Therefore the number of false positives (keeping genes that are not significant) is avoided. 
+The number of genes that are significantly differentially expressed differs drastically. The Benjamini-Hochberg correction results in 8948 genes, meanwhile the Bonferroni correction in **1859 genes**. The Bonferroni correction was chosen, since it is more conservative and controls the type I error. Therefore the number of false positives (keeping genes that are not significant) is avoided. 
 
 ```{r echo=FALSE, fig.dim= c(5,4), fig.cap= 'Volcano plot of significant differential expressed genes'}
 
@@ -348,11 +352,13 @@ initial_regression_1<-summary(lm(Drug~.,genes_regression)) # 1. (model A)
 # feature selection
 repeat{
   end_regression_1<-initial_regression_1
+  
   pvx<-pf(end_regression_1$fstatistic[1],end_regression_1$fstatistic[2],
           end_regression_1$fstatistic[3],lower.tail=FALSE)
   
 coeffs=as.data.frame(end_regression_1$coefficients)
 coeffs=coeffs[-c(1),]
+
 coeffs=coeffs[order(coeffs$`Pr(>|t|)`),] # 2.
 coeffs=coeffs[-c(nrow(coeffs)),]
 genes_regression=cbind(brain_cancer_exp[,rownames(coeffs)],ae_d7[,uni_drug])
@@ -361,6 +367,7 @@ colnames(genes_regression)[ncol(genes_regression)]="Drug"
 initial_regression_1<-summary(lm(Drug~.,genes_regression)) # 3.(model B)
 pvy<-pf(initial_regression_1$fstatistic[1],initial_regression_1$fstatistic[2],
         initial_regression_1$fstatistic[3],lower.tail=FALSE)
+
 if(pvy>=pvx){
   break # 4.
   }
@@ -388,25 +395,32 @@ To further check this result, the full model is compared with the reduced model 
 
 # Identification of drug targets
 
-The 51 effective drugs which were identified in question one were used to determine their specific targets. The prsim.treat delivered this information. There were drugs which attack more than one target or had no target available. Some targets occur for different drugs. All in all 124 targets remained. To explore the data of these targets, the ``` brain_cancer_achilles ```, ``` brain_cancer_exp ``` and ``` brain_cancer_cnv ``` values were used. Not for all targets were all values available, therefore "ATP5A1", "MMP12" and "MMP23A" were not utilized for further analysis.
+The 51 effective drugs which were identified in question one were used to determine their specific targets. The ```prism.treat``` delivered this information. There were drugs which attack more than one target or had no target available. Some targets occur for different drugs. In total, **124 targets** for all effective drugs remained. 
+
+To explore these targets, three other data frames where used. The  ``` brain_cancer_achilles ``` gives information on gene knockdown scores what indicates the importance for cell survival. The ``` brain_cancer_cnv ``` contains gene copy number values and therefore reflects genetic alterations. Lastly, the ``` brain_cancer_exp ``` dataset was used, which was already used for the identification of genetic markers. Not for all targets were all values available, therefore "ATP5A1", "MMP12" and "MMP23A" were not utilized for further analysis.
 
 ## Analysis of the targets
-To find out whether the distribution of the target values from one of the datasets had the same distribution as one of the complete datasets, a qqplot was applied.
+To find out whether the distribution of the target values from one of the datasets had the same distribution as one of the complete datasets, a QQ-plot was applied. This is a graphical analysis which compares two probability distributions by their quantiles. 
 
 # qqplot1
 # qqplot2
 # qqplot3
 
-The visualization made clear, that the distribution of the effective targets from ```prism.exp``` and ```prism.achilles``` are not representative for the complete dataset. Therefore, these two parameters seem to have a correlation to the effectiveness.
+# Plots nebeneinander mit: fig.show="hold", out.width="30%"
 
-To further analyze this correlation a Wilcoxon Rank Sum test was applied. For the achilles data a one-sided test was made and resulted in 59 from 121 targets, which derive from the distribution of the complete dataset.  After applying the Bonferroni correction only 44 targets left. For the exp and the cnv data a two-sided Wilcoxon test was applied. The corrected values are 41 targets for exp and 6 targets for cnv, which did not confirm the H0-hypothesis. In conclusion, the effectiveness correlates in some way with the achilles and the exp data. However, there are still other parameters, which contribute to the effectiveness for specific target.
-WILCOXON TEST ???
+The visualizations made clear, that the distribution of the effective targets from .exp and .achilles are not representative for the complete dataset. A similar shape of both distribution can just be accepted if the QQ-plot is a straight line. Therefore, these two parameters seem to have a correlation to the effectiveness.
+
+To further analyze this correlation another Wilcoxon Rank Sum test was applied. For the .achilles a one-sided test was made and resulted in 59 targets out of 121, which derive from the distribution of the complete dataset.  After applying the Bonferroni correction only **44 targets** left. For the .exp and the .cnv data a two-sided Wilcoxon test was applied. The corrected values are **41 targets** for .exp and **6 targets** for .cnv, which did not confirm the H0-hypothesis. In conclusion, the effectiveness correlates in some way with the .achilles and the .exp data. However, there are still other parameters, which contribute to the effectiveness for specific target.
 
 # Linear regression model for effectivness prediction
 
 Lea&Lennard
 
 # Discussion
+
+The universal drug is called nimorazole and is an anti-infective drug which acts as bacterial DNA inhibitor. Moreover, it can be used as radiosensitizer to improve radiotherapy in head and neck squamous cell carcinoma. A radioresistance results in many cancer types because of a low oxygen level. Nimorazole enhances cell death by binding to damaged DNA and preventing repair mechanisms. 
+
+The brain cancer subtype glioma can be divided in astrocytoma and glioblastoma. We suspect that the description glioma is occuring whenever there is a classification missing. As these three subtypes belong to the same class of cancers and the clustering did not lead to another result, we decided on not take the subtypes into account. 
 
 
 
@@ -416,6 +430,8 @@ Chen, R., Smith-Cohn, M., Cohen, A.L., and Colman, H. (2017). Glioma Subclassifi
 
 Corsello, S. M., Nagari, R. T., Spangler, R. D., Rossen, J., Kocak, M., Bryan, J. G., … Golub, T. R. (2020). Discovering the anticancer potential of non-oncology drugs by systematic viability profiling. Nature Cancer, 1(2), 235–248.
 
+DeWeerdt, S. (2018). The genomics of brain cancer. Nature, 561(7724), 54-55.
+
 Fang, Z., Du, R., and Cui, X. (2012). Uniform approximation is more appropriate for Wilcoxon Rank-Sum Test in gene set analysis. PLoS One 7, e31505.
 
 Pushpakom, S., Iorio, F., Eyers, P. A., Escott, K. J., Hopper, S., Wells, A., … Pirmohamed, M. (2019). Drug repurposing: progress, challenges and recommendations. Nature Reviews Drug Discovery, 18(1), 41–58.
@@ -423,4 +439,5 @@ Pushpakom, S., Iorio, F., Eyers, P. A., Escott, K. J., Hopper, S., Wells, A., �
 Sung, H., Ferlay, J., Siegel, R.L., Laversanne, M., Soerjomataram, I., Jemal, A., and Bray, F. (2021). Global Cancer Statistics 2020: GLOBOCAN Estimates of Incidence and Mortality Worldwide for 36 Cancers in 185 Countries. CA Cancer J Clin 71, 209-249.
 
 Tan, Y.D., and Xu, H. (2014). A general method for accurate estimation of false discovery rates in identification of differentially expressed genes. Bioinformatics 30, 2018-2025.
+
 
