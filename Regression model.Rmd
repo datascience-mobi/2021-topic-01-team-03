@@ -1142,9 +1142,54 @@ for (i in celllines[,2]){
 }
 ```
 
+Improved regression model
+```{r}
+training1 <- na.omit(training1) # delete 66 NA rows
 
+pairs(~prism+IQANK1+RAB11FIP1+FOXG1+LPIN3+ERVMER34.1+PTN+VRK2+achilles+exp+cnv, data = training1, pch = 20, cex = 0.5)
+
+l3 <- lm(prism~IQANK1+RAB11FIP1+FOXG1+LPIN3+ERVMER34.1+PTN+VRK2+achilles+exp+cnv+prism, data = training1)
+summary(l3)
+
+pca3 <- prcomp(training1[,-c(11)])
+summary(pca3)
+for(i in 1:(ncol(training1)-1)){
+par(las=2);barplot(pca3$rotation[,i],horiz = TRUE, main = paste("PC",i))
+
+}
+
+l.pca3 <- lm(training1$prism~pca3$x)
+summary(l.pca3)
+```
+
+# Reduce regression model
 ```{r}
 
+initial_regression_1 <- summary(l.pca3)
+
+
+repeat{
+  end_regression_1<-initial_regression_1
+  pvx<-pf(end_regression_1$fstatistic[1],end_regression_1$fstatistic[2],
+          end_regression_1$fstatistic[3],lower.tail=FALSE)
+  
+coeffs=as.data.frame(end_regression_1$coefficients)
+coeffs=coeffs[-c(1),]
+coeffs=coeffs[order(coeffs$`Pr(>|t|)`),] # 2.
+coeffs=coeffs[-c(nrow(coeffs)),]
+
+pca.left <- sapply(row.names(coeffs),function(x){unlist(strsplit(x, split = "x"))[2]})
+pca3.leftx <- pca3$x[,which(colnames(pca3$x) %in% pca.left)] 
+
+initial_regression_1<-summary(lm(training1$prism~pca3.leftx)) # 3.(model B)
+pvy<-pf(initial_regression_1$fstatistic[1],initial_regression_1$fstatistic[2],
+        initial_regression_1$fstatistic[3],lower.tail=FALSE)
+if(pvy>=pvx){
+  break # 4.
+}
+}
+
+initial_regression_1
 ```
 
 
@@ -1326,6 +1371,27 @@ search.prism <- function(search.mode = "t", cellline, target.or.drug, dose = 8){
 
 ```
 
+# cell lines and drugs
+```{r}
+celllines <- brain_cancer_achilles[,1]
+celllines <- cbind(celllines, rownames(brain_cancer_achilles))
+celllines <- na.omit(celllines)
+
+training3 <- data.frame()
+
+for (i in celllines[,2]){
+  print(i)
+  for (j in effective_in_all_doses){
+    #line_target.search(i, j)
+    print(j)
+    training3 <- rbind(training3, search.prism("d",i,j,8))
+  }
+}
+```
+
+
+
+
 
 ```{r}
 
@@ -1340,7 +1406,7 @@ for (i in celllines[,2]){
   for (j in training_targets.solo){
     #line_target.search(i, j)
     print(j)
-    training2 <- rbind(training2, search.prism("t",i,j,8∟))
+    training2 <- rbind(training2, search.prism("t",i,j,8))
   }
 }
 ```
