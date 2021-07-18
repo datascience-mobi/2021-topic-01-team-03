@@ -387,8 +387,6 @@ brain_cancer_achilles=prism.achilles[names,]
 
 brain_cancer_cnv=prism.cnv[names,]
 brain_cancer_exp=prism.exp[names,]
-#brain_cancer_snv=prism.snv[names,] #does not make sense no cell line info, other type of filtering required
-#brain_cancer_treat=prism.treat[names,] #does not make sense no cell line info, other type of filtering required
 ```
 
 # Selecting achilles targets
