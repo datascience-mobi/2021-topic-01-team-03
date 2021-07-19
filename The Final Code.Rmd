@@ -70,15 +70,15 @@ for(i in 1:ncol(brain_cancer)){
 brain_cancer=brain_cancer[ , colSums(is.na(brain_cancer)) == 0]
 ```
 
-## Removal of useless columns 
+## Removal of columns with less relevant information
 
-```{r}
+```{r Columns removal}
 brain_cancer_cl=brain_cancer_cl[,-c(4,6,7,8,9,11,12,15,17,19,23,24,26,28,29,30,31,32,33)]
 ```
 
 ## Dividing cell lines into subtypes
 
-```{r}
+```{r Dividing cell lines into subtypes}
 medulloblastoma=brain_cancer_cl$DepMap_ID[grep("Medulloblastoma", brain_cancer_cl$disease_subtype)]#we obtain the names of the cell lines that are classified as medulloblastoma
 glioblastoma=brain_cancer_cl$DepMap_ID[grep("Glioblastoma", brain_cancer_cl$disease_subtype)]
 glioma=brain_cancer_cl$DepMap_ID[grep("Glioma", brain_cancer_cl$disease_subtype)]
@@ -98,7 +98,7 @@ astrocytoma_bc <- brain_cancer[astrocytoma,]
 
 ## Dividing drugs in doses groups
 
-```{r}
+```{r Dividing drugs in doses groups}
 doses_for_list=list("::0.00061034::","::0.0024414::","::0.00976562::","::0.0390625::","::0.15625::","::0.625::","::10::","::2.5::")
 #8 most repetitive doses  that we observed in our data
 select_doses=function(x){
@@ -120,7 +120,7 @@ questionable_drugs=prism.treat[colnames(deviation),]#we dont know if we can use 
 
 ## Working on drugs that do not fit the standard doses
 
-```{r}
+```{r Not standard drugs}
 #Calculation of all differences between questionable drugs and standard doses
 std_doses <- c(0.00061034,0.0024414,0.00976562,0.0390625,0.15625,0.625,10,2.5) #vector with standard dosages
 #Picking dosages from dosages that have to be assigned to standard dosages
@@ -158,7 +158,7 @@ ncol(brain_cancer)
 
 ## Filter effective drugs in each dose group
 
-```{r}
+```{r Effective drugs filtering}
 # Defining a threshold by looking at the data set
 threshold<-round(median(apply(brain_cancer,2,mean)),1)
 # Lets select the drugs that go with the threshold of 0.2 in each dose group
@@ -173,7 +173,7 @@ length(which(apply(brain_cancer,2,mean)<=threshold)) #this is the amount of drug
 
 ##Select drugs that are effective in all doses
 
-```{r}
+```{r Effective in all doses drugs}
 save_new_colnames<-function(x){
   a<-gsub(pattern = "::.*", replacement = "", colnames(x))
   colnames(x)<-a
@@ -219,7 +219,7 @@ effective_in_all_doses=present_in_all_doses(doses_interception[[1]],doses_interc
 
 ## Select one relevant dose
 
-```{r}
+```{r Select one relevant dose}
 #we need to select the dose with the biggest variance
 variance<-vector(length =length(all_effective_drugs))
 for(i in 1:length(all_effective_drugs)){
@@ -234,7 +234,7 @@ effective_d7=all_effective_drugs[[d7]]
 
 ## Drugs and subtypes relationship
 
-```{r}
+```{r Drugs vs Subtypes}
 ae_d7 <-data.frame(matrix(nrow = 34,ncol = length(effective_in_all_doses)),row.names = rownames(brain_cancer))
 colnames(ae_d7)=effective_in_all_doses
 for (i in 1:length(effective_in_all_doses)){
@@ -248,7 +248,7 @@ medulloblastoma_ae_d7=ae_d7[medulloblastoma,]
 
 ## Effective drugs and subtype analysis
 
-```{r}
+```{r Effective drugs vs Subtypes}
 ## calculate the means for each drug in a subtype 
 astrocytoma_ae_d7_mean = colMeans(astrocytoma_ae_d7)
 glioma_ae_d7_mean = colMeans(glioma_ae_d7)
@@ -303,36 +303,19 @@ ggplot(pre_arrangement, aes(x = Numbers , y = Efficiency, color = Subtype)) +
 
 ##What are the targets of the effective drugs?
 
-```{r}
+```{r Targets of effective drugs}
 brain_cancer_treat=prism.treat[colnames(brain_cancer),] #selecting only the drugs we previously filtered out from brain_cancer
 brain_cancer_treat=brain_cancer_treat[!duplicated(brain_cancer_treat$broad_id),]
 rownames(brain_cancer_treat)<-brain_cancer_treat[,1]
 effective_bc_treat=brain_cancer_treat[effective_in_all_doses,-c(1,2,3,4,10)]
-```
 
-#Target of effective drugs
-
-```{r}
 brain_cancer.effective_targets <- effective_bc_treat$target
 which(is.na(effective_bc_treat$target))
 ```
 
-##Selecting brain cancer specific cell lines in all data sets
-
-```{r}
-brain_cancer_cl=subset.data.frame(prism.cl, disease == 	"Brain Cancer") #identify the brain cancer cell lines' names
-names=brain_cancer_cl[,1] #saving the names as names
-#select wanted cell lines from all datasets
-brain_cancer=prism[names,]
-brain_cancer_achilles=prism.achilles[names,]
-brain_cancer_cnv=prism.cnv[names,]
-brain_cancer_exp=prism.exp[names,]
-```
-
-
 # Compare drug and achilles targets
 
-```{r}
+```{r Drugs vs Achilles}
 brain_cancer.effective_targets <- as.character(brain_cancer.effective_targets) # convert to character
 x <- 1
 brain_cancer.effective_targets.solo <- list() #create list
@@ -395,10 +378,10 @@ qqplot(unlist(brain_cancer_cnv.var), unlist(brain_cancer_cnv.targets.var), xlim 
 abline(a = 0, b = 1)
 ```
 
-# Wilcoxen ranked test
+## Wilcoxon ranked test
 
-## Achilles
-```{r}
+### Achilles
+```{r Achilles preparation}
 # Removal of lines with NA from new dataframe
 brain_cancer_achilles_T <- na.omit(brain_cancer_achilles)
 brain_cancer_achilles.targets_T <- na.omit(brain_cancer_achilles.targets)
@@ -407,7 +390,7 @@ brain_cancer_achilles_T <- as.data.frame(t(scale(as.matrix(t(brain_cancer_achill
 brain_cancer_achilles.targets_T <- as.data.frame(t(scale(as.matrix(t(brain_cancer_achilles.targets_T)))))
 ```
 
-```{r}
+```{r Wilcoxon test}
 # Wilcoxon test
 # H0: The distribution of the effective targets (achilles values) is equal to the one of the achilles dataset
 # H1: The distribution of the effective targets = achilles values are "less" than the one of the achilles dataset
@@ -421,8 +404,8 @@ for(i in 1:ncol(brain_cancer_achilles.targets_T)) {
 }
 length(which(wilcox_pvalue_a<=0.05))# 59
 ```
-##Adjustment of multiple testing problem 
-```{r}
+###Adjustment of multiple testing problem 
+```{r Corrections}
 # Bonferroni correction
 wilcox_pvalue_a_bonf <- p.adjust(wilcox_pvalue_a, method = "bonferroni", n = length(wilcox_pvalue_a)) 
 b_correction_a <- which(wilcox_pvalue_a_bonf<=0.01)
@@ -434,8 +417,8 @@ length(p_values_a_b)# 44 targets are from another distribution and less
 ```
 
 
-## Expression
-```{r}
+### Expression
+```{r Exp Preparation}
 # Removal of lines with NA from new dataframe
 brain_cancer_exp_T <- na.omit(brain_cancer_exp)
 brain_cancer_exp.targets_T <- na.omit(brain_cancer_exp.targets)
@@ -444,7 +427,7 @@ brain_cancer_exp_T <- as.data.frame(t(scale(as.matrix(t(brain_cancer_exp_T)))))
 brain_cancer_exp.targets_T <- as.data.frame(t(scale(as.matrix(t(brain_cancer_exp.targets_T)))))
 ```
 
-```{r}
+```{r Wilcoxon Exp}
 # Wilcoxon test
 # H0: The distribution of the effective targets (exp values) is equal to the one of the exp dataset
 # H1: The distribution of the effective targets = exp values are different than the one of the exp dataset
@@ -458,8 +441,8 @@ for(i in 1:ncol(brain_cancer_exp.targets_T)) {
 }
 length(which(wilcox_pvalue_e<=0.05))# 112 (two.sided)
 ```
-##Adjustment of multiple testing problem 
-```{r}
+###Adjustment of multiple testing problem 
+```{r Corrections}
 # Bonferroni correction
 wilcox_pvalue_e_bonf <- p.adjust(wilcox_pvalue_e, method = "bonferroni", n = length(wilcox_pvalue_e)) 
 b_correction_e <- which(wilcox_pvalue_e_bonf<=0.01)
@@ -471,8 +454,8 @@ length(p_values_e_b)# 98 (two.sided)
 ```
 
 
-## Copy Number Values
-```{r}
+### Copy Number Values
+```{r Copy Number Values preparation}
 # Removal of lines with NA from new dataframe
 brain_cancer_cnv_T <- na.omit(brain_cancer_cnv)
 brain_cancer_cnv.targets_T <- na.omit(brain_cancer_cnv.targets)
@@ -481,7 +464,7 @@ brain_cancer_cnv_T <- as.data.frame(t(scale(as.matrix(t(brain_cancer_cnv_T)))))
 brain_cancer_cnv.targets_T <- as.data.frame(t(scale(as.matrix(t(brain_cancer_cnv.targets_T)))))
 ```
 
-```{r}
+```{r Copy Number Values Wilcoxon}
 # Wilcoxon test
 # H0: The distribution of the effective targets (cnv values) is equal to the one of the cnv dataset
 # H1: The distribution of the effective targets = cnv values are different than the one of the cnv dataset
@@ -496,7 +479,7 @@ for(i in 1:ncol(brain_cancer_cnv.targets_T)) {
 length(which(wilcox_pvalue_c<=0.05))# 41 (two.sided)
 ```
 ##Adjustment of multiple testing problem 
-```{r}
+```{r Corrections}
 # Bonferroni correction
 wilcox_pvalue_c_bonf <- p.adjust(wilcox_pvalue_c, method = "bonferroni", n = length(wilcox_pvalue_c)) 
 b_correction_c <- which(wilcox_pvalue_c_bonf<=0.01)
@@ -508,12 +491,11 @@ length(p_values_c_b)# 6 (two.sided)
 ```
 
 
-
 # Question 3: Are there any genetic markers that are specific for brain cancer subtypes?
 
 ## Clustering of the exp value 
 
-```{r}
+```{r Exp clustering}
 #PCA before applying the kmeans 
 exp <- brain_cancer_exp
 exp_pca <- prcomp(exp)
@@ -541,8 +523,9 @@ ggplot(gg_pca, aes( x = PC1, y = PC2, shape = Cluster, colour = Subtype)) +
 ```
 
 
-##Performance of Shapiro Test to investigate whether gene expressions are normally distributed. 
-```{r}
+##Performance of Shapiro Test to investigate whether gene expressions are normally distributed.
+
+```{r Shapiro test}
 # Filtering genes that have no variance
 bc_exp_var <- apply(brain_cancer_exp,2,var)
 bc_exp_no_var <- which(bc_exp_var==0)
@@ -568,7 +551,8 @@ exp_p_mean=mean(exp_pvalue)
 
 
 ##Wilcoxon test: compare all gene from 34 brain cancer cell lines with the same gene from all other tumors
-```{r}
+
+```{r Wilcoxon test}
 # Creating dataframe with all non brain cancer cell lines
 non_bc_cl = prism.cl[!prism.cl$disease == "Brain Cancer",]
 non_bc_names=non_bc_cl[,1] 
@@ -611,9 +595,9 @@ length(which(wilcox_pvalue_genes<=0.05))#the amount of genes that are significan
 #H1: Group gene expression values come from two distributions with different central measures (=different expression)
 ```
 
-
 ##Adjustment of multiple testing problem 
-```{r}
+
+```{r Corrections}
 #Bonferroni correction
 wilcox_pvalue_bonf = p.adjust(wilcox_pvalue_genes, method = "bonferroni", n = length(wilcox_pvalue_genes)) #I first was confused from p-value=1 but is possible when there is absolutely no evidence to reject H0
 b_correction=which(wilcox_pvalue_bonf<=0.01)
@@ -627,7 +611,8 @@ bh_correction=which(wilcox_pvalue_BH<=0.01)
 ```
 
 ##Volcano plot
-```{r}
+
+```{r Volcano plot}
 non_bc_exp=prism.exp[non_bc_names,]
 volcano_bc=brain_cancer_exp[,b_correction]
 volcano_non_bc=non_bc_exp[,b_correction]
@@ -656,7 +641,7 @@ top_genes=rownames(best_p_values)
 top_genes
 ```
 
-```{r}
+```{r Correlation between genes}
 pheatmap(cor(brain_cancer_exp[,top_genes]), cluster_cols = F, cluster_rows = F, display_numbers = T) #Genes FAM83H and IQANK1 have high covariance, so we need to remove one of them before we do the linear regression. We will keep the value with higher p-value.
 if(best_p_values[c(grep("FAM83H", top_genes)),2]>best_p_values[c(grep("IQANK1", top_genes)),2])
 {top_genes=top_genes[-grep("IQANK1", top_genes)]
@@ -668,7 +653,7 @@ top_genes
 
 ##Universal drug for regression model
 
-```{r}
+```{r Universal drug for regression model}
 # Checking the histograms of each drug
 for(i in 1:ncol(ae_d7)){
      hist(ae_d7[,i],breaks=20,main=ae_d7[i], xlim=c(0.2,-9), ylim=c(0,15), xlab="Efficiency")
@@ -694,7 +679,7 @@ colnames(ae_d7)[uni_drug]
 
 ##Universal drug for non_bc
 
-```{r}
+```{r Universal drug for non_bc}
 #we want to see if the universal drug for all cell lines the same as for braim cancer cell lines is
 non_bc_d7=prism[,unique(grep(paste(colnames(doses_subsets[[d7]]),collapse="|"), colnames(prism)))]
 non_bc_d7=save_new_colnames(non_bc_d7)
@@ -720,7 +705,7 @@ colnames(non_bc_d7)[uni_drug2]
 
 ##Regression model to find out which genes we keep for the final model
 
-```{r}
+```{r Regression model to find out which genes we keep for the final model}
 # Creating a data frame with top 20 genes and universal drug
 genes_regression=cbind(brain_cancer_exp[,top_genes],ae_d7[,uni_drug])
 colnames(genes_regression)[ncol(genes_regression)]="Drug"
@@ -759,7 +744,8 @@ anova(red,full)#H0: modelle equivalent-> kann nicht verworfen werden-> nicht equ
 ```
 
 #Regression model with all cell lines
-```{r}
+
+```{r #Regression model with all cell lines}
 #we apply the same procedure for all cell lines to compare the outcome of our regression with brain cancer cell lines and determine how meaningful it is
 all_cell_lines_d7=prism[,unique(grep(paste(colnames(doses_subsets[[d7]]),collapse="|"), colnames(prism)))]
 all_cell_lines_uni_drug=grep(colnames(ae_d7)[uni_drug], colnames(all_cell_lines_d7))
