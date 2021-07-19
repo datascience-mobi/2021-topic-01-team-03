@@ -404,7 +404,7 @@ To explore these targets, three other data frames where used. The  ``` brain_can
 To find out whether the distribution of the target values from one of the datasets had the same distribution as one of the complete datasets, a QQ-plot was applied. This is a graphical analysis which compares two probability distributions by their quantiles. 
 
 
-```{r  echo=FALSE, fig.dim= c(5,4),  fig.cap= c("Comparison of the distribution of proliveration values of the target knockout of the effective targets with all targets","Comparison of the distribution of expression values of the targets of the effective targets with all targets", "Comparison of the distribution of copie number values of the target knockout of the effective targets with all targets")}
+```{r  echo=FALSE}}
 
 brain_cancer_treat=prism.treat[colnames(brain_cancer),] #selecting only the drugs we previously filtered out from brain_cancer
 brain_cancer_treat=brain_cancer_treat[!duplicated(brain_cancer_treat$broad_id),]
@@ -445,48 +445,34 @@ brain_cancer.effective_targets.solo <- unique(brain_cancer.effective_targets.sol
 
 brain_cancer.effective_targets.solo <- brain_cancer.effective_targets.solo[-1] # remove NA
 
-
 # achilles targets
 brain_cancer_achilles.targets <- brain_cancer_achilles[,which(colnames(brain_cancer_achilles) %in% brain_cancer.effective_targets.solo)] # selecting target genes in achilles
-#brain_cancer.effective_targets.solo[-which(brain_cancer.effective_targets.solo %in% colnames(brain_cancer_achilles))] # missing targets
-qqplot(unlist(brain_cancer_achilles), unlist(brain_cancer_achilles.targets), xlab = "Complete prism.achilles", ylab = "prism.achilles values of the effective targets")
-abline(a = 0, b = 1)
 
 # exp targets
 brain_cancer_exp.targets <- brain_cancer_exp[,which(colnames(brain_cancer_exp) %in% brain_cancer.effective_targets.solo)] # selecting target genes in exp
-#brain_cancer.effective_targets.solo[-which(brain_cancer.effective_targets.solo %in% colnames(brain_cancer_exp))] # missing targets
+
+
+# cnv targets
+brain_cancer_cnv.targets <- brain_cancer_cnv[,which(colnames(brain_cancer_cnv) %in% brain_cancer.effective_targets.solo)] # selecting target genes in cnv
+```
+
+
+```{r echo=FALSE, fig.show="hold", out.width="35%", fig.align = 'center',fig.cap="Comparison of the distribution of copy number values of the target knockout of the effective targets with all targets"}
+qqplot(unlist(brain_cancer_achilles), unlist(brain_cancer_achilles.targets), xlab = "Complete prism.achilles", ylab = "prism.achilles values of the effective targets")
+abline(a = 0, b = 1)
+
 qqplot(unlist(brain_cancer_exp), unlist(brain_cancer_exp.targets), xlab = "Complete prism.exp", ylab = "prism.exp values of the effective targets")
 abline(a = 0, b = 1)
 
-# cnv targets
-brain_cancer_cnv.targets <- brain_cancer_cnv[,which(colnames(brain_cancer_cnv) %in% brain_cancer.effective_targets.solo)] # selecting target genes in cnvVie
-#brain_cancer.effective_targets.solo[-which(brain_cancer.effective_targets.solo %in% colnames(brain_cancer_cnv))] # missing targets
 qqplot(unlist(brain_cancer_cnv), unlist(brain_cancer_cnv.targets), xlim = c(0,2.5), ylim = c(0,2.5), xlab = "Complete prism.cnv", ylab = "prism.cnv values of the effective targets")
 abline(a = 0, b = 1)
 
 ```
 
-```{r echo=FALSE, fig.dim= c(5,4), fig.cap= c("Comparison of the distribution of proliveration values of the target knockout of the effective targets with all targets")}
-
-qqplot(unlist(brain_cancer_achilles), unlist(brain_cancer_achilles.targets), xlab = "Complete prism.achilles", ylab = "prism.achilles values of the effective targets")
-abline(a = 0, b = 1)
-
-```
-
-```{r  echo=FALSE, fig.dim= c(5,4), fig.cap= c("Comparison of the distribution of expression values of the targets of the effective targets with all targets")}
-
-```
-
-```{r  echo=FALSE, fig.dim= c(5,4), fig.cap= c("Comparison of the distribution of copie number values of the target knockout of the effective targets with all targets")}
-
-```
-
-
-# Plots nebeneinander mit: fig.show="hold", out.width="30%"
-
 The visualizations made clear, that the distribution of the effective targets from .exp and .achilles are not representative for the complete dataset. A similar shape of both distribution can just be accepted if the QQ-plot is a straight line. Therefore, these two parameters seem to have a correlation to the effectiveness.
 
 To further analyze this correlation another Wilcoxon Rank Sum test was applied. For the .achilles a one-sided test was made and resulted in 59 targets out of 121, which derive from the distribution of the complete dataset.  After applying the Bonferroni correction only **44 targets** left. For the .exp and the .cnv data a two-sided Wilcoxon test was applied. The corrected values are **41 targets** for .exp and **6 targets** for .cnv, which did not confirm the H0-hypothesis. In conclusion, the effectiveness correlates in some way with the .achilles and the .exp data. However, there are still other parameters, which contribute to the effectiveness for specific target.
+\newpage
 
 # Linear regression model for effectivness prediction
 
@@ -495,7 +481,7 @@ Therefore, the decision was made to predict the effectiveness based on a chosen 
 
 Lm
 
-```{r}
+```{r eval=FALSE}
 training <- na.omit(training) # delete 66 NA rows
 
 pairs(~prism+IQANK1+RAB11FIP1+FOXG1+LPIN3+ERVMER34.1+PTN+VRK2+achilles+exp+cnv, data = training, pch = 20, cex = 0.5) # heatmap?
