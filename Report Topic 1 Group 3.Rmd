@@ -473,7 +473,7 @@ abline(a = 0, b = 1)
 
 The visualizations made clear, that the distribution of the effective targets from .exp and .achilles are not representative for the complete data set. A similar shape of both distributions can only be accepted if the QQ-plot is a straight line. Therefore, these two parameters seem to have a correlation to the effectiveness.
 
-To further analyse this correlation, another Wilcoxon Rank Sum test was applied. For the .achilles a one-sided test was employed and resulted in 59 targets out of 121, which derive from the distribution of the complete data set. The one-sided test was used, because only very negative proliferation values are relevant in gene knock-outs. After applying the Bonferroni correction, only **44 targets** were left. For the .exp and the .cnv data a two-sided Wilcoxon test was applied. The corrected values are **41 targets** for .exp and **6 targets** for .cnv, which did not confirm the H0-hypothesis. In conclusion, the effectiveness correlates, in a certain way, with the .achilles and the .exp data. However, there are still other parameters, which contribute to the effectiveness for specific target.
+To further analyse this correlation, another Wilcoxon Rank Sum test was applied. For the .achilles a one-sided test was employed and resulted in 59 targets out of 121, which derive from the distribution of the complete data set. The one-sided test was used, because only very negative proliferation values are relevant in gene knock-outs. After applying the Bonferroni correction, only **44 targets** were left. For the .exp and the .cnv data a two-sided Wilcoxon test was applied. The corrected values are **98 targets** for .exp and **6 targets** for .cnv, which did not confirm the H0-hypothesis. In conclusion, the effectiveness correlates, in a certain way, with the .achilles and the .exp data. However, there are still other parameters, which contribute to the effectiveness for specific target.
 
 
 # Linear regression model for effectiveness prediction
@@ -569,37 +569,26 @@ To reduce the amount of input values effectively with constant p-values and cons
 # Discussion
 
 
-This project unites drug repurposing and precision medicine. Meanwhile, the main question of whether it is possible to predict the effectiveness of a drug by means of various variables is exploited. 
-An interesting prospect is the combination of precision medicine with drug repurposing, to avoid the use of ineffective drugs in patients that could lead to side effects. Moreover, drug repurposing leads to a cost reduction. According to Workman et al., a cancer drug in the US cost $100.000 annually in 2012 and the cost is increasing steadily. 
+This project unites drug repurposing and precision medicine. In the context of this report, precision medicine is defined as the individualized treatment for brain cancer patients, depending on their genetic profile.  Meanwhile, the main question of whether it is possible to predict the effectiveness of a drug by means of various variables is exploited.
 
-The foundation of this report to investigate different contributing factors, that will become the variables of the final linear regression model. 
-First, effective drugs from the relevant brain cancer cell lines were extracted, as they hold the greatest potential for drug repurposing. Figure 1 underlines the superior effectiveness of medulloblastoma cell lines in comparison to the other subtypes. 
+The foundation of this investigation was to analyse different contributing factors, that will become the variables of the final linear regression model. 
 
- [Facts zu Medulloblastoma]. 
+Although looking at the dosage as a factor holds a lot of potential, this report is limited by the fact that only the dosage with the highest variance was utilized. More in depth exploration of the dosage contribution could lead to an improvement of the final model, since the data is limited to only 8 identified dosages. 
+
+Figure 1 underlines the superior effectiveness of medulloblastoma cell lines in comparison to the other subtypes with the evident quantitative limitations for this subtype. In summary, there is no conclusive evidence to support the claim that medulloblastoma cell lines are more likely to positively respond to drug treatment. 
  
-To assess the informational yield of the brain cancer subtypes, a principal component analysis, coupled with a kmeans clustering, was conducted. The overall goal of this clustering was to take a closer look at the relationship of the subtypes to another. During these analytical steps, it became apparent that there is no correlation between the subtypes, regarding their expression. 
+To assess the informational yield of the brain cancer subtypes, a principal component analysis, coupled with a kmeans clustering, was conducted. The overall goal of this clustering was to take a closer look at the relationship of the subtypes to another. During these analytic steps, it became apparent that there is no correlation between the subtypes, regarding their gene expression. An explanation might be that the brain cancer subtype glioma can be divided in astrocytoma and glioblastoma. At this point, the theory is that the description “glioma” is employed whenever there is a classification missing. As these three subtypes belong to the same class of cancers and the clustering did not lead to another result, it was decided to not take the subtypes into account.
 
-The brain cancer subtype glioma can be divided in astrocytoma and glioblastoma. At this point the theory is that the description “glioma” is employed whenever there is a classification missing. As these three subtypes belong to the same class of cancers and the clustering did not lead to another result, it was decided to not take the subtypes into account.
+As an additional contributing component, cell lines were examined regarding their genetic markers. A “universal drug” was discovered along the way. The universal drug is called **nimorazole** and is a non-infectious drug, which acts as bacterial DNA inhibitor. It can be used as radiosensitizer to improve radiotherapy in head and neck squamous cell carcinoma. Nimorazole enhances cell death by binding to damaged DNA and inhibits its repair mechanisms. Despite the fact that the drug shows consistent effectiveness throughout the cell lines, it shows very little effect in regards to treating cancer in the context of the other effective drugs. As a result, all seven genes used in the final regression model are solely based on this drug and could similarly create a bias towards this particular drug. 
 
-A great promise of combining precision medicine with drug repurposing is to avoid the use of drugs that are ineffective in patients and could even lead to side effects. Moreover, drug repurposing leads to a cost reduction. According to Workman et al. a cancer drug in the US costs $100 ,000 annually in 2012 and the tendency is increasing. 
+Analysis of the drug targets implicates a correlation between the .exp and .achilles values. This correlation makes these targets an interesting factor for the final regression model. As stated by Maughan (2017), the main difficulty in treating brain cancer are the interactions and relationships between all genetic factors involved. Finding an effective and specific cancer drug like Trastuzumab for breast cancer treatment is extremely rare and not very likely. Another problem is the quick adaptation of cancer cells to treatment options, in order to develop a drug resistance.
 
-Involving drug targets for the prediction of the effectiveness of brain cancer treatment is problematic. As Maughan (2017) pointed out, cancer is caused by a complex interplay of multiple genetic factors. The high expectation of finding specific targets for cancer therapies is an imagination caused by a few successful targeted drugs like trastuzumab for breast cancer. Nevertheless, a problem of tumors is the heterogeneity of cells. A resistance against a drug occurs when it adapts to the drug. 
+Comprising the previously described factors, the final regression model was created. The model, as shown in the report, is severely limited by the minimal amount of variance it shows. One reason for this could be that the data offers known information and drug repurposing is mostly based on unknown effective mechanisms. Maybe a more complex method of machine learning could find a higher correlation between our given parameters. Because such a model is based on a specific number of parameters, it can only support real experiments.
+ 
+The relevance of this regression model to predict the effectiveness of a drug is to minimize costs in drug redevelopment, which can sum up to $100,000 annually in the US alone (in 2012), as described by Workman *et al.*. This can not only reduce the costs, but potentially also avoid the risks of side effects in cancer patients by providing a personalized treatment plan. 
 
-As an additional contributing component, cell lines were examined regarding their genetic markers. A “universal drug” was discovered along the way,…. 
-
-The universal drug is called nimorazole and is an anti-infective drug which acts as bacterial DNA inhibitor. It can be used as radiosensitizer to improve radiotherapy in head and neck squamous cell carcinoma. A radioresistance results in many cancer types because of a low oxygen level. Nimorazole enhances cell death by binding to damaged DNA and inhibits its repair mechanisms. 
-
-[Targets von Lea und Lennard]
-
-A reason for that could be that the data offers known information and drug repurposing is mostly based on unknown effective mechanisms. Maybe a more complex method of machine learning could find a higher correlation between our given parameters. Because such a model is based on a specific number of parameters, it can only support real experiments.
-- supportive role of this system 
-- conclusive results 
-- 
-
-Precise medicine is the rising star in oncology and holds great promise for its treatment. However, this report highlights the limitations of the approach. Even when combining the six data frames used in this analysis, no reliable regression model could be created.
-
-
-
+The acquired data suggest that the regression model is not suitable to provide reliable treatment options or identify potential drugs by itself. It could, however, be a very efficient guide in the selection process of drug redevelopment. In addition, exploration of specific brain cancer genes could prove to be a more reliable variable in the developed regression model. In conclusion, precision medicine is the rising star in oncology and holds great promise for its treatment. However, this report highlights the limitations of the approach. Even when combining the six data frames used in this analysis, no reliable regression model could be created.
+\newpage 
 
 # Literature
 
