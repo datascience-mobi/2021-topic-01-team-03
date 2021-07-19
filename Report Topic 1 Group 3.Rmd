@@ -489,7 +489,17 @@ To further analyze this correlation another Wilcoxon Rank Sum test was applied. 
 
 # Linear regression model for effectivness prediction
 
-Lea&Lennard
+The fist idea was to predict the effectiveness based on a chosen cell line and a drug. But this idea was discarded because the three datasets ```prism.achilles```, ```prsim.exp ``` and ``` prism.cnv``` depend only on the targets and not the drugs. 
+Therefore, the decision was made to predict the effectiveness based on a chosen cell line and one target. Hence, the value for one target of each of the three datasets is specific and depends on a single cell line. The ```prism``` values, which give information about the effectiveness, were averaged, because more than one drug can have the same target. The focus was only set on the highest drug dosage.
+
+Lm
+
+To reduce the amount of input values effectively with constant p-value and constant proportion of the explained variance, a PCA was applied. The calculated PC values were used to train the model. 
+
+PCA
+
+It is visible that the model only describes little proportion of the variance. However, the regression model is still better than the null model. A reason for that could be, that the data offers known information and drug repurposing is mostly based on unknown effective mechanisms. Maybe a more complex method of machine learning could find more correlation between our given parameters. Because such a model only bases on a specific amount of parameters it only can support real experiments.
+
 
 # Discussion
 
