@@ -280,17 +280,19 @@ for (i in 1:length(effective_dosis)){
   effective_dosis[[i]] <- as.vector(effective_dosis[[i]])
 }
 
+q_matrix <- matrix()
 for (i in 1:length(effective_dosis)){
   hist(effective_dosis[[i]], main = paste("Dose", i, "of effective drugs"), xlab = "effectivity")
   q <- quantile(effective_dosis[[i]], probs = c(0.05, 0.5, 0.95))
   abline(v = q, col = "red", lty = 2, lwd = 2)
+  q_matrix <- cbind(q_matrix, q)
 }
 
 
-q_matrix <- rbind(q1,q2,q3,q4,q5,q6,q7,q8)
+
 
 #heatmap
-heatmap(as.matrix(mean_eiad_matrix))#--> cluster
+heatmap(q_matrix)#--> cluster
 
 #heatmap.2
 #install.packages("gplots")
@@ -1295,13 +1297,27 @@ https://www.reneshbedre.com/blog/multiple-hypothesis-testing-corrections.html
 #  min_bcatT[i]  <- min(brain_cancer_achilles.targets_T[i,][which(brain_cancer_achilles.targets_T[i,]>0)])
 #}
 #pseudo_value_a <- min(min_bcatT)
-# pseudo_value_a = 0.0004840532
+#pseudo_value_a = 0.0004840532
 ```
 
 ```{r}
 # Removal of lines with NA from new dataframe
 brain_cancer_achilles_T <- na.omit(brain_cancer_achilles)
 brain_cancer_achilles.targets_T <- na.omit(brain_cancer_achilles.targets)
+
+##### pseudo value
+#min_bcaT <- vector(length = 18119)
+#for(i in 1:18119){
+#  min_bcaT[i] <- min(brain_cancer_achilles_T[i,][which(brain_cancer_achilles_T[i,]>0)])
+#}
+#min(min_bcaT)
+
+#min_bcatT <- vector(length = 121)
+#for(i in 1:121){
+#  min_bcatT[i]  <- min(brain_cancer_achilles.targets_T[i,][which(brain_cancer_achilles.targets_T[i,]>0)])
+#}
+#pseudo_value_a <- min(min_bcatT)
+#pseudo_value_a = 0.0004840532
 
 #Z-transformation
 #pseudo_value_a <- 0.0004840532
