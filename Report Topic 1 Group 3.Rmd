@@ -402,9 +402,84 @@ To explore these targets, three other data frames where used. The  ``` brain_can
 ## Analysis of the targets
 To find out whether the distribution of the target values from one of the datasets had the same distribution as one of the complete datasets, a QQ-plot was applied. This is a graphical analysis which compares two probability distributions by their quantiles. 
 
-# qqplot1
-# qqplot2
-# qqplot3
+
+```{r  echo=FALSE, fig.dim= c(5,4),  fig.cap= c("Comparison of the distribution of proliveration values of the target knockout of the effective targets with all targets","Comparison of the distribution of expression values of the targets of the effective targets with all targets", "Comparison of the distribution of copie number values of the target knockout of the effective targets with all targets")}
+
+brain_cancer_treat=prism.treat[colnames(brain_cancer),] #selecting only the drugs we previously filtered out from brain_cancer
+brain_cancer_treat=brain_cancer_treat[!duplicated(brain_cancer_treat$broad_id),]
+rownames(brain_cancer_treat)<-brain_cancer_treat[,1]
+effective_bc_treat=brain_cancer_treat[effective_in_all_doses,-c(1,2,3,4,10)]
+
+brain_cancer.effective_targets <- effective_bc_treat$target
+
+# which(is.na(effective_bc_treat$target))
+
+
+brain_cancer_cl=subset.data.frame(prism.cl, disease == 	"Brain Cancer") #identify the brain cancer cell lines' names
+
+names=brain_cancer_cl[,1] #saving the names as names
+
+#select wanted cell lines from all datasets
+brain_cancer=prism[names,]
+brain_cancer_achilles=prism.achilles[names,]
+
+brain_cancer_cnv=prism.cnv[names,]
+brain_cancer_exp=prism.exp[names,]
+
+
+brain_cancer.effective_targets <- as.character(brain_cancer.effective_targets) # convert to character
+
+x <- 1
+brain_cancer.effective_targets.solo <- list() #create list
+
+for(i in brain_cancer.effective_targets) #split multiple targets
+  {
+  
+ brain_cancer.effective_targets.solo[[x]] <- strsplit(i, split = ", ")
+ x <- x+1
+ }
+brain_cancer.effective_targets.solo <- unlist(brain_cancer.effective_targets.solo) #list to vector
+
+brain_cancer.effective_targets.solo <- unique(brain_cancer.effective_targets.solo) # remove multiple targets
+
+brain_cancer.effective_targets.solo <- brain_cancer.effective_targets.solo[-1] # remove NA
+
+
+# achilles targets
+brain_cancer_achilles.targets <- brain_cancer_achilles[,which(colnames(brain_cancer_achilles) %in% brain_cancer.effective_targets.solo)] # selecting target genes in achilles
+#brain_cancer.effective_targets.solo[-which(brain_cancer.effective_targets.solo %in% colnames(brain_cancer_achilles))] # missing targets
+qqplot(unlist(brain_cancer_achilles), unlist(brain_cancer_achilles.targets), xlab = "Complete prism.achilles", ylab = "prism.achilles values of the effective targets")
+abline(a = 0, b = 1)
+
+# exp targets
+brain_cancer_exp.targets <- brain_cancer_exp[,which(colnames(brain_cancer_exp) %in% brain_cancer.effective_targets.solo)] # selecting target genes in exp
+#brain_cancer.effective_targets.solo[-which(brain_cancer.effective_targets.solo %in% colnames(brain_cancer_exp))] # missing targets
+qqplot(unlist(brain_cancer_exp), unlist(brain_cancer_exp.targets), xlab = "Complete prism.exp", ylab = "prism.exp values of the effective targets")
+abline(a = 0, b = 1)
+
+# cnv targets
+brain_cancer_cnv.targets <- brain_cancer_cnv[,which(colnames(brain_cancer_cnv) %in% brain_cancer.effective_targets.solo)] # selecting target genes in cnvVie
+#brain_cancer.effective_targets.solo[-which(brain_cancer.effective_targets.solo %in% colnames(brain_cancer_cnv))] # missing targets
+qqplot(unlist(brain_cancer_cnv), unlist(brain_cancer_cnv.targets), xlim = c(0,2.5), ylim = c(0,2.5), xlab = "Complete prism.cnv", ylab = "prism.cnv values of the effective targets")
+abline(a = 0, b = 1)
+
+```
+
+```{r echo=FALSE, fig.dim= c(5,4), fig.cap= c("Comparison of the distribution of proliveration values of the target knockout of the effective targets with all targets")}
+
+qqplot(unlist(brain_cancer_achilles), unlist(brain_cancer_achilles.targets), xlab = "Complete prism.achilles", ylab = "prism.achilles values of the effective targets")
+abline(a = 0, b = 1)
+
+```
+
+```{r  echo=FALSE, fig.dim= c(5,4), fig.cap= c("Comparison of the distribution of expression values of the targets of the effective targets with all targets")}
+
+```
+
+```{r  echo=FALSE, fig.dim= c(5,4), fig.cap= c("Comparison of the distribution of copie number values of the target knockout of the effective targets with all targets")}
+
+```
+
 
 # Plots nebeneinander mit: fig.show="hold", out.width="30%"
 
