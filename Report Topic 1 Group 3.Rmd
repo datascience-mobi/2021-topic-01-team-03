@@ -472,7 +472,7 @@ abline(a = 0, b = 1)
 The visualizations made clear, that the distribution of the effective targets from .exp and .achilles are not representative for the complete dataset. A similar shape of both distribution can just be accepted if the QQ-plot is a straight line. Therefore, these two parameters seem to have a correlation to the effectiveness.
 
 To further analyze this correlation another Wilcoxon Rank Sum test was applied. For the .achilles a one-sided test was made and resulted in 59 targets out of 121, which derive from the distribution of the complete dataset.  After applying the Bonferroni correction only **44 targets** left. For the .exp and the .cnv data a two-sided Wilcoxon test was applied. The corrected values are **41 targets** for .exp and **6 targets** for .cnv, which did not confirm the H0-hypothesis. In conclusion, the effectiveness correlates in some way with the .achilles and the .exp data. However, there are still other parameters, which contribute to the effectiveness for specific target.
-\newpage
+
 
 # Linear regression model for effectivness prediction
 
@@ -481,7 +481,7 @@ Therefore, the decision was made to predict the effectiveness based on a chosen 
 
 Lm
 
-```{r eval=FALSE, echo=FALSE}
+```{r eval=TRUE, include=FALSE}
 training <- na.omit(training) # delete 66 NA rows
 
 #pairs(~prism+IQANK1+RAB11FIP1+FOXG1+LPIN3+ERVMER34.1+PTN+VRK2+achilles+exp+cnv, data = training, pch = 20, cex = 0.5) # heatmap?
@@ -554,17 +554,12 @@ anova(f.lm,lm.pca)
 ```
 
 
-```{r}
+```{r echo=FALSE}
 #lm1 <- lm(prism~IQANK1+RAB11FIP1+FOXG1+LPIN3+ERVMER34.1+PTN+VRK2+achilles+exp+cnv+prism, data = dat.train)
 summary(lm1)
 
 plot(dat.test$prism,pred)
 abline(a=0,b=1, col="red")
-
-#lm.pca <- lm(dat.train$prism~pca$x)
-summary(lm.pca)
-
-anova(f.lm,lm.pca)
 ```
 
 
