@@ -520,10 +520,39 @@ lm.pca <- lm(dat.train$prism~pca$x)
 summary(lm.pca)
 
 
+# Reduce regression model
+
+initial_regression_1 <- summary(lm.pca)
 
 
+repeat{
+  end_regression_1<-initial_regression_1
+  pvx<-pf(end_regression_1$fstatistic[1],end_regression_1$fstatistic[2],
+          end_regression_1$fstatistic[3],lower.tail=FALSE)
+  
+coeffs=as.data.frame(end_regression_1$coefficients)
+coeffs=coeffs[-c(1),]
+coeffs=coeffs[order(coeffs$`Pr(>|t|)`),] 
+coeffs=coeffs[-c(nrow(coeffs)),]
 
-pred <- predict(l2, newdata = dat.test)
+pca.left <- sapply(row.names(coeffs),function(x){unlist(strsplit(x, split = "x"))[2]})
+pca.leftx <- pca$x[,which(colnames(pca$x) %in% pca.left)] 
+
+initial_regression_1<-summary(lm(dat.train$prism~pca.leftx)) 
+pvy<-pf(initial_regression_1$fstatistic[1],initial_regression_1$fstatistic[2],
+        initial_regression_1$fstatistic[3],lower.tail=FALSE)
+if(pvy>=pvx){
+  break 
+}
+}
+
+initial_regression_1
+f.lm <- lm(training1$prism~pca3.leftx)
+
+anova(f.lm,lm.pca)
+
+
+pred <- predict(f.lm, newdata = dat.test)
 plot(dat.test$prism,pred)
 abline(a=0,b=1, col="red")
 
@@ -539,44 +568,6 @@ rmse.test <- sqrt(1/n * sum(residuals^2))
 rmse.test
 
 
-l3 <- lm(prism~IQANK1+RAB11FIP1+FOXG1+LPIN3+ERVMER34.1+PTN+VRK2+achilles+exp+cnv+prism, data = training1)
-summary(l3)
-
-
-
-
-
-
-# Reduce regression model
-
-initial_regression_1 <- summary(l.pca3)
-
-
-repeat{
-  end_regression_1<-initial_regression_1
-  pvx<-pf(end_regression_1$fstatistic[1],end_regression_1$fstatistic[2],
-          end_regression_1$fstatistic[3],lower.tail=FALSE)
-  
-coeffs=as.data.frame(end_regression_1$coefficients)
-coeffs=coeffs[-c(1),]
-coeffs=coeffs[order(coeffs$`Pr(>|t|)`),] 
-coeffs=coeffs[-c(nrow(coeffs)),]
-
-pca.left <- sapply(row.names(coeffs),function(x){unlist(strsplit(x, split = "x"))[2]})
-pca3.leftx <- pca3$x[,which(colnames(pca3$x) %in% pca.left)] 
-
-initial_regression_1<-summary(lm(training1$prism~pca3.leftx)) 
-pvy<-pf(initial_regression_1$fstatistic[1],initial_regression_1$fstatistic[2],
-        initial_regression_1$fstatistic[3],lower.tail=FALSE)
-if(pvy>=pvx){
-  break 
-}
-}
-
-initial_regression_1
-
-
-anova(lm(training1$prism~pca3.leftx),l.pca3)
 ```
 
 
