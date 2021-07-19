@@ -93,7 +93,6 @@ glioma_bc <- brain_cancer[glioma,]
 astrocytoma_bc <- brain_cancer[astrocytoma,]
 ```
 
-
 # Question 1: How can we distinguish the most effective drugs?
 
 ## Dividing drugs in doses groups
@@ -404,7 +403,9 @@ for(i in 1:ncol(brain_cancer_achilles.targets_T)) {
 }
 length(which(wilcox_pvalue_a<=0.05))# 59
 ```
+
 ###Adjustment of multiple testing problem 
+
 ```{r Corrections}
 # Bonferroni correction
 wilcox_pvalue_a_bonf <- p.adjust(wilcox_pvalue_a, method = "bonferroni", n = length(wilcox_pvalue_a)) 
@@ -416,8 +417,8 @@ length(p_values_a_b)# 44 targets are from another distribution and less
   
 ```
 
-
 ### Expression
+
 ```{r Exp Preparation}
 # Removal of lines with NA from new dataframe
 brain_cancer_exp_T <- na.omit(brain_cancer_exp)
@@ -441,7 +442,9 @@ for(i in 1:ncol(brain_cancer_exp.targets_T)) {
 }
 length(which(wilcox_pvalue_e<=0.05))# 112 (two.sided)
 ```
+
 ###Adjustment of multiple testing problem 
+
 ```{r Corrections}
 # Bonferroni correction
 wilcox_pvalue_e_bonf <- p.adjust(wilcox_pvalue_e, method = "bonferroni", n = length(wilcox_pvalue_e)) 
@@ -453,8 +456,8 @@ length(p_values_e_b)# 98 (two.sided)
   
 ```
 
-
 ### Copy Number Values
+
 ```{r Copy Number Values preparation}
 # Removal of lines with NA from new dataframe
 brain_cancer_cnv_T <- na.omit(brain_cancer_cnv)
@@ -478,7 +481,9 @@ for(i in 1:ncol(brain_cancer_cnv.targets_T)) {
 }
 length(which(wilcox_pvalue_c<=0.05))# 41 (two.sided)
 ```
+
 ##Adjustment of multiple testing problem 
+
 ```{r Corrections}
 # Bonferroni correction
 wilcox_pvalue_c_bonf <- p.adjust(wilcox_pvalue_c, method = "bonferroni", n = length(wilcox_pvalue_c)) 
@@ -522,7 +527,6 @@ ggplot(gg_pca, aes( x = PC1, y = PC2, shape = Cluster, colour = Subtype)) +
   geom_point(size = 4)
 ```
 
-
 ##Performance of Shapiro Test to investigate whether gene expressions are normally distributed.
 
 ```{r Shapiro test}
@@ -548,7 +552,6 @@ bc_exp_norm = which(exp_pvalue >= 0.05)
 exp_p_mean=mean(exp_pvalue)
 #aproximately half of the genes are normally distributed and on avarage gene expression is normally distributed too.
 ``` 
-
 
 ##Wilcoxon test: compare all gene from 34 brain cancer cell lines with the same gene from all other tumors
 
@@ -650,7 +653,6 @@ if(best_p_values[c(grep("FAM83H", top_genes)),2]>best_p_values[c(grep("IQANK1", 
 top_genes
 ```
 
-
 ##Universal drug for regression model
 
 ```{r Universal drug for regression model}
@@ -675,7 +677,6 @@ vec_max_eff=unlist(lapply(eff_intervals,max))
 uni_drug=which(vec_max_eff==max(vec_max_eff))
 colnames(ae_d7)[uni_drug]
 ```
-
 
 ##Universal drug for non_bc
 
@@ -830,7 +831,6 @@ initial_regression_1
 f.lm <- lm(dat.train$prism~pca.leftx)
 anova(f.lm,lm.pca)
 ```
-
 
 ```{r Visualization regression model, echo=FALSE, fig.cap="Comparison between real and predicted values"}
 summary(lm1)
