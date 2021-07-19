@@ -1,18 +1,20 @@
 ---
-title: "Bioinfo Projekt"
+title: "The Final Code"
 author: "Ilya"
-date: "5/1/2021"
+date: "7/19/2021"
 output: html_document
 ---
-
 ```{r}
 load("../2021-topic-01-team-03/dataset/prism_datasets.rda")
 load("../2021-topic-01-team-03/dataset/cellline_datasets.rda")
+load("../2021-topic-01-team-03/dataset/linear.model_data.RData")
 ```
 
 # Guidelines
 
 prism: effect of the treatment (columns) on cell growth of cell lines (rows).For example, BRD-A00077618-236-07-6::0.0024414::HTS002 indicates treatment with the drug BRD-A00077618-236-07-6, with a dose of 2.4 nM, in assay HTS002. Values represent log fold changes with respect to a control DMSO experiment.
+
+
 
 prism.treat:information about the treatment (row) and the drug used
 
@@ -45,9 +47,7 @@ library(factoextra)
 
 ```{r Selection of cell lines}
 brain_cancer_cl=subset.data.frame(prism.cl, disease == 	"Brain Cancer") #identify the brain cancer cell lines' names
-
 names=brain_cancer_cl[,1] #saving the names as names
-
 #select wanted cell lines from all datasets
 brain_cancer=prism[names,]
 brain_cancer_achilles=prism.achilles[names,]
@@ -61,10 +61,8 @@ brain_cancer_exp=prism.exp[names,]
 # replacing NAs 
 lines=row.names(brain_cancer)
 row.names(brain_cancer_achilles) = lines
-
 # NA removal 
 brain_cancer_achilles_no_NA=na.omit(brain_cancer_achilles) #remove the entire cell lines from everywhere without KO scores
-
 # NA substitution for mean in brain_cancer
 for(i in 1:ncol(brain_cancer)){
   brain_cancer[is.na(brain_cancer[,i]), i] <- mean(brain_cancer[,i], na.rm = TRUE)
@@ -72,28 +70,22 @@ for(i in 1:ncol(brain_cancer)){
 brain_cancer=brain_cancer[ , colSums(is.na(brain_cancer)) == 0]
 ```
 
-## Removal of columns without useful information
+## Removal of useless columns 
 
-```{r Columns removal}
+```{r}
 brain_cancer_cl=brain_cancer_cl[,-c(4,6,7,8,9,11,12,15,17,19,23,24,26,28,29,30,31,32,33)]
 ```
 
 ## Dividing cell lines into subtypes
 
-```{r Subtypes classification}
+```{r}
 medulloblastoma=brain_cancer_cl$DepMap_ID[grep("Medulloblastoma", brain_cancer_cl$disease_subtype)]#we obtain the names of the cell lines that are classified as medulloblastoma
-
 glioblastoma=brain_cancer_cl$DepMap_ID[grep("Glioblastoma", brain_cancer_cl$disease_subtype)]
-
 glioma=brain_cancer_cl$DepMap_ID[grep("Glioma", brain_cancer_cl$disease_subtype)]
-
 astrocytoma=brain_cancer_cl$DepMap_ID[grep("Astrocytoma", brain_cancer_cl$disease_subtype)]
-
 #making sure we didnt forget anything 
-
 disease_subtypes=c(medulloblastoma,glioblastoma,glioma,astrocytoma)
 length(disease_subtypes)
-
 # Converting them into dataframes [IS THIS RELEVANT?]
 glioblastoma_bc <- brain_cancer[glioblastoma,]
 medulloblastoma_bc <- brain_cancer[medulloblastoma,]
@@ -101,11 +93,12 @@ glioma_bc <- brain_cancer[glioma,]
 astrocytoma_bc <- brain_cancer[astrocytoma,]
 ```
 
+
 # Question 1: How can we distinguish the most effective drugs?
 
 ## Dividing drugs in doses groups
 
-```{r Doses division}
+```{r}
 doses_for_list=list("::0.00061034::","::0.0024414::","::0.00976562::","::0.0390625::","::0.15625::","::0.625::","::10::","::2.5::")
 #8 most repetitive doses  that we observed in our data
 select_doses=function(x){
@@ -114,62 +107,49 @@ select_doses=function(x){
 doses_subsets<-lapply(doses_for_list,select_doses)
 #we create a list where each element is a dose and it contains the positions of corresponding doses in brain_cancer dataframe
 assigned<-unlist(doses_subsets)
-
 for (i in 1:length(doses_subsets)) {
   doses_subsets[[i]]<-brain_cancer[,doses_subsets[[i]]]
 }
 #we create a list where each element has only drugs corresponding to the dose
-
 length(assigned)
 length(colnames(brain_cancer))
 #something is missing
-
 deviation=brain_cancer[,-assigned] #lets see what we missed-> these are the doses that are not exact and have some kind of a deviation
-
 questionable_drugs=prism.treat[colnames(deviation),]#we dont know if we can use these drugs, may be their doses deviate too far from the standard
 ```
 
 ## Working on drugs that do not fit the standard doses
 
-```{r Not standard doses}
+```{r}
 #Calculation of all differences between questionable drugs and standard doses
 std_doses <- c(0.00061034,0.0024414,0.00976562,0.0390625,0.15625,0.625,10,2.5) #vector with standard dosages
-
 #Picking dosages from dosages that have to be assigned to standard dosages
 doses_to_assign=as.numeric(questionable_drugs$dose)
-
 #Creating data frame for the differences between standard dosages and questionable drugs
 extra_drugs <-data.frame(matrix(nrow = 8,ncol = length(doses_to_assign)),row.names = std_doses)
 colnames(extra_drugs)=rownames(questionable_drugs)
-
 for (i in 1:length(doses_to_assign)){
     extra_drugs[,i]=abs(std_doses - doses_to_assign[i])
 }
-
 #Assigning the drugs to the closest standard dosage 
 to_which_dose=apply(extra_drugs, 2, which.min) #function of which.min: gives row number of min value of column. In comparison just apply: gives min difference
-
 doses_for_list_2<-list(1,2,3,4,5,6,7,8)
 select_doses_2=function(x){
  unique(grep(x, to_which_dose))
 }
 doses_subsets2<-lapply(doses_for_list_2,select_doses_2)
-
 #just a quick check how many doses there are in total
 length(unlist(doses_subsets2))
 nrow(questionable_drugs)
 #matches with dimension from questionable_drugs 
-
 add_extra_doses_list=function(x){
   cbind(brain_cancer[,unique(grep(paste(colnames(extra_drugs[,doses_subsets2[[x]]]),collapse="|"), colnames(brain_cancer)))], doses_subsets[[x]])
 }
 doses_subsets<-lapply(doses_for_list_2,add_extra_doses_list)
-
 #Adding new assigned dosages to small data frames of standard dosages 
 add_extra_doses=function(x,y){
   cbind(brain_cancer[,unique(grep(paste(colnames(extra_drugs[,x]),collapse="|"), colnames(brain_cancer)))], y)
   }
-
 #New data sets for each dosage with assigned outliers to closest deviation
 sum(sapply(doses_subsets, ncol))
 ncol(brain_cancer)
@@ -178,36 +158,29 @@ ncol(brain_cancer)
 
 ## Filter effective drugs in each dose group
 
-```{r Effective drugs}
+```{r}
 # Defining a threshold by looking at the data set
 threshold<-round(median(apply(brain_cancer,2,mean)),1)
-
 # Lets select the drugs that go with the threshold of 0.2 in each dose group
 effective_drugs<-function(x){
   effective_x<-x[,which(apply(x,2,mean)<=threshold)]
   return(effective_x)
 }
-
 all_effective_drugs<-lapply(doses_subsets, effective_drugs)
-
 sum(sapply(all_effective_drugs, ncol))
 length(which(apply(brain_cancer,2,mean)<=threshold)) #this is the amount of drugs that we keep in total. We compare these 2 length to make sure that that we do not select the same drug twice. If it was the case the first length would be bigger than the second one
 ```
 
 ##Select drugs that are effective in all doses
 
-```{r All doses effectiveness}
+```{r}
 save_new_colnames<-function(x){
   a<-gsub(pattern = "::.*", replacement = "", colnames(x))
   colnames(x)<-a
   return(x)
 }
-
 all_effective_drugs<-lapply(all_effective_drugs, save_new_colnames)
-
 ## remove everything but the drug information from colnames and make them new colnames of the dataframes
-
-
 common_drugs<-function(y){
   different<-setdiff(colnames(all_effective_drugs[[1]]), colnames(all_effective_drugs[[y]]))
   
@@ -215,13 +188,10 @@ common_drugs<-function(y){
   
   colnames(all_effective_drugs[[1]][,-different])
 }
-
 doses_interception<-lapply(doses_for_list_2, common_drugs)
 doses_interception<-doses_interception[-1]
-
 #function returns the names of the common drugs between 2 dataframes
 #which drugs are present in all 8 doses?
-
 present_in_all_doses<-function(a,b,c,d,e,f,g){
  bb<-setdiff(a, b)
  a<-a [! a %in% bb]
@@ -243,15 +213,13 @@ present_in_all_doses<-function(a,b,c,d,e,f,g){
  
  return(a)
 }
-
 effective_in_all_doses=present_in_all_doses(doses_interception[[1]],doses_interception[[2]],doses_interception[[3]],doses_interception[[4]],doses_interception[[5]],doses_interception[[6]],doses_interception[[7]])
 #51 drugs are effective in all doses
-
 ```
 
 ## Select one relevant dose
 
-```{r The most relevant dose}
+```{r}
 #we need to select the dose with the biggest variance
 variance<-vector(length =length(all_effective_drugs))
 for(i in 1:length(all_effective_drugs)){
@@ -266,41 +234,34 @@ effective_d7=all_effective_drugs[[d7]]
 
 ## Drugs and subtypes relationship
 
-```{r Drugs and subtypes relationship}
-ae_d7 <-data.frame(matrix(nrow = nrow(effective_d7),ncol = length(effective_in_all_doses)),row.names = rownames(brain_cancer))
+```{r}
+ae_d7 <-data.frame(matrix(nrow = 34,ncol = length(effective_in_all_doses)),row.names = rownames(brain_cancer))
 colnames(ae_d7)=effective_in_all_doses
-
 for (i in 1:length(effective_in_all_doses)){
   ae_d7[,i]=effective_d7[,grep(effective_in_all_doses[i], colnames(effective_d7))]
 }
-
 glioma_ae_d7=ae_d7[glioma,]
 glioblastoma_ae_d7=ae_d7[glioblastoma,]
 astrocytoma_ae_d7=ae_d7[astrocytoma,]
 medulloblastoma_ae_d7=ae_d7[medulloblastoma,]
-
 ```
 
 ## Effective drugs and subtype analysis
 
-```{r Drugs vs Subtype}
-
+```{r}
 ## calculate the means for each drug in a subtype 
 astrocytoma_ae_d7_mean = colMeans(astrocytoma_ae_d7)
 glioma_ae_d7_mean = colMeans(glioma_ae_d7)
 glioblastoma_ae_d7_mean = colMeans(glioblastoma_ae_d7)
 medulloblastoma_ae_d7_mean = colMeans(medulloblastoma_ae_d7)
-
 ## create a combined data frame with all the means from each subtype 
 means_eff <- data.frame(Astrocytoma = astrocytoma_ae_d7_mean,
                         Glioma = glioma_ae_d7_mean, 
                         Glioblastoma = glioblastoma_ae_d7_mean,  
                         Medulloblastoma = medulloblastoma_ae_d7_mean)
 rownames(means_eff) = effective_in_all_doses
-
 means_drugs <- data.frame(means_eff, 
                           Means = apply(means_eff, 1 , mean))
-
 new_means_eff <- data.frame(Efficiency = c(means_drugs$Astrocytoma, means_drugs$Glioma, means_drugs$Glioblastoma, means_drugs$Medulloblastoma), 
                             Drug_Mean = c(means_drugs$Means, means_drugs$Means, means_drugs$Means, means_drugs$Means), 
                             subtype = c(rep("Astrocytoma", nrow(means_drugs)),
@@ -308,9 +269,7 @@ new_means_eff <- data.frame(Efficiency = c(means_drugs$Astrocytoma, means_drugs$
                                       rep("Glioblastoma", nrow(means_drugs)),
                                       rep("Medulloblastoma", nrow(means_drugs))), 
                             Drug = c(effective_in_all_doses, effective_in_all_doses, effective_in_all_doses, effective_in_all_doses))
-
 ## create a new boxplot that shows the overall the distribution and 
-
 p <- ggplot(new_means_eff, aes(x = subtype, y = Efficiency, color = subtype)) + 
                          ggtitle("Subtype Boxplots") +
                           xlab("Subtypes") + 
@@ -318,29 +277,21 @@ p <- ggplot(new_means_eff, aes(x = subtype, y = Efficiency, color = subtype)) +
   geom_boxplot(outlier.colour="red", outlier.shape=8,
                 outlier.size=4)
 p + theme(legend.position = "none")
-
-
 ## rearrange the Values in descending order 
-
 first = new_means_eff$Drug_Mean
 second = sort(new_means_eff$Drug_Mean, decreasing = TRUE)
               
-
-
 arrangement <- data.frame(Drug_Ranks = match(first, second), 
                                 Efficiency = new_means_eff$Efficiency, 
                                 Subtype = new_means_eff$subtype,
                                 Drug = new_means_eff$Drug, 
                                 Drug_Mean = new_means_eff$Drug_Mean)
 res <- 1 
-
-for(i in c(1:length(effective_in_all_doses))){zv <- rep(i,4);res <- c(res, zv)}
-
+for(i in c(1:51)){zv <- rep(i,4);res <- c(res, zv)}
 vec <- res[2:205]
 pre_arrangement <- arrange(arrangement, Drug_Ranks)
 pre_arrangement <- data.frame(pre_arrangement, 
                                Numbers = vec)
-
 ## Plot the new, rearranged subtypes 
 ggplot(pre_arrangement, aes(x = Numbers , y = Efficiency, color = Subtype)) + 
                          ggtitle("Means of subtypes") +
@@ -348,42 +299,43 @@ ggplot(pre_arrangement, aes(x = Numbers , y = Efficiency, color = Subtype)) +
                           ylab("Efficiency") + 
   
   geom_point(aes(shape=Subtype))
-
 ```
 
 ##What are the targets of the effective drugs?
 
-```{r Targets}
+```{r}
 brain_cancer_treat=prism.treat[colnames(brain_cancer),] #selecting only the drugs we previously filtered out from brain_cancer
 brain_cancer_treat=brain_cancer_treat[!duplicated(brain_cancer_treat$broad_id),]
 rownames(brain_cancer_treat)<-brain_cancer_treat[,1]
 effective_bc_treat=brain_cancer_treat[effective_in_all_doses,-c(1,2,3,4,10)]
+```
 
+#Target of effective drugs
+
+```{r}
 brain_cancer.effective_targets <- effective_bc_treat$target
-
 which(is.na(effective_bc_treat$target))
-
-## da fehlen halt bei diesen 8 Drogen die targets, die könnte man sonst ggf. rausnehmen 
 ```
 
-# Selecting achilles targets
+##Selecting brain cancer specific cell lines in all data sets
 
-```{r Achilles targets}
-#brain_cancer_achilles.mean <- apply(brain_cancer_achilles,2,mean)
-#hist(brain_cancer_achilles.mean, breaks = 200)
-#brain_cancer_achilles.var <- apply(brain_cancer_achilles,2,var)#variance
-#hist(brain_cancer_achilles.var, breaks = 200, xlim = c(0,0.4))
-#brain_cancer_achilles.relevant <- colnames(brain_cancer_achilles)[brain_cancer_achilles.mean < -0.2]
+```{r}
+brain_cancer_cl=subset.data.frame(prism.cl, disease == 	"Brain Cancer") #identify the brain cancer cell lines' names
+names=brain_cancer_cl[,1] #saving the names as names
+#select wanted cell lines from all datasets
+brain_cancer=prism[names,]
+brain_cancer_achilles=prism.achilles[names,]
+brain_cancer_cnv=prism.cnv[names,]
+brain_cancer_exp=prism.exp[names,]
 ```
 
-# Compare drugs and achilles targets
 
-```{r Drugs vs Achilles targets}
+# Compare drug and achilles targets
+
+```{r}
 brain_cancer.effective_targets <- as.character(brain_cancer.effective_targets) # convert to character
-
 x <- 1
 brain_cancer.effective_targets.solo <- list() #create list
-
 for(i in brain_cancer.effective_targets) #split multiple targets
   {
   
@@ -391,22 +343,17 @@ for(i in brain_cancer.effective_targets) #split multiple targets
  x <- x+1
  }
 brain_cancer.effective_targets.solo <- unlist(brain_cancer.effective_targets.solo) #list to vector
-
 brain_cancer.effective_targets.solo <- unique(brain_cancer.effective_targets.solo) # remove multiple targets
-
 brain_cancer.effective_targets.solo <- brain_cancer.effective_targets.solo[-1] # remove NA
-
 # achilles targets
 brain_cancer_achilles.targets <- brain_cancer_achilles[,which(colnames(brain_cancer_achilles) %in% brain_cancer.effective_targets.solo)] # selecting target genes in achilles
 brain_cancer.effective_targets.solo[-which(brain_cancer.effective_targets.solo %in% colnames(brain_cancer_achilles))] # missing targets
-
 hist(unlist(brain_cancer_achilles), breaks = 50)
 hist(unlist(brain_cancer_achilles.targets), breaks = 50)
 summary(unlist(brain_cancer_achilles))
 summary(unlist(brain_cancer_achilles.targets))
 qqplot(unlist(brain_cancer_achilles), unlist(brain_cancer_achilles.targets))
 abline(a = 0, b = 1)
-
 # achilles variance analysis
 brain_cancer_achilles.var <- apply(brain_cancer_achilles,2,function(x){var(x, na.rm = TRUE)})#variance
 brain_cancer_achilles.targets.var <- apply(brain_cancer_achilles.targets,2, function(x){var(x, na.rm = TRUE)})
@@ -414,19 +361,15 @@ hist(unlist(brain_cancer_achilles.var), breaks = 500, xlim = c(0,0.2))
 hist(unlist(brain_cancer_achilles.targets.var), breaks = 40, xlim = c(0,0.2))
 qqplot(unlist(brain_cancer_achilles.var), unlist(brain_cancer_achilles.targets.var), xlim = c(0,0.2))
 abline(a = 0, b = 1)
-
-
 # exp targets
 brain_cancer_exp.targets <- brain_cancer_exp[,which(colnames(brain_cancer_exp) %in% brain_cancer.effective_targets.solo)] # selecting target genes in exp
 brain_cancer.effective_targets.solo[-which(brain_cancer.effective_targets.solo %in% colnames(brain_cancer_exp))] # missing targets
-
 hist(unlist(brain_cancer_exp), breaks = 50)
 hist(unlist(brain_cancer_exp.targets), breaks = 50)
 summary(unlist(brain_cancer_exp))
 summary(unlist(brain_cancer_exp.targets))
 qqplot(unlist(brain_cancer_exp), unlist(brain_cancer_exp.targets))
 abline(a = 0, b = 1)
-
 # exp variance analysis
 brain_cancer_exp.var <- apply(brain_cancer_exp,2,function(x){var(x, na.rm = TRUE)})#variance
 brain_cancer_exp.targets.var <- apply(brain_cancer_exp.targets,2, function(x){var(x, na.rm = TRUE)})
@@ -434,19 +377,15 @@ hist(unlist(brain_cancer_exp.var), breaks = 500)
 hist(unlist(brain_cancer_exp.targets.var), breaks = 40)
 qqplot(unlist(brain_cancer_exp.var), unlist(brain_cancer_exp.targets.var), xlim = c(0,8))
 abline(a = 0, b = 1)
-
-
 # cnv targets
 brain_cancer_cnv.targets <- brain_cancer_cnv[,which(colnames(brain_cancer_cnv) %in% brain_cancer.effective_targets.solo)] # selecting target genes in cnvVie
 brain_cancer.effective_targets.solo[-which(brain_cancer.effective_targets.solo %in% colnames(brain_cancer_cnv))] # missing targets
-
 hist(unlist(brain_cancer_cnv), breaks = 50)
 hist(unlist(brain_cancer_cnv.targets), breaks = 50)
 summary(unlist(brain_cancer_cnv))
 summary(unlist(brain_cancer_cnv.targets))
 qqplot(unlist(brain_cancer_cnv), unlist(brain_cancer_cnv.targets))
 abline(a = 0, b = 1)
-
 # cnv variance analysis
 brain_cancer_cnv.var <- apply(brain_cancer_cnv,2,function(x){var(x, na.rm = TRUE)})#variance
 brain_cancer_cnv.targets.var <- apply(brain_cancer_cnv.targets,2, function(x){var(x, na.rm = TRUE)})
@@ -456,98 +395,194 @@ qqplot(unlist(brain_cancer_cnv.var), unlist(brain_cancer_cnv.targets.var), xlim 
 abline(a = 0, b = 1)
 ```
 
+# Wilcoxen ranked test
+
+## Achilles
+```{r}
+# Removal of lines with NA from new dataframe
+brain_cancer_achilles_T <- na.omit(brain_cancer_achilles)
+brain_cancer_achilles.targets_T <- na.omit(brain_cancer_achilles.targets)
+# Transposition and scaling
+brain_cancer_achilles_T <- as.data.frame(t(scale(as.matrix(t(brain_cancer_achilles_T)))))
+brain_cancer_achilles.targets_T <- as.data.frame(t(scale(as.matrix(t(brain_cancer_achilles.targets_T)))))
+```
+
+```{r}
+# Wilcoxon test
+# H0: The distribution of the effective targets (achilles values) is equal to the one of the achilles dataset
+# H1: The distribution of the effective targets = achilles values are "less" than the one of the achilles dataset
+wilcox_a <- vector(mode = "list",length=ncol(brain_cancer_achilles.targets_T))
+for(i in 1:ncol(brain_cancer_achilles.targets_T)) {         
+  wilcox_a[[i]] <- wilcox.test(as.numeric(brain_cancer_achilles_T[,i]),as.numeric(brain_cancer_achilles.targets_T[,i]), alternative = "less", paired = F)
+}
+wilcox_pvalue_a <- vector(length = ncol(brain_cancer_achilles.targets_T))
+for(i in 1:ncol(brain_cancer_achilles.targets_T)) {
+  wilcox_pvalue_a[i] <- wilcox_a[[i]]$p.value
+}
+length(which(wilcox_pvalue_a<=0.05))# 59
+```
+##Adjustment of multiple testing problem 
+```{r}
+# Bonferroni correction
+wilcox_pvalue_a_bonf <- p.adjust(wilcox_pvalue_a, method = "bonferroni", n = length(wilcox_pvalue_a)) 
+b_correction_a <- which(wilcox_pvalue_a_bonf<=0.01)
+p_values_a_b <- wilcox_pvalue_a_bonf[b_correction_a]
+sig_targets_a <- colnames(brain_cancer_achilles.targets_T)[b_correction_a]
+hist(p_values_a_b)
+length(p_values_a_b)# 44 targets are from another distribution and less
+  
+```
+
+
+## Expression
+```{r}
+# Removal of lines with NA from new dataframe
+brain_cancer_exp_T <- na.omit(brain_cancer_exp)
+brain_cancer_exp.targets_T <- na.omit(brain_cancer_exp.targets)
+# Transposition and scaling
+brain_cancer_exp_T <- as.data.frame(t(scale(as.matrix(t(brain_cancer_exp_T)))))
+brain_cancer_exp.targets_T <- as.data.frame(t(scale(as.matrix(t(brain_cancer_exp.targets_T)))))
+```
+
+```{r}
+# Wilcoxon test
+# H0: The distribution of the effective targets (exp values) is equal to the one of the exp dataset
+# H1: The distribution of the effective targets = exp values are different than the one of the exp dataset
+wilcox_e <- vector(mode = "list",length=ncol(brain_cancer_exp.targets_T))
+for(i in 1:ncol(brain_cancer_exp.targets_T)) {         
+  wilcox_e[[i]] <- wilcox.test(as.numeric(brain_cancer_exp_T[,i]),as.numeric(brain_cancer_exp.targets_T[,i]), alternative = "two.sided", paired = F)
+}
+wilcox_pvalue_e <- vector(length = ncol(brain_cancer_exp.targets_T))
+for(i in 1:ncol(brain_cancer_exp.targets_T)) {
+  wilcox_pvalue_e[i] <- wilcox_e[[i]]$p.value
+}
+length(which(wilcox_pvalue_e<=0.05))# 112 (two.sided)
+```
+##Adjustment of multiple testing problem 
+```{r}
+# Bonferroni correction
+wilcox_pvalue_e_bonf <- p.adjust(wilcox_pvalue_e, method = "bonferroni", n = length(wilcox_pvalue_e)) 
+b_correction_e <- which(wilcox_pvalue_e_bonf<=0.01)
+p_values_e_b <- wilcox_pvalue_e_bonf[b_correction_e]
+sig_targets_e <- colnames(brain_cancer_exp.targets_T)[b_correction_e]
+hist(p_values_e_b)
+length(p_values_e_b)# 98 (two.sided)
+  
+```
+
+
+## Copy Number Values
+```{r}
+# Removal of lines with NA from new dataframe
+brain_cancer_cnv_T <- na.omit(brain_cancer_cnv)
+brain_cancer_cnv.targets_T <- na.omit(brain_cancer_cnv.targets)
+# Transposition and scaling
+brain_cancer_cnv_T <- as.data.frame(t(scale(as.matrix(t(brain_cancer_cnv_T)))))
+brain_cancer_cnv.targets_T <- as.data.frame(t(scale(as.matrix(t(brain_cancer_cnv.targets_T)))))
+```
+
+```{r}
+# Wilcoxon test
+# H0: The distribution of the effective targets (cnv values) is equal to the one of the cnv dataset
+# H1: The distribution of the effective targets = cnv values are different than the one of the cnv dataset
+wilcox_c <- vector(mode = "list",length=ncol(brain_cancer_cnv.targets_T))
+for(i in 1:ncol(brain_cancer_cnv.targets_T)) {         
+  wilcox_c[[i]] <- wilcox.test(as.numeric(brain_cancer_cnv_T[,i]),as.numeric(brain_cancer_cnv.targets_T[,i]), alternative = "two.sided", paired = F)
+}
+wilcox_pvalue_c <- vector(length = ncol(brain_cancer_cnv.targets_T))
+for(i in 1:ncol(brain_cancer_cnv.targets_T)) {
+  wilcox_pvalue_c[i] <- wilcox_c[[i]]$p.value
+}
+length(which(wilcox_pvalue_c<=0.05))# 41 (two.sided)
+```
+##Adjustment of multiple testing problem 
+```{r}
+# Bonferroni correction
+wilcox_pvalue_c_bonf <- p.adjust(wilcox_pvalue_c, method = "bonferroni", n = length(wilcox_pvalue_c)) 
+b_correction_c <- which(wilcox_pvalue_c_bonf<=0.01)
+p_values_c_b <- wilcox_pvalue_c_bonf[b_correction_c]
+sig_targets_c <- colnames(brain_cancer_cnv.targets_T)[b_correction_c]
+hist(p_values_c_b)
+length(p_values_c_b)# 6 (two.sided)
+  
+```
+
+
+
 # Question 3: Are there any genetic markers that are specific for brain cancer subtypes?
 
 ## Clustering of the exp value 
 
-```{r Exp clustering}
+```{r}
 #PCA before applying the kmeans 
-
 exp <- brain_cancer_exp
 exp_pca <- prcomp(exp)
  
 # plot the PC's an examine their variance 
 fviz_eig(exp_pca)
-
-
 ## kmeans for the clustering.frame 
-
 set.seed(126)
-
 PC <- as.data.frame(exp_pca$x)
 PC1 <- PC$PC1
 PC2 <- PC$PC2
-
 ## Proper kmeans after PCA 
-
 km_c <- kmeans(exp_pca$x, 4, iter.max = 10000, nstart = 1)
-
 ## create a new data frame for the ggplot visualisation 
 gg_pca <- data.frame( PC1 = PC1,
                       PC2 = PC2, 
                       Cell_line = rownames(exp), 
                       Subtype = brain_cancer_cl$disease_subtype, 
                       Cluster = as.factor(km_c$cluster))
-
 ggplot(gg_pca, aes( x = PC1, y = PC2, shape = Cluster, colour = Subtype)) +
   ggtitle("Cell line clustering") +
   xlab("PC1") + 
   ylab("PC2")+ 
   geom_point(size = 4)
-
 ```
 
-##Performance of Shapiro Test to investigate whether gene expressions are normally distributed
 
-```{r Shapiro test}
+##Performance of Shapiro Test to investigate whether gene expressions are normally distributed. 
+```{r}
 # Filtering genes that have no variance
 bc_exp_var <- apply(brain_cancer_exp,2,var)
 bc_exp_no_var <- which(bc_exp_var==0)
 bc_exp_high_var <- brain_cancer_exp[,-bc_exp_no_var]
 bc_exp_high_var <- apply(bc_exp_high_var,2,as.numeric)
-
 #Listing all gene variances
 exp_list <- vector(mode = "list", length = ncol(bc_exp_high_var))
 for(i in 1:ncol(bc_exp_high_var)) {         
   exp_list[[i]] <- bc_exp_high_var[ , i]
 }
-
 # checking data for normality by applying a shapiro test on list element
 bc_exp_shap = lapply(exp_list,shapiro.test)
-
 # Keeping p values in another list
 exp_pvalue <- vector(length = ncol(bc_exp_high_var))
 for(i in 1:ncol(bc_exp_high_var)) {         
   exp_pvalue[i] <- bc_exp_shap[[i]]$p.value
 } 
-
 # Selecting genes with a p value smaller than 5%
 bc_exp_norm = which(exp_pvalue >= 0.05)
 exp_p_mean=mean(exp_pvalue)
 #aproximately half of the genes are normally distributed and on avarage gene expression is normally distributed too.
-
 ``` 
 
-##Wilcoxon test: compare all gene from 34 brain cancer cell lines with the same gene from all other tumors
 
-```{r Wilcoxon test}
+##Wilcoxon test: compare all gene from 34 brain cancer cell lines with the same gene from all other tumors
+```{r}
 # Creating dataframe with all non brain cancer cell lines
 non_bc_cl = prism.cl[!prism.cl$disease == "Brain Cancer",]
 non_bc_names=non_bc_cl[,1] 
 non_bc_exp=prism.exp[non_bc_names,]
 brain_cancer_exp_w=brain_cancer_exp
 non_bc_exp=non_bc_exp[rowSums(is.na(non_bc_exp)) == 0,]
-
 #Z-transformation
 calculate_pseudo_v<-function(x,y){
    min(x[y,][which(x[y,]>0)])
 }
 #function to determine the pseudovalue for both datasets. It takes a dataframe and looks for a minimum value for each row (in this case cell line). Then it chooses only the minimum values that are bigger than 0. Out of these positive mins, it chooses the smallest one, which is our pseudo value
-
 pseudo_count1<-calculate_pseudo_v(non_bc_exp,nrow(non_bc_exp))
 pseudo_count2<-calculate_pseudo_v(brain_cancer_exp_w, nrow(brain_cancer_exp_w))
 #Now we have 2 pseudo values from 2 datasets, we wil compare them in the following loop to determine the ultimate pseudo value to apply on both datasets
-
 if(pseudo_count1==pseudo_count2){
   pseudo_count<-pseudo_count1
 } else if(pseudo_count1>pseudo_count2) {
@@ -555,43 +590,35 @@ if(pseudo_count1==pseudo_count2){
 } else {
   pseudo_count<-pseudo_count1
 }
-
-
 non_bc_exp=non_bc_exp+pseudo_count
 brain_cancer_exp_w=brain_cancer_exp_w+pseudo_count
-
 non_bc_exp=as.data.frame(t(scale(as.matrix(t(non_bc_exp)))))
 brain_cancer_exp_w=as.data.frame(t(scale(as.matrix(t(brain_cancer_exp_w)))))
-
 # Removal of lines with NA from new dataframe
 brain_cancer_exp_w=as.data.frame(t(na.omit(t(brain_cancer_exp_w))))
 non_bc_exp=non_bc_exp[,colnames(brain_cancer_exp_w)]
-
 # Performance of Wilcoxon
 wilcox_genes <- vector(mode = "list",length=ncol(brain_cancer_exp_w))
 for(i in 1:ncol(brain_cancer_exp_w)) {         
   wilcox_genes[[i]] <- wilcox.test(as.numeric(non_bc_exp[,i]),as.numeric(brain_cancer_exp_w[,i]), alternative = "two.sided", paired = F)
 }
-
 wilcox_pvalue_genes <- vector(length = ncol(brain_cancer_exp_w))
 for(i in 1:ncol(brain_cancer_exp_w)) {
   wilcox_pvalue_genes[i] <- wilcox_genes[[i]]$p.value
 }
 length(which(wilcox_pvalue_genes<=0.05))#the amount of genes that are significantly different in expression comparing to other tumors
-
 #H0: expression value for the gene comes from the same distribution (=same expression)
 #H1: Group gene expression values come from two distributions with different central measures (=different expression)
 ```
 
-##Adjustment of multiple testing problem 
 
-```{r Corrections}
+##Adjustment of multiple testing problem 
+```{r}
 #Bonferroni correction
 wilcox_pvalue_bonf = p.adjust(wilcox_pvalue_genes, method = "bonferroni", n = length(wilcox_pvalue_genes)) #I first was confused from p-value=1 but is possible when there is absolutely no evidence to reject H0
 b_correction=which(wilcox_pvalue_bonf<=0.01)
 p_values_b=wilcox_pvalue_bonf[b_correction]
 sig_genes=colnames(brain_cancer_exp_w)[b_correction]
-
 hist(p_values_b)
   
 #Benjamini-Hochberg correction
@@ -600,25 +627,18 @@ bh_correction=which(wilcox_pvalue_BH<=0.01)
 ```
 
 ##Volcano plot
-
-```{r Volcano plot}
+```{r}
 non_bc_exp=prism.exp[non_bc_names,]
-
 volcano_bc=brain_cancer_exp[,b_correction]
 volcano_non_bc=non_bc_exp[,b_correction]
-
 df<-data.frame(matrix(nrow = length(b_correction),ncol = 2))
 rownames(df)=colnames(volcano_bc)
 colnames(df)=c("-log10 p-value", "log2 foldchange")
 df[,1]=-log10(p_values_b)
-
 bc_exp_mean=apply(volcano_bc,2, mean)
 non_bc_exp_mean=apply(volcano_non_bc,2,mean, na.rm=T)
-
 df[,2]=log2((non_bc_exp_mean/bc_exp_mean))
 logfc=df[,2]
-
-
 highlight_df <- df %>% filter(logfc>=1|logfc<=-1)
 bp<-sort(highlight_df[,1],decreasing = T)[1:20]
 best_p_values<-data.frame(matrix(nrow =length(bp),ncol = 2))
@@ -626,21 +646,18 @@ for (y in 1:length(bp)) {
   best_p_values[y,]<-highlight_df[which(highlight_df[,1]==bp[y]),]
   rownames(best_p_values)[y]=rownames(highlight_df[which(highlight_df[,1]==bp[y]),])
 }
-
 ggplot(df, aes(x=df[,2], y=df[,1]),ylim = range(0,1))+
   xlab("Log2-Fold-Change") + 
   ylab("-log10(p-value)") + 
   geom_point() +
   geom_point(data=highlight_df, aes(x=highlight_df[,2], y=highlight_df[,1]), color='blue') +
   geom_point(data=best_p_values, aes(x=best_p_values[,2], y=best_p_values[,1]), color='red')
-
 top_genes=rownames(best_p_values)
 top_genes
 ```
 
-```{r Correlation of top_genes}
+```{r}
 pheatmap(cor(brain_cancer_exp[,top_genes]), cluster_cols = F, cluster_rows = F, display_numbers = T) #Genes FAM83H and IQANK1 have high covariance, so we need to remove one of them before we do the linear regression. We will keep the value with higher p-value.
-
 if(best_p_values[c(grep("FAM83H", top_genes)),2]>best_p_values[c(grep("IQANK1", top_genes)),2])
 {top_genes=top_genes[-grep("IQANK1", top_genes)]
   } else  
@@ -648,82 +665,65 @@ if(best_p_values[c(grep("FAM83H", top_genes)),2]>best_p_values[c(grep("IQANK1", 
 top_genes
 ```
 
+
 ##Universal drug for regression model
 
-```{r Universal drug dose 7}
+```{r}
 # Checking the histograms of each drug
-
 for(i in 1:ncol(ae_d7)){
      hist(ae_d7[,i],breaks=20,main=ae_d7[i], xlim=c(0.2,-9), ylim=c(0,15), xlab="Efficiency")
 } 
 #We make histograms for every drug to see the distribution for efficiency scores
   
 # Computing the global minimum and maximum
-
 min_eff=min(apply(ae_d7,2,min))
 max_eff=max(apply(ae_d7,2,max))
-
 # Creating a sequence for the interval
-
 interval=seq(from=min_eff, to=max_eff, by=((abs(min_eff)+max_eff))/20)
-
-
 # Put the data frame row wise in the intervals
-
 eff_intervals <- vector(mode = "list",length=ncol(ae_d7)) 
 for(i in 1:ncol(ae_d7)) {  
   eff_intervals[[i]]=table(cut(ae_d7[,i],breaks=interval,right=TRUE,include.lowest=TRUE))
   }
-
 # Extracting the maximum value and so the universal drug
 vec_max_eff=unlist(lapply(eff_intervals,max))
 uni_drug=which(vec_max_eff==max(vec_max_eff))
 colnames(ae_d7)[uni_drug]
 ```
 
+
 ##Universal drug for non_bc
 
-```{r Universal drug non_bc}
+```{r}
 #we want to see if the universal drug for all cell lines the same as for braim cancer cell lines is
 non_bc_d7=prism[,unique(grep(paste(colnames(doses_subsets[[d7]]),collapse="|"), colnames(prism)))]
 non_bc_d7=save_new_colnames(non_bc_d7)
 non_bc_d7=non_bc_d7[,effective_in_all_doses]
-
 for(i in 1:ncol(non_bc_d7)){
   non_bc_d7[is.na(non_bc_d7[,i]), i] <- mean(non_bc_d7[,i], na.rm = TRUE)
 }
 non_bc_d7=non_bc_d7[ ,colSums(is.na(non_bc_d7)) == 0]
-
-
 min_eff2=min(apply(non_bc_d7,2,min))
 max_eff2=max(apply(non_bc_d7,2,max))
-
 # Creating a sequence for the interval
-
 interval2=seq(from=min_eff2, to=max_eff2, by=((abs(min_eff2)+max_eff2))/20)
-
-
 # Put the data frame row wise in the intervals
-
 eff_intervals2 <- vector(mode = "list",length=ncol(non_bc_d7)) 
 for(i in 1:ncol(non_bc_d7)) {  
   eff_intervals2[[i]]=table(cut(non_bc_d7[,i],breaks=interval2,right=TRUE,include.lowest=TRUE))
   }
-
 # Extracting the maximum value and so the universal drug
 vec_max_eff2=unlist(lapply(eff_intervals2,max))
 uni_drug2=which(vec_max_eff2==max(vec_max_eff2))
 colnames(non_bc_d7)[uni_drug2]
-
 ```
 
 ##Regression model to find out which genes we keep for the final model
 
-```{r Final genes with regression}
+```{r}
 # Creating a data frame with top 20 genes and universal drug
 genes_regression=cbind(brain_cancer_exp[,top_genes],ae_d7[,uni_drug])
 colnames(genes_regression)[ncol(genes_regression)]="Drug"
-
 # linear regression model
 initial_regression_1<-summary(lm(Drug~.,genes_regression))
 # feature selection
@@ -738,50 +738,37 @@ coeffs=coeffs[order(coeffs$`Pr(>|t|)`),]
 coeffs=coeffs[-c(nrow(coeffs)),]
 genes_regression=cbind(brain_cancer_exp[,rownames(coeffs)],ae_d7[,uni_drug])
 colnames(genes_regression)[ncol(genes_regression)]="Drug"
-
 initial_regression_1<-summary(lm(Drug~.,genes_regression))
 pvy<-pf(initial_regression_1$fstatistic[1],initial_regression_1$fstatistic[2],initial_regression_1$fstatistic[3],lower.tail=FALSE)
 if(pvy>=pvx){
   break
 }
 }
-
 end_regression_1
-
 final_genes=rownames(as.data.frame(end_regression_1$coefficients))
 final_genes=final_genes[-1]
 final_genes
-
 #anova and not p-value to compare models?
 genes_regression=cbind(brain_cancer_exp[,final_genes],ae_d7[,uni_drug])
 colnames(genes_regression)[ncol(genes_regression)]="Drug"
 red<-lm(Drug~.,genes_regression)
-
 genes_regression=cbind(brain_cancer_exp[,top_genes],ae_d7[,uni_drug])
 colnames(genes_regression)[ncol(genes_regression)]="Drug"
 full<-lm(Drug~.,genes_regression)
-
 anova(red,full)#H0: modelle equivalent-> kann nicht verworfen werden-> nicht equivalent-> p value gross-> koplexere model nicht signifikant besser
-
 ```
 
 #Regression model with all cell lines
-
-```{r Regression model with all cell lines}
+```{r}
 #we apply the same procedure for all cell lines to compare the outcome of our regression with brain cancer cell lines and determine how meaningful it is
 all_cell_lines_d7=prism[,unique(grep(paste(colnames(doses_subsets[[d7]]),collapse="|"), colnames(prism)))]
 all_cell_lines_uni_drug=grep(colnames(ae_d7)[uni_drug], colnames(all_cell_lines_d7))
 all_cell_lines_genes=prism.exp[,top_genes]
-
 remove<-setdiff(row.names(all_cell_lines_d7), row.names(all_cell_lines_genes))
 all_cell_lines_d7=all_cell_lines_d7[-unique(grep(paste(remove,collapse="|"), rownames(all_cell_lines_d7))),]
-
-
 genes_regression2=cbind(all_cell_lines_genes,all_cell_lines_d7[,all_cell_lines_uni_drug])
 colnames(genes_regression2)[ncol(genes_regression2)]="Drug"
-
 initial_regression_2<-summary(lm(Drug~.,genes_regression2))
-
 #loop starts
 repeat{
   end_regression_2<-initial_regression_2
@@ -793,20 +780,74 @@ coeffs=coeffs[order(coeffs$`Pr(>|t|)`),]
 coeffs=coeffs[-c(nrow(coeffs)),]
 genes_regression2=cbind(prism.exp[,rownames(coeffs)],all_cell_lines_d7[,all_cell_lines_uni_drug])
 colnames(genes_regression2)[ncol(genes_regression2)]="Drug"
-
 initial_regression_2<-summary(lm(Drug~.,genes_regression2))
 py<-pf(initial_regression_2$fstatistic[1],initial_regression_2$fstatistic[2],initial_regression_2$fstatistic[3],lower.tail=FALSE)
 if(py>=px){
   break
 }
 }
-
 end_regression_2
-
 ```
 
 # Question 4: What other factors contribute to drug effectiveness prediction?
 
-```{r}
+```{r Linear regression model, eval=TRUE, include=FALSE}
+training <- na.omit(training) # delete 66 NA rows
+pairs(~prism+IQANK1+RAB11FIP1+FOXG1+LPIN3+ERVMER34.1+PTN+VRK2+achilles+exp+cnv, data = training, pch = 20, cex = 0.5)
+# devide sample in train and test set
+devide <- sample(1:nrow(training),nrow(training)/2)
+dat.train <- training[devide,]
+dat.test <- training[-devide,]
+# first linear model
+lm1 <- lm(prism~IQANK1+RAB11FIP1+FOXG1+LPIN3+ERVMER34.1+PTN+VRK2+achilles+exp+cnv+prism, data = dat.train)
+summary(lm1)
+# comer real values with prediction
+pred <- predict(lm1, newdata = dat.test)
+plot(dat.test$prism,pred)
+abline(a=0,b=1, col="red")
+n <- nrow(dat.train)
+rmse.test <- sqrt(1/n * sum(lm1$residuals^2))
+rmse.test
+n <- nrow(dat.test)
+residuals <- dat.test$prism - pred
+rmse.test <- sqrt(1/n * sum(residuals^2))
+rmse.test
+# pca to reduce 
+pca <- prcomp(dat.train[,-c(11)])
+summary(pca)
+for(i in 1:(ncol(dat.train)-1)){
+par(las=2);barplot(pca$rotation[,i],horiz = TRUE, main = paste("PC",i))
+}
+lm.pca <- lm(dat.train$prism~pca$x)
+summary(lm.pca)
+# Reduce regression model
+initial_regression_1 <- summary(lm.pca)
+repeat{
+  end_regression_1<-initial_regression_1
+  pvx<-pf(end_regression_1$fstatistic[1],end_regression_1$fstatistic[2],
+          end_regression_1$fstatistic[3],lower.tail=FALSE)
+  
+coeffs=as.data.frame(end_regression_1$coefficients)
+coeffs=coeffs[-c(1),]
+coeffs=coeffs[order(coeffs$`Pr(>|t|)`),] 
+coeffs=coeffs[-c(nrow(coeffs)),]
+pca.left <- sapply(row.names(coeffs),function(x){unlist(strsplit(x, split = "x"))[2]})
+pca.leftx <- pca$x[,which(colnames(pca$x) %in% pca.left)] 
+initial_regression_1<-summary(lm(dat.train$prism~pca.leftx)) 
+pvy<-pf(initial_regression_1$fstatistic[1],initial_regression_1$fstatistic[2],
+        initial_regression_1$fstatistic[3],lower.tail=FALSE)
+if(pvy>=pvx){
+  break 
+}
+}
+initial_regression_1
+f.lm <- lm(dat.train$prism~pca.leftx)
+anova(f.lm,lm.pca)
+```
 
+
+```{r Visualization regression model, echo=FALSE, fig.cap="Comparison between real and predicted values"}
+summary(lm1)
+plot(dat.test$prism,pred, xlab = "Real effectiveness values", ylab = "Predicted effectiveness values")
+abline(a=0,b=1, col="red")
 ```
