@@ -1,9 +1,3 @@
----
-title: "README.md"
-author: "Ilya"
-date: "7/19/2021"
-output: html_document
----
 # 2021-topic-01-team-03
 
 Project: "Drug viability screens for oncological and non-oncological treatments"
