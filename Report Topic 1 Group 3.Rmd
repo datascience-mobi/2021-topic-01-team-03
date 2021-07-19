@@ -21,6 +21,7 @@ load("../2021-topic-01-team-03/dataset/cellline_datasets.rda")
 effective_in_all_doses=read.csv("../2021-topic-01-team-03/dataset/effective_in_all_doses.csv")
 effective_in_all_doses=as.vector(effective_in_all_doses[,-1])
 load("../2021-topic-01-team-03/dataset/ae_d7.RData")
+load("../2021-topic-01-team-03/dataset/training.RData")
 ```
 
 ```{r cleanup, echo=FALSE}
@@ -493,6 +494,91 @@ The fist idea was to predict the effectiveness based on a chosen cell line and a
 Therefore, the decision was made to predict the effectiveness based on a chosen cell line and one target. Hence, the value for one target of each of the three datasets is specific and depends on a single cell line. The ```prism``` values, which give information about the effectiveness, were averaged, because more than one drug can have the same target. The focus was only set on the highest drug dosage.
 
 Lm
+
+```{r}
+training <- na.omit(training) # delete 66 NA rows
+
+pairs(~prism+IQANK1+RAB11FIP1+FOXG1+LPIN3+ERVMER34.1+PTN+VRK2+achilles+exp+cnv, data = training, pch = 20, cex = 0.5) # heatmap?
+
+devide <- sample(1:nrow(training),nrow(training)/2)
+
+dat.train <- training[devide,]
+dat.test <- training[-devide,]
+
+lm1 <- lm(prism~IQANK1+RAB11FIP1+FOXG1+LPIN3+ERVMER34.1+PTN+VRK2+achilles+exp+cnv+prism, data = dat.train)
+summary(lm1)
+
+
+pca <- prcomp(dat.train[,-c(11)])
+summary(pca)
+for(i in 1:(ncol(dat.train)-1)){
+par(las=2);barplot(pca$rotation[,i],horiz = TRUE, main = paste("PC",i))
+}
+
+
+lm.pca <- lm(dat.train$prism~pca$x)
+summary(lm.pca)
+
+
+
+
+
+pred <- predict(l2, newdata = dat.test)
+plot(dat.test$prism,pred)
+abline(a=0,b=1, col="red")
+
+
+n <- nrow(dat.train)
+rmse.test <- sqrt(1/n * sum(l2$residuals^2))
+rmse.test
+
+
+n <- nrow(dat.test)
+residuals <- dat.test$prism - pred
+rmse.test <- sqrt(1/n * sum(residuals^2))
+rmse.test
+
+
+l3 <- lm(prism~IQANK1+RAB11FIP1+FOXG1+LPIN3+ERVMER34.1+PTN+VRK2+achilles+exp+cnv+prism, data = training1)
+summary(l3)
+
+
+
+
+
+
+# Reduce regression model
+
+initial_regression_1 <- summary(l.pca3)
+
+
+repeat{
+  end_regression_1<-initial_regression_1
+  pvx<-pf(end_regression_1$fstatistic[1],end_regression_1$fstatistic[2],
+          end_regression_1$fstatistic[3],lower.tail=FALSE)
+  
+coeffs=as.data.frame(end_regression_1$coefficients)
+coeffs=coeffs[-c(1),]
+coeffs=coeffs[order(coeffs$`Pr(>|t|)`),] 
+coeffs=coeffs[-c(nrow(coeffs)),]
+
+pca.left <- sapply(row.names(coeffs),function(x){unlist(strsplit(x, split = "x"))[2]})
+pca3.leftx <- pca3$x[,which(colnames(pca3$x) %in% pca.left)] 
+
+initial_regression_1<-summary(lm(training1$prism~pca3.leftx)) 
+pvy<-pf(initial_regression_1$fstatistic[1],initial_regression_1$fstatistic[2],
+        initial_regression_1$fstatistic[3],lower.tail=FALSE)
+if(pvy>=pvx){
+  break 
+}
+}
+
+initial_regression_1
+
+
+anova(lm(training1$prism~pca3.leftx),l.pca3)
+```
+
 
 To reduce the amount of input values effectively with constant p-value and constant proportion of the explained variance, a PCA was applied. The calculated PC values were used to train the model. 
 
