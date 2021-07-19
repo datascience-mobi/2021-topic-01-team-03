@@ -21,7 +21,7 @@ load("../2021-topic-01-team-03/dataset/cellline_datasets.rda")
 effective_in_all_doses=read.csv("../2021-topic-01-team-03/dataset/effective_in_all_doses.csv")
 effective_in_all_doses=as.vector(effective_in_all_doses[,-1])
 load("../2021-topic-01-team-03/dataset/ae_d7.RData")
-load("../2021-topic-01-team-03/dataset/training.RData")
+load("../2021-topic-01-team-03/dataset/linear.model_data.RData")
 ```
 
 ```{r cleanup, echo=FALSE}
@@ -486,6 +486,11 @@ training <- na.omit(training) # delete 66 NA rows
 
 pairs(~prism+IQANK1+RAB11FIP1+FOXG1+LPIN3+ERVMER34.1+PTN+VRK2+achilles+exp+cnv, data = training, pch = 20, cex = 0.5) # heatmap?
 
+
+
+
+
+# devide sample in train and test set
 devide <- sample(1:nrow(training),nrow(training)/2)
 
 dat.train <- training[devide,]
@@ -494,7 +499,7 @@ dat.test <- training[-devide,]
 lm1 <- lm(prism~IQANK1+RAB11FIP1+FOXG1+LPIN3+ERVMER34.1+PTN+VRK2+achilles+exp+cnv+prism, data = dat.train)
 summary(lm1)
 
-
+# pca to reduce 
 pca <- prcomp(dat.train[,-c(11)])
 summary(pca)
 for(i in 1:(ncol(dat.train)-1)){
@@ -533,7 +538,7 @@ if(pvy>=pvx){
 }
 
 initial_regression_1
-f.lm <- lm(training1$prism~pca3.leftx)
+f.lm <- lm(dat.train$prism~pca.leftx)
 
 anova(f.lm,lm.pca)
 
