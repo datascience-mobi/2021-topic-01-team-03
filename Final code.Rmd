@@ -8,6 +8,7 @@ output: html_document
 ```{r}
 load("../2021-topic-01-team-03/dataset/prism_datasets.rda")
 load("../2021-topic-01-team-03/dataset/cellline_datasets.rda")
+load("../2021-topic-01-team-03/dataset/linear.model_data.RData")
 ```
 
 # Guidelines
@@ -369,7 +370,6 @@ brain_cancer.effective_targets <- effective_bc_treat$target
 
 which(is.na(effective_bc_treat$target))
 
-## da fehlen halt bei diesen 8 Drogen die targets, die könnte man sonst ggf. rausnehmen 
 ```
 
 ##Selecting brain cancer specific cell lines in all data sets
@@ -383,21 +383,11 @@ names=brain_cancer_cl[,1] #saving the names as names
 brain_cancer=prism[names,]
 brain_cancer_achilles=prism.achilles[names,]
 
-## hier ist irgendwas schief gegangen, ab da sind super viele NA's drin 
 
 brain_cancer_cnv=prism.cnv[names,]
 brain_cancer_exp=prism.exp[names,]
 ```
 
-# Selecting achilles targets
-
-```{r}
-#brain_cancer_achilles.mean <- apply(brain_cancer_achilles,2,mean)
-#hist(brain_cancer_achilles.mean, breaks = 200)
-#brain_cancer_achilles.var <- apply(brain_cancer_achilles,2,var)#variance
-#hist(brain_cancer_achilles.var, breaks = 200, xlim = c(0,0.4))
-#brain_cancer_achilles.relevant <- colnames(brain_cancer_achilles)[brain_cancer_achilles.mean < -0.2]
-```
 
 # Compare drug and achilles targets
 
@@ -478,6 +468,141 @@ hist(unlist(brain_cancer_cnv.targets.var), breaks = 40)
 qqplot(unlist(brain_cancer_cnv.var), unlist(brain_cancer_cnv.targets.var), xlim = c(0,0.1), ylim = c(0,0.1))
 abline(a = 0, b = 1)
 ```
+
+# Wilcoxen ranked test
+
+## Achilles
+```{r}
+# Removal of lines with NA from new dataframe
+brain_cancer_achilles_T <- na.omit(brain_cancer_achilles)
+brain_cancer_achilles.targets_T <- na.omit(brain_cancer_achilles.targets)
+
+# Transposition and scaling
+brain_cancer_achilles_T <- as.data.frame(t(scale(as.matrix(t(brain_cancer_achilles_T)))))
+brain_cancer_achilles.targets_T <- as.data.frame(t(scale(as.matrix(t(brain_cancer_achilles.targets_T)))))
+
+```
+
+```{r}
+# Wilcoxon test
+# H0: The distribution of the effective targets (achilles values) is equal to the one of the achilles dataset
+# H1: The distribution of the effective targets = achilles values are "less" than the one of the achilles dataset
+wilcox_a <- vector(mode = "list",length=ncol(brain_cancer_achilles.targets_T))
+for(i in 1:ncol(brain_cancer_achilles.targets_T)) {         
+  wilcox_a[[i]] <- wilcox.test(as.numeric(brain_cancer_achilles_T[,i]),as.numeric(brain_cancer_achilles.targets_T[,i]), alternative = "less", paired = F)
+}
+
+wilcox_pvalue_a <- vector(length = ncol(brain_cancer_achilles.targets_T))
+for(i in 1:ncol(brain_cancer_achilles.targets_T)) {
+  wilcox_pvalue_a[i] <- wilcox_a[[i]]$p.value
+}
+
+length(which(wilcox_pvalue_a<=0.05))# 59
+
+
+```
+##Adjustment of multiple testing problem 
+```{r}
+# Bonferroni correction
+wilcox_pvalue_a_bonf <- p.adjust(wilcox_pvalue_a, method = "bonferroni", n = length(wilcox_pvalue_a)) 
+b_correction_a <- which(wilcox_pvalue_a_bonf<=0.01)
+p_values_a_b <- wilcox_pvalue_a_bonf[b_correction_a]
+sig_targets_a <- colnames(brain_cancer_achilles.targets_T)[b_correction_a]
+
+hist(p_values_a_b)
+length(p_values_a_b)# 44 targets are from another distribution and less
+  
+```
+
+
+## Expression
+```{r}
+# Removal of lines with NA from new dataframe
+brain_cancer_exp_T <- na.omit(brain_cancer_exp)
+brain_cancer_exp.targets_T <- na.omit(brain_cancer_exp.targets)
+
+# Transposition and scaling
+brain_cancer_exp_T <- as.data.frame(t(scale(as.matrix(t(brain_cancer_exp_T)))))
+brain_cancer_exp.targets_T <- as.data.frame(t(scale(as.matrix(t(brain_cancer_exp.targets_T)))))
+
+```
+
+```{r}
+# Wilcoxon test
+# H0: The distribution of the effective targets (exp values) is equal to the one of the exp dataset
+# H1: The distribution of the effective targets = exp values are different than the one of the exp dataset
+wilcox_e <- vector(mode = "list",length=ncol(brain_cancer_exp.targets_T))
+for(i in 1:ncol(brain_cancer_exp.targets_T)) {         
+  wilcox_e[[i]] <- wilcox.test(as.numeric(brain_cancer_exp_T[,i]),as.numeric(brain_cancer_exp.targets_T[,i]), alternative = "two.sided", paired = F)
+}
+
+wilcox_pvalue_e <- vector(length = ncol(brain_cancer_exp.targets_T))
+for(i in 1:ncol(brain_cancer_exp.targets_T)) {
+  wilcox_pvalue_e[i] <- wilcox_e[[i]]$p.value
+}
+
+length(which(wilcox_pvalue_e<=0.05))# 112 (two.sided)
+
+
+```
+##Adjustment of multiple testing problem 
+```{r}
+# Bonferroni correction
+wilcox_pvalue_e_bonf <- p.adjust(wilcox_pvalue_e, method = "bonferroni", n = length(wilcox_pvalue_e)) 
+b_correction_e <- which(wilcox_pvalue_e_bonf<=0.01)
+p_values_e_b <- wilcox_pvalue_e_bonf[b_correction_e]
+sig_targets_e <- colnames(brain_cancer_exp.targets_T)[b_correction_e]
+
+hist(p_values_e_b)
+length(p_values_e_b)# 98 (two.sided)
+  
+```
+
+
+## Copy Number Values
+```{r}
+# Removal of lines with NA from new dataframe
+brain_cancer_cnv_T <- na.omit(brain_cancer_cnv)
+brain_cancer_cnv.targets_T <- na.omit(brain_cancer_cnv.targets)
+
+# Transposition and scaling
+brain_cancer_cnv_T <- as.data.frame(t(scale(as.matrix(t(brain_cancer_cnv_T)))))
+brain_cancer_cnv.targets_T <- as.data.frame(t(scale(as.matrix(t(brain_cancer_cnv.targets_T)))))
+
+```
+
+```{r}
+# Wilcoxon test
+# H0: The distribution of the effective targets (cnv values) is equal to the one of the cnv dataset
+# H1: The distribution of the effective targets = cnv values are different than the one of the cnv dataset
+wilcox_c <- vector(mode = "list",length=ncol(brain_cancer_cnv.targets_T))
+for(i in 1:ncol(brain_cancer_cnv.targets_T)) {         
+  wilcox_c[[i]] <- wilcox.test(as.numeric(brain_cancer_cnv_T[,i]),as.numeric(brain_cancer_cnv.targets_T[,i]), alternative = "two.sided", paired = F)
+}
+
+wilcox_pvalue_c <- vector(length = ncol(brain_cancer_cnv.targets_T))
+for(i in 1:ncol(brain_cancer_cnv.targets_T)) {
+  wilcox_pvalue_c[i] <- wilcox_c[[i]]$p.value
+}
+
+length(which(wilcox_pvalue_c<=0.05))# 41 (two.sided)
+
+
+```
+##Adjustment of multiple testing problem 
+```{r}
+# Bonferroni correction
+wilcox_pvalue_c_bonf <- p.adjust(wilcox_pvalue_c, method = "bonferroni", n = length(wilcox_pvalue_c)) 
+b_correction_c <- which(wilcox_pvalue_c_bonf<=0.01)
+p_values_c_b <- wilcox_pvalue_c_bonf[b_correction_c]
+sig_targets_c <- colnames(brain_cancer_cnv.targets_T)[b_correction_c]
+
+hist(p_values_c_b)
+length(p_values_c_b)# 6 (two.sided)
+  
+```
+
+
 
 # Question 3: Are there any genetic markers that are specific for brain cancer subtypes?
 
@@ -831,6 +956,84 @@ end_regression_2
 
 # Question 4: What other factors contribute to drug effectiveness prediction?
 
-```{r}
+```{r Linear regression model, eval=TRUE, include=FALSE}
+training <- na.omit(training) # delete 66 NA rows
+
+pairs(~prism+IQANK1+RAB11FIP1+FOXG1+LPIN3+ERVMER34.1+PTN+VRK2+achilles+exp+cnv, data = training, pch = 20, cex = 0.5)
+
+# devide sample in train and test set
+devide <- sample(1:nrow(training),nrow(training)/2)
+
+dat.train <- training[devide,]
+dat.test <- training[-devide,]
+
+# first linear model
+lm1 <- lm(prism~IQANK1+RAB11FIP1+FOXG1+LPIN3+ERVMER34.1+PTN+VRK2+achilles+exp+cnv+prism, data = dat.train)
+summary(lm1)
+
+# comer real values with prediction
+pred <- predict(lm1, newdata = dat.test)
+plot(dat.test$prism,pred)
+abline(a=0,b=1, col="red")
+
+n <- nrow(dat.train)
+rmse.test <- sqrt(1/n * sum(lm1$residuals^2))
+rmse.test
+
+n <- nrow(dat.test)
+residuals <- dat.test$prism - pred
+rmse.test <- sqrt(1/n * sum(residuals^2))
+rmse.test
+
+# pca to reduce 
+pca <- prcomp(dat.train[,-c(11)])
+summary(pca)
+
+for(i in 1:(ncol(dat.train)-1)){
+par(las=2);barplot(pca$rotation[,i],horiz = TRUE, main = paste("PC",i))
+}
+
+lm.pca <- lm(dat.train$prism~pca$x)
+summary(lm.pca)
+
+# Reduce regression model
+
+initial_regression_1 <- summary(lm.pca)
+
+
+repeat{
+  end_regression_1<-initial_regression_1
+  pvx<-pf(end_regression_1$fstatistic[1],end_regression_1$fstatistic[2],
+          end_regression_1$fstatistic[3],lower.tail=FALSE)
+  
+coeffs=as.data.frame(end_regression_1$coefficients)
+coeffs=coeffs[-c(1),]
+coeffs=coeffs[order(coeffs$`Pr(>|t|)`),] 
+coeffs=coeffs[-c(nrow(coeffs)),]
+
+pca.left <- sapply(row.names(coeffs),function(x){unlist(strsplit(x, split = "x"))[2]})
+pca.leftx <- pca$x[,which(colnames(pca$x) %in% pca.left)] 
+
+initial_regression_1<-summary(lm(dat.train$prism~pca.leftx)) 
+pvy<-pf(initial_regression_1$fstatistic[1],initial_regression_1$fstatistic[2],
+        initial_regression_1$fstatistic[3],lower.tail=FALSE)
+if(pvy>=pvx){
+  break 
+}
+}
+
+initial_regression_1
+f.lm <- lm(dat.train$prism~pca.leftx)
+
+anova(f.lm,lm.pca)
 
 ```
+
+
+```{r Visualization regression model, echo=FALSE, fig.cap="Comparison between real and predicted values"}
+summary(lm1)
+
+plot(dat.test$prism,pred, xlab = "Real effectiveness values", ylab = "Predicted effectiveness values")
+abline(a=0,b=1, col="red")
+```
+
