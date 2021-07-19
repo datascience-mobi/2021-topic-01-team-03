@@ -432,6 +432,8 @@ Corsello, S. M., Nagari, R. T., Spangler, R. D., Rossen, J., Kocak, M., Bryan, J
 
 DeWeerdt, S. (2018). The genomics of brain cancer. Nature, 561(7724), 54-55.
 
+Liang, C., Tian, L., Liu, Y., Hui, N., Qiao, G., Li, H., Shi, Z., Tang, Y., Zhang, D., Xie, X., Zhao, X., A promising antiviral candidate drug for the COVID-19 pandemic: A mini-review of remdesivir. (2020). Eur J Med Chem., 201, 112527. 
+
 Fang, Z., Du, R., and Cui, X. (2012). Uniform approximation is more appropriate for Wilcoxon Rank-Sum Test in gene set analysis. PLoS One 7, e31505.
 
 Pushpakom, S., Iorio, F., Eyers, P. A., Escott, K. J., Hopper, S., Wells, A., … Pirmohamed, M. (2019). Drug repurposing: progress, challenges and recommendations. Nature Reviews Drug Discovery, 18(1), 41–58.
@@ -439,5 +441,3 @@ Pushpakom, S., Iorio, F., Eyers, P. A., Escott, K. J., Hopper, S., Wells, A., �
 Sung, H., Ferlay, J., Siegel, R.L., Laversanne, M., Soerjomataram, I., Jemal, A., and Bray, F. (2021). Global Cancer Statistics 2020: GLOBOCAN Estimates of Incidence and Mortality Worldwide for 36 Cancers in 185 Countries. CA Cancer J Clin 71, 209-249.
 
 Tan, Y.D., and Xu, H. (2014). A general method for accurate estimation of false discovery rates in identification of differentially expressed genes. Bioinformatics 30, 2018-2025.
-
-
