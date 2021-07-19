@@ -1,5 +1,5 @@
 ---
-title: 'Topic 1 Group 3: Drug viability screens for oncological and non-oncological
+title: 'Drug viability screens for oncological and non-oncological
   treatments'
 author: "Cedrik Neber, Lea Ahrens, Lennard Kleemann, Ilya Schneider, Xenia Quaas"
 date: "19th July 2021"
@@ -551,13 +551,14 @@ anova(f.lm,lm.pca)
 
 ```
 
-To reduce the amount of input values effectively with constant p-values and constant proportion of the explained variance, a PCA was applied. The calculated PC values were used to train the model. It is visible that the model only describes a small proportion of the variance, with a adjusted r-squared value of **0.1852**. However, the regression model is still better than the null model, as indicated by the p-value of the F-statistic of **<2.2 e-16**. 
 ```{r Visualization regression model, echo=FALSE, fig.dim= c(5,4),fig.align = 'center', fig.cap="Comparison between real and predicted values"}
 summary(lm1)
 
 plot(dat.test$prism,pred, xlab = "Real effectiveness values", ylab = "Predicted effectiveness values")
 abline(a=0,b=1, col="red")
 ```
+To reduce the amount of input values effectively with constant p-values and constant proportion of the explained variance, a PCA was applied. The calculated PC values were used to train the model. It is visible that the model only describes a small proportion of the variance, with a adjusted r-squared value of **0.1852**. However, the regression model is still better than the null model, as indicated by the p-value of the F-statistic of **<2.2 e-16**. 
+
 # Discussion
 
 This project unites drug repurposing and precision medicine. In the context of this report, precision medicine is defined as the individualized treatment for brain cancer patients, depending on their genetic profile.  Meanwhile, the main question of whether it is possible to predict the effectiveness of a drug by means of various variables is exploited.
