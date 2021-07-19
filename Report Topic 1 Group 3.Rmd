@@ -566,13 +566,34 @@ It is visible that the model only describes little proportion of the variance. H
 
 # Discussion
 
-The universal drug is called nimorazole and is an anti-infective drug which acts as bacterial DNA inhibitor. Moreover, it can be used as radiosensitizer to improve radiotherapy in head and neck squamous cell carcinoma. A radioresistance results in many cancer types because of a low oxygen level. Nimorazole enhances cell death by binding to damaged DNA and preventing repair mechanisms. 
 
-The brain cancer subtype glioma can be divided in astrocytoma and glioblastoma. We suspect that the description glioma is occuring whenever there is a classification missing. As these three subtypes belong to the same class of cancers and the clustering did not lead to another result, we decided on not take the subtypes into account. 
+This project unites drug repurposing and precision medicine. Meanwhile, the main question of whether it is possible to predict the effectiveness of a drug by means of various variables is exploited. 
+A great promise of combining precision medicine with drug repurposing is to avoid the use of drugs which are ineffective in patients and even could lead to side effects. Moreover, drug repurposing leads to a cost reduction. According to Workman et al. a cancer drug in the US costs $100.000 annually in 2012 and the tendency is increasing. 
+
+The basis of this report is the investigation of different contributing factors that will become the variables of the final linear regression model. 
+First, effective drugs from the relevant brain cancer cell lines were extracted, as they hold the greatest potential for drug repurposing. Figure 1 underlines the superior effectiveness of medulloblastoma cell line in comparison to the other subtypes. 
+
+ [Facts zu Medulloblastoma]. 
+ 
+To assess the informational yield of the brain cancer subtypes, a principal component analysis coupled with a kmeans clustering was conducted. The overall goal of this clustering was to take a closer look at the relationship of the subtypes to another. During these analytical steps, it became apparent that there is no correlation between the subtypes regarding their expression. 
+
+The brain cancer subtype glioma can be divided in astrocytoma and glioblastoma. We suspect that the description glioma is occuring whenever there is a classification missing. As these three subtypes belong to the same class of cancers and the clustering did not lead to another result, we decided on not take the subtypes into account.
 
 A great promise of combining precision medicine with drug repurposing is to avoid the use of drugs which are ineffective in patients and even could lead to side effects. Moreover, drug repurposing leads to a cost reduction. According to Workman et al. a cancer drug in the US costs $100 ,000 anually in 2012 and the tendency is increasing. 
 
-Involving drug targets for the prediction of the effectiveness of brain cancer treatment is problematically. As Maughan (2017) pointed out, cancer is caused by a complex interplay of multiple genetic factors. The high expectation of finding specific targets for cancer therapies is an imagination caused by a few successful targeted drugs like trastuzumab for breast cancer. Nevertheless, a problem of tumors is the heterogeneity of cells. A resistance against a drug can results when the it adapts to the drug. 
+Involving drug targets for the prediction of the effectiveness of brain cancer treatment is problematic. As Maughan (2017) pointed out, cancer is caused by a complex interplay of multiple genetic factors. The high expectation of finding specific targets for cancer therapies is an imagination caused by a few successful targeted drugs like trastuzumab for breast cancer. Nevertheless, a problem of tumors is the heterogeneity of cells. A resistance against a drug can result when the it adapts to the drug. 
+
+As an additional contributing component, cell lines were examined regarding their genetic markers. A “universal drug” was discovered along the way,…. 
+
+The universal drug is called nimorazole and is an anti-infective drug which acts as bacterial DNA inhibitor. Moreover, it can be used as radiosensitizer to improve radiotherapy in head and neck squamous cell carcinoma. A radioresistance results in many cancer types because of a low oxygen level. Nimorazole enhances cell death by binding to damaged DNA and preventing repair mechanisms. 
+
+[Targets von Lea und Lennard]
+
+Involving drug targets for the prediction of the effectiveness of brain cancer treatment is problematically. As Maughan (2017) pointed out, cancer is caused by a complex interplay of multiple genetic factors. The high expectation of finding specific targets for cancer therapies is an imagination caused by a few successful targeted drugs like trastuzumab for breast cancer. Nevertheless, a problem of tumors is the heterogeneity of cells. A resistance against a drug can results when it adapts to the drug. 
+
+[Regressionsmodell Lea und Lennard]
+
+Precise medicine is the rising star in in oncology and holds great promise for its treatment. However, this report highlights the limitations of the approach. Even when combining the six data frames used in this analysis, no reliable regression model could be created. 
 
 
 # Literature
