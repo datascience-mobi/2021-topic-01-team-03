@@ -1195,6 +1195,9 @@ initial_regression_1
 
 ## Improved search function
 ```{r}
+
+final_genes <- c("IQANK1","RAB11FIP1","FOXG1","LPIN3","ERVMER34.1","PTN","VRK2")
+
 search.prism <- function(search.mode = "t", cellline, target.or.drug, dose = 8){
 
   #mode: targe=t, drug=d
@@ -1392,7 +1395,7 @@ for (i in celllines[,2]){
 
 
 
-
+# cell lines and targets
 ```{r}
 
 celllines <- brain_cancer_achilles[,1]
